@@ -1,0 +1,13 @@
+megs: 32
+romimage: file=$BXSHARE/BIOS-bochs-latest
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+vga: extension=vbe
+floppya: 1_44=a.img, status=inserted
+floppyb: 1_44=b.img, status=inserted
+#ata0-master: type=disk, path="hd.img", mode=flat, cylinders=40, heads=16, spt=63
+boot: floppy
+log: bochsout.txt
+mouse: enabled=0
+#ips: 15000000
+clock: sync=slowdown
+vga_update_interval: 150000

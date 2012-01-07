@@ -1,0 +1,369 @@
+
+/home/kang/source/panda/a.img,0
+
+/home/kang/source/panda/bochsout.txt,165
+00000000000i[     ]   Build from CVS snapshot,2,45
+00000000000i[     ]   Build from CVS snapshot, on April 2,45
+00000000000i[     ]   processors:processors4,151
+
+/home/kang/source/panda/bochsrc,20
+romimage: file=2,9
+
+/home/kang/source/panda/boot/boot.s,235
+align 2,1
+jmp 7,60
+start:start10,86
+print_str:print_str38,548
+.next:.next40,573
+.done:.done46,650
+msg	50,665
+bootseg 54,733
+setupseg 55,773
+setupoffset 56,813
+setupsize 57,839
+bootdriver 58,861
+times 60,908
+dw 61,930
+
+/home/kang/source/panda/boot/head.s,1210
+Main:Main8,65
+global 21,322
+extern 22,339
+gdt_flush:gdt_flush23,349
+finish:finish32,484
+ISR_NOERRCODE 68,1432
+ISR_NOERRCODE 69,1448
+ISR_NOERRCODE 70,1464
+ISR_NOERRCODE 71,1480
+ISR_NOERRCODE 72,1496
+ISR_NOERRCODE 73,1512
+ISR_NOERRCODE 74,1528
+ISR_NOERRCODE 75,1544
+ISR_ERRCODE 76,1560
+ISR_NOERRCODE 77,1576
+ISR_ERRCODE 78,1592
+ISR_ERRCODE 79,1609
+ISR_ERRCODE 80,1626
+ISR_ERRCODE 81,1643
+ISR_ERRCODE 82,1660
+ISR_NOERRCODE 83,1677
+ISR_NOERRCODE 84,1694
+ISR_NOERRCODE 85,1711
+ISR_NOERRCODE 86,1728
+ISR_NOERRCODE 87,1745
+ISR_NOERRCODE 88,1762
+ISR_NOERRCODE 89,1779
+ISR_NOERRCODE 90,1796
+ISR_NOERRCODE 91,1813
+ISR_NOERRCODE 92,1830
+ISR_NOERRCODE 93,1847
+ISR_NOERRCODE 94,1864
+ISR_NOERRCODE 95,1881
+ISR_NOERRCODE 96,1898
+ISR_NOERRCODE 97,1915
+ISR_NOERRCODE 98,1932
+ISR_NOERRCODE 99,1949
+IRQ 101,1967
+IRQ 102,1982
+IRQ 103,1997
+IRQ 104,2012
+IRQ 105,2027
+IRQ 106,2042
+IRQ 107,2057
+IRQ 108,2072
+IRQ 109,2087
+IRQ 110,2102
+IRQ 111,2117
+IRQ 112,2132
+IRQ 113,2147
+IRQ 114,2162
+IRQ 115,2177
+IRQ 116,2192
+extern 119,2220
+isr_common_stub:isr_common_stub121,2240
+extern 145,2795
+irq_common_stub:irq_common_stub147,2815
+section 174,3128
+stack_top:stack_top176,3176
+
+/home/kang/source/panda/boot/setup.s,477
+align 2,1
+jmp 5,21
+setup:setup9,49
+set_print_str:set_print_str62,739
+.next:.next64,768
+.done:.done70,845
+empty_8042:empty_804273,858
+system:system80,930
+setupseg 90,1060
+setupoffset	91,1082
+setupsize 92,1106
+systemseg 94,1128
+systemoffset	95,1150
+systemsize 96,1175
+setup_msg 99,1203
+gdt_addr:gdt_addr103,1256
+gdt:gdt108,1296
+gdt_null:gdt_null109,1301
+gdt_system_code:gdt_system_code114,1355
+gdt_syste_data:gdt_syste_data119,1416
+times 127,1506
+
+/home/kang/source/panda/build.sh,660
+rm -rf a.img;img3,11
+BOOT=8,69
+$NASM $BOOT/setup.s -o $OBJS/setup.o;o18,293
+$NASM $BOOT/head.s  -o $OBJS/head.o;o19,331
+$GCC  $KERNEL/main.c   -o $OBJS/main.o;o22,392
+$GCC  $KERNEL/screen.c -o $OBJS/screen.o;o23,432
+$GCC  $KERNEL/irq.c    -o $OBJS/irq.o;o24,474
+$GCC  $KERNEL/timer.c  -o $OBJS/timer.o;o25,513
+$GCC  $KERNEL/gdt.c    -o $OBJS/gdt.o;o27,593
+$GCC  $KERNEL/idt.c    -o $OBJS/idt.o;o28,632
+$GCC  $KERNEL/kb.c     -o $OBJS/kb.o;o29,671
+cd  $OBJS;32,725
+ld boot.o -o boot.bin -T ../$TOOL/boot.ld;ld33,736
+ld setup.o -o setup.bin -T ../$TOOL/setup.ld;ld34,779
+   -o kernel.bin -T ../$TOOL/kernel.ld;ld41,999
+bochs;46,1094
+
+/home/kang/source/panda/cscope.files,0
+
+/home/kang/source/panda/cscope.out,435
+	`Çtive_œq_di§tive_œq_di73,374
+	$šb$š633,3078
+	g‹xtmem±g‹xtmem2173,10932
+	g©Œig©Œ2177,10951
+	gc¤_xgc¤_2181,10973
+24 cÚc2198,11054
+dp2205,11090
+de¡de2221,11150
+t2241,11224
+addr2257,11280
+»tt2277,11362
+d2283,11383
+s2289,11411
+‹mpmp2355,11649
+de¡de2369,11719
+	$¡$2379,11749
+c¤_yc¤_2503,12385
+	$move_c¤$move_c2511,12419
+wh”ewh”2665,13185
+	$puts2703,13336
+	$´štk_$´štk2837,13905
+	$£‰ext$£‰ex2953,14400
+
+/home/kang/source/panda/include/asm.h,540
+#define ASM_H10,141
+#define ENABLE_NMI 13,157
+#define DISABLE_NMI 14,181
+#define local_irq_disable(24,459
+#define local_irq_enable(25,510
+#define safe_halt(26,560
+static inline unsigned long native_irq_save(29,611
+static inline void native_irq_restore(47,1131
+static inline void native_irq_disable(55,1345
+static inline void native_irq_enable(60,1436
+static inline void native_safe_halt(65,1526
+static inline void native_halt(70,1620
+#define typecheck(80,1839
+#define local_irq_save(88,2053
+#define local_irq_restore(93,2254
+
+/home/kang/source/panda/include/kb.h,54
+#define KD_H10,139
+unsigned char kbdus[kbdus17,447
+
+/home/kang/source/panda/include/screen.h,24
+#define SCREEN_H10,147
+
+/home/kang/source/panda/include/system.h,1221
+#define SYSTEM_H10,148
+typedef unsigned long size_t;13,169
+typedef unsigned long long u64;14,199
+typedef signed long long   s64;15,231
+typedef unsigned int       u32;16,263
+typedef signed int         s32;17,295
+typedef unsigned short     u16;18,327
+typedef signed short       s16;19,359
+typedef unsigned char      u8;20,391
+typedef signed char        s8;21,422
+struct registers_t25,525
+    unsigned int gs,27,546
+    unsigned int gs, fs,27,546
+    unsigned int gs, fs, es,27,546
+    unsigned int gs, fs, es, ds;27,546
+    unsigned int edi,28,579
+    unsigned int edi, esi,28,579
+    unsigned int edi, esi, ebp,28,579
+    unsigned int edi, esi, ebp, esp,28,579
+    unsigned int edi, esi, ebp, esp, ebx,28,579
+    unsigned int edi, esi, ebp, esp, ebx, edx,28,579
+    unsigned int edi, esi, ebp, esp, ebx, edx, ecx,28,579
+    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;28,579
+    unsigned int int_no,29,636
+    unsigned int int_no, err_code;29,636
+    unsigned int eip,30,671
+    unsigned int eip, cs,30,671
+    unsigned int eip, cs, eflags,30,671
+    unsigned int eip, cs, eflags, useresp,30,671
+    unsigned int eip, cs, eflags, useresp, ss;30,671
+typedef void (*isq_t)isq_t33,726
+
+/home/kang/source/panda/kernel/asm.c,206
+#define in(11,139
+#define out(18,473
+unsigned short inw 24,635
+unsigned char inb 31,788
+void outb 38,939
+inline void write_nmi(44,1071
+inline void enable_nmi(50,1145
+inline void disable_nmi(55,1203
+
+/home/kang/source/panda/kernel/cscope.out,393
+	`__vÞ©že__vÞ©ž49,271
+	g‹xtmem±g‹xtmem1573,8030
+	g©Œig©Œ1577,8049
+	gc¤_xgc¤_1581,8071
+24 cÚc1598,8152
+dp1605,8188
+de¡de1621,8248
+t1641,8322
+addr1657,8378
+»tt1677,8460
+d1683,8481
+s1689,8509
+‹mpmp1755,8747
+de¡de1769,8817
+	$¡$1779,8847
+c¤_yc¤_1903,9483
+	$move_c¤$move_c1911,9517
+wh”ewh”2065,10283
+	$puts2103,10434
+	$´štk_$´štk2237,11003
+	$£‰ext$£‰ex2353,11498
+
+/home/kang/source/panda/kernel/gdt.c,438
+struct gdt_entry14,259
+    unsigned short limit;16,278
+    unsigned short base_low;17,304
+    unsigned char  base_middle;18,333
+    unsigned char  access;19,365
+    unsigned char  granularity;20,392
+    unsigned char  base_high;21,424
+struct gdt_ptr24,482
+    unsigned short limit;26,499
+    unsigned int   base;27,525
+struct gdt_entry gdt[gdt30,578
+struct gdt_ptr gp;31,603
+void gdt_set_entry(37,726
+void gdt_init(54,1301
+
+/home/kang/source/panda/kernel/idt.c,490
+struct idt_entry39,1206
+    unsigned short base_lo;41,1225
+    unsigned short selector;42,1253
+    unsigned char  zero;43,1282
+    unsigned char  flags;44,1307
+    unsigned short base_hi;45,1333
+struct idt_ptr48,1389
+    unsigned short limit;50,1406
+    unsigned int   base;51,1432
+struct idt_entry idt[idt55,1526
+struct idt_ptr   idtp;56,1553
+const char* exception_messages[exception_messages113,2755
+void idt_set(153,3471
+void idt_init(170,3960
+void isr_handler(256,6780
+
+/home/kang/source/panda/kernel/irq.c,158
+isq_t irq_routines[irq_routines34,629
+void irq_install_handler(37,715
+void irq_uninstall_handler(44,889
+void irq_remap(57,1383
+void irq_handler(81,2208
+
+/home/kang/source/panda/kernel/kb.c,52
+void keyboard_handler(13,194
+void kb_init(45,1328
+
+/home/kang/source/panda/kernel/main.c,19
+void kmain(12,160
+
+/home/kang/source/panda/kernel/screen.c,533
+unsigned short *textmemptr;textmemptr17,470
+int attrib 18,498
+int csr_x 19,517
+void *memcpy(memcpy22,566
+void* memset(33,759
+void* memmove(42,904
+unsigned short *memsetw(memsetw62,1298
+size_t strlen(69,1498
+unsigned char inportb 77,1631
+void outportb 84,1786
+void scroll(91,1947
+void move_csr(116,2739
+void cls(139,3469
+void putch(161,3964
+inline void puts(216,5490
+inline void printk(226,5617
+inline void printk_hex(231,5675
+inline void printk_int(250,6099
+void settextcolor(289,6795
+void init_video(297,7077
+
+/home/kang/source/panda/kernel/timer.c,243
+int timer_ticks 16,272
+void timer_handler(23,556
+void timer_wait(38,921
+void timer_install(48,1123
+static u32 ticks 56,1243
+static u32 seconds 57,1265
+static void timer_callback(58,1289
+void timer_init(72,1610
+void timer_wait(98,2365
+
+/home/kang/source/panda/system.h,1221
+#define SYSTEM_H10,148
+typedef unsigned long size_t;13,169
+typedef unsigned long long u64;14,199
+typedef signed long long   s64;15,231
+typedef unsigned int       u32;16,263
+typedef signed int         s32;17,295
+typedef unsigned short     u16;18,327
+typedef signed short       s16;19,359
+typedef unsigned char      u8;20,391
+typedef signed char        s8;21,422
+struct registers_t25,525
+    unsigned int gs,27,546
+    unsigned int gs, fs,27,546
+    unsigned int gs, fs, es,27,546
+    unsigned int gs, fs, es, ds;27,546
+    unsigned int edi,28,579
+    unsigned int edi, esi,28,579
+    unsigned int edi, esi, ebp,28,579
+    unsigned int edi, esi, ebp, esp,28,579
+    unsigned int edi, esi, ebp, esp, ebx,28,579
+    unsigned int edi, esi, ebp, esp, ebx, edx,28,579
+    unsigned int edi, esi, ebp, esp, ebx, edx, ecx,28,579
+    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;28,579
+    unsigned int int_no,29,636
+    unsigned int int_no, err_code;29,636
+    unsigned int eip,30,671
+    unsigned int eip, cs,30,671
+    unsigned int eip, cs, eflags,30,671
+    unsigned int eip, cs, eflags, useresp,30,671
+    unsigned int eip, cs, eflags, useresp, ss;30,671
+typedef void (*isq_t)isq_t33,726
+
+/home/kang/source/panda/tool/boot.ld,37
+OUTPUT_FORMAT(1,0
+ENTRY(start)2,24
+
+/home/kang/source/panda/tool/kernel.ld,36
+OUTPUT_FORMAT(1,0
+ENTRY(Main)2,24
+
+/home/kang/source/panda/tool/setup.ld,37
+OUTPUT_FORMAT(1,0
+ENTRY(setup)2,24
