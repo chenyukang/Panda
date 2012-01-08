@@ -4,10 +4,12 @@
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-03 17:33:50
 //
-// @Brief  :
+// @Brief  : The kernel entry point
 
 #include <asm.h>
+#include <cpu.h>
 #include <screen.h>
+#include <string.h>
 
 void kmain()
 {
@@ -24,6 +26,15 @@ void kmain()
     timer_init(1);
     puts("kb init...\n");
     kb_init();
+    //detect_cpu();
+#if 0
+    printk("%s\n", "hello world");
+    printk("%c\n", 'y');
+    printk("%d\n", 32);
+    printk("%d\n", -32);
+    printk("value: %d\n", 1<<31);
+    printk("most: %d\n", 1<<30);
+#endif
 //    asm volatile ("int $0xF");
     int initial = 1;
     while(1){

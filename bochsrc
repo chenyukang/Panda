@@ -11,3 +11,4 @@ mouse: enabled=0
 #ips: 15000000
 clock: sync=slowdown
 vga_update_interval: 150000
+screenmode: name="Panda"

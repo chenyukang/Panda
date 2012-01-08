@@ -12,6 +12,14 @@ Main:
 	mov [0xb8000], cl
 	mov cl, 0x04
 	mov [0xb8001], cl
+	
+	;; check A20 enable
+	;; xor eax, eax
+	;; inc eax
+	;; mov 0x000000, eax
+	;; cmp eax, 0x100000
+	;; je lb
+	
 	;; Finally, we goto real OS
 	extern kmain
 	call kmain

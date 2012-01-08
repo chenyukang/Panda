@@ -1,6 +1,6 @@
 #!/bin/sh
 
-rm -rf a.img;
+
 
 #build boot bin
 #nasm -o boot.bin boot.S;
@@ -9,9 +9,11 @@ BOOT="./boot"
 KERNEL="./kernel"
 INCLUDE="./include"
 NASM="nasm -f elf"
-GCC="gcc -c -Wall -I./include/ -fno-stack-protector -fno-builtin"
+GCC="gcc -c -W -Wall -I./include/ -fno-stack-protector -fno-builtin"
 OBJS="./objs"
 TOOL="./tool"
+
+rm -rf a.img $OBJS/*.o;
 
 echo "building boot"
 $NASM $BOOT/boot.s  -o $OBJS/boot.o;
@@ -27,6 +29,8 @@ $GCC  $KERNEL/asm.c    -o $OBJS/asm.o;
 $GCC  $KERNEL/gdt.c    -o $OBJS/gdt.o;
 $GCC  $KERNEL/idt.c    -o $OBJS/idt.o;
 $GCC  $KERNEL/kb.c     -o $OBJS/kb.o;
+$GCC  $KERNEL/cpu.c    -o $OBJS/cpu.o;
+$GCC  $KERNEL/string.c -o $OBJS/string.o;
 
 echo "linking"
 cd  $OBJS;
@@ -37,17 +41,14 @@ ld setup.o -o setup.bin -T ../$TOOL/setup.ld;
 #   gdt.o idt.o -o kernel.bin -T ../$TOOL/kernel.ld;
 
 ld head.o main.o screen.o gdt.o idt.o asm.o irq.o \
-   timer.o kb.o \
+   timer.o kb.o cpu.o string.o \
    -o kernel.bin -T ../$TOOL/kernel.ld;
 
 cat boot.bin setup.bin kernel.bin > ../a.img
 cd ../;
 
-bochs;
+#bochs;
 
 #rm *.o;
-
-
-
 
 

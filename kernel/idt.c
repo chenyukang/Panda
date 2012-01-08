@@ -8,6 +8,7 @@
 
 #include <system.h>
 #include <screen.h>
+#include <string.h>
 #include <asm.h>
 
 /*

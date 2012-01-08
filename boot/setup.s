@@ -93,7 +93,7 @@ setupsize 	equ 	1024
 
 systemseg 	equ	0x0000
 systemoffset	equ 	0x0000
-systemsize 	equ 	1024*8
+systemsize 	equ 	1024*30 ; this will bigger than kernel.bin
 	
 	
 setup_msg db "Setup Panda OS"	;

@@ -9,7 +9,8 @@
 #if !defined(SYSTEM_H)
 #define SYSTEM_H
 
-  
+#define abs(x) ((x < 0) ? (-(x)): (x) )
+
 typedef unsigned long size_t;
 typedef unsigned long long u64;
 typedef signed long long   s64;
@@ -38,5 +39,10 @@ void idt_set(unsigned char k, unsigned long base,
 
 void timer_init(u32 frequency);
 void timer_wait(int ticks);
+
+extern void gdt_init(void);
+extern void idt_init(void);
+extern void kb_init(void);
+
 #endif
 
