@@ -9,17 +9,9 @@
 #if !defined(SYSTEM_H)
 #define SYSTEM_H
 
-#define abs(x) ((x < 0) ? (-(x)): (x) )
+#include <types.h>
 
-typedef unsigned long size_t;
-typedef unsigned long long u64;
-typedef signed long long   s64;
-typedef unsigned int       u32;
-typedef signed int         s32;
-typedef unsigned short     u16;
-typedef signed short       s16;
-typedef unsigned char      u8;
-typedef signed char        s8;
+#define abs(x) ((x < 0) ? (-(x)): (x) )
 
 
 /* This defines what the stack looks like after an ISR was running */

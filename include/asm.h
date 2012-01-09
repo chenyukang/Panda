@@ -10,6 +10,8 @@
 #define ASM_H
 
 
+#include <types.h>
+
 #define ENABLE_NMI 0x00
 #define DISABLE_NMI 0x80
 
@@ -26,50 +28,66 @@ inline void disable_nmi(void);
 #define safe_halt()         (native_safe_halt())
 
 
-static inline unsigned long native_irq_save(void)
+#define first_zerobit(x) (first_onebit(~(x)))
+
+/* ffs: if ret == 0 : no one bit found
+   return index is begin with 1 */
+static inline int first_onebit(int x)
 {
-        unsigned long flags;
-
-        /*
-         * "=rm" is safe here, because "pop" adjusts the stack before
-         * it evaluates its effective address -- this is part of the
-         * documented behavior of the "pop" instruction.
-         */
-        asm volatile("# __raw_save_flags\n\t"
-                     "pushf ; pop %0"
-                     : "=rm" (flags)
-                     : /* no input */
-                     : "memory");
-
-        return flags;
+    if (!x) {
+        return 0;
+    }
+    else {
+        int ret;
+        __asm__("bsfl %1, %0; incl %0" : "=r" (ret) : "r" (x));
+        return ret;
+    }
 }
 
-static inline void native_irq_restore(unsigned long flags)
+static inline u32 native_irq_save(void)
 {
-        asm volatile("push %0 ; popf"
-                     : /* no output */
-                     :"g" (flags)
-                     :"memory", "cc");
+    u32 flags;
+
+    /*
+     * "=rm" is safe here, because "pop" adjusts the stack before
+     * it evaluates its effective address -- this is part of the
+     * documented behavior of the "pop" instruction.
+     */
+    asm volatile("# __raw_save_flags\n\t"
+                 "pushf ; pop %0"
+                 : "=rm" (flags)
+                 : /* no input */
+                 : "memory");
+
+    return flags;
+}
+
+static inline void native_irq_restore(u32 flags)
+{
+    asm volatile("push %0 ; popf"
+                 : /* no output */
+                 :"g" (flags)
+                 :"memory", "cc");
 }
 
 static inline void native_irq_disable(void)
 {
-        asm volatile("cli": : :"memory");
+    asm volatile("cli": : :"memory");
 }
 
 static inline void native_irq_enable(void)
 {
-        asm volatile("sti": : :"memory");
+    asm volatile("sti": : :"memory");
 }
 
 static inline void native_safe_halt(void)
 {
-        asm volatile("sti; hlt": : :"memory");
+    asm volatile("sti; hlt": : :"memory");
 }
 
 static inline void native_halt(void)
 {
-        asm volatile("hlt": : :"memory");
+    asm volatile("hlt": : :"memory");
 }
 
 /* Functions below is according Linux kernel source*/
@@ -77,17 +95,17 @@ static inline void native_halt(void)
 /* Check at compile time that sth is of a particular type
    Always return 1
 */
-#define typecheck(type,x)              \
-    ({  type __dummy;                  \
-        typeof(x) __dummy2;            \
-        (void)(&__dummy == &__dummy2); \
-        1;                             \
+#define typecheck(type,x)                       \
+    ({  type __dummy;                           \
+        typeof(x) __dummy2;                     \
+        (void)(&__dummy == &__dummy2);          \
+        1;                                      \
     })
 
 
 #define local_irq_save(flags)                   \
     do { typecheck(unsigned long, flags);       \
-         flags = native_irq_save();             \
+        flags = native_irq_save();              \
     } while(0);                                 \
 
 #define local_irq_restore(flags)                \
