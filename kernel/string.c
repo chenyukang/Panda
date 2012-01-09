@@ -213,3 +213,13 @@ int printk(const char* format, ... )
     va_end(ap);
     return cnt;
 }
+
+void test_printk()
+{
+    printk("%s\n", "hello world");
+    printk("%c\n", 'y');
+    printk("%d\n", 32);
+    printk("%d\n", -32);
+    printk("value: %d\n", 1<<31);
+    printk("most: %d\n", 1<<30);
+}

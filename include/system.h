@@ -21,7 +21,7 @@
 #define kassert(_Expression)                                            \
     if(!(_Expression))                                                  \
     {                                                                   \
-        printk("FILE:%s LINE:%d  (\"%s\"  FAILED)\n", __FILE__, __LINE__ , #_Expression); \
+        printk("FILE:%s LINE:%d  (Assertion: \"%s\" FAILED)\n", __FILE__, __LINE__ , #_Expression); \
         while(1) ;                                                      \
     }                                                                   \
 
@@ -50,6 +50,6 @@ void timer_wait(int ticks);
 extern void gdt_init(void);
 extern void idt_init(void);
 extern void kb_init(void);
-
+extern void test_idt();
 #endif
 

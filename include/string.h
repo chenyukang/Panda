@@ -18,6 +18,7 @@ void* memset(void* addr, unsigned char v, size_t cnt);
 void* memcpy(void *dest, const void *src, size_t cnt);
 void* memmove(void* dest, const void* src, size_t cnt);
 u16*  memsetw(u16* dest, u16 val, size_t count);
+void test_printk();
     
 int printk(const char* format, ... );
 

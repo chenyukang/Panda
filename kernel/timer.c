@@ -19,10 +19,10 @@ static void timer_callback(void)
      *  display a message on the screen */
     if (ticks % 70 == 0)
     {
-        puts("now:");
-        printk_int(seconds++);
+//        puts("now:");
+//        printk_int(seconds++);
         seconds++;
-        puts("\n");
+//        puts("\n");
     }
 }
 

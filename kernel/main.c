@@ -23,22 +23,11 @@ void kmain()
     
     timer_init(1);
     puts("kb init...\n");
-
     kb_init();
 
     kassert(1==1);
-//    kassert(1==2);
+    kassert(1==0);
 
-    printk("%s\n", "hello world");
-    printk("%c\n", 'y');
-    printk("%d\n", 32);
-    printk("%d\n", -32);
-    printk("value: %d\n", 1<<31);
-    printk("most: %d\n", 1<<30);
-
-    asm volatile ("int $0xF");
-    asm volatile ("int $0x04");
-    asm volatile ("int $0x06");
     int initial = 1;
     while(1){
         //initial = 0;
