@@ -13,7 +13,6 @@ GCC="gcc -c -W -Wall -I./include/ -fno-stack-protector -fno-builtin"
 OBJS="./objs"
 TOOL="./tool"
 
-
 do_clean() {
     echo "clean up"
     rm -rf a.img bochsout.txt $OBJS/*.o;
