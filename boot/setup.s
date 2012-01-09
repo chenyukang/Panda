@@ -56,8 +56,7 @@ setup:
 	or  eax, 1
 	mov cr0, eax
 
-	jmp dword 0x8:0x0
-	jmp $
+	jmp dword 0x8:0x0	;jump to head.s
 
 set_print_str:
 	mov ah, 0x0E
@@ -76,17 +75,6 @@ empty_8042:
 	jnz  empty_8042
 	ret
 
-[bits 32]
-system:
-	;设置寄存器
-	mov ax, 0x10
-	mov ds , ax
-	mov cl , '1'
-	mov [0xb8000] , cl
-	mov cl , 0x04
-	mov [0xb8001] , cl
-	jmp $
-
 setupseg 	equ 	0x9000
 setupoffset	equ 	0x0100
 setupsize 	equ 	1024
@@ -98,7 +86,6 @@ systemsize 	equ 	1024*30 ; this will bigger than kernel.bin
 	
 setup_msg db "Setup Panda OS"	;
 	db 13, 10, 0  		;
-
 
 gdt_addr:
 	dw 0x7fff
