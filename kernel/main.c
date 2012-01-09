@@ -20,22 +20,25 @@ void kmain()
     puts("idt_init ...\n");
     idt_init();
     puts("timer init ...\n");
-    //asm volatile ("int $0x3");
-    //asm volatile ("int $0x4");
-    asm volatile("sti");
+    
     timer_init(1);
     puts("kb init...\n");
+
     kb_init();
-    //detect_cpu();
-#if 0
+
+    kassert(1==1);
+//    kassert(1==2);
+
     printk("%s\n", "hello world");
     printk("%c\n", 'y');
     printk("%d\n", 32);
     printk("%d\n", -32);
     printk("value: %d\n", 1<<31);
     printk("most: %d\n", 1<<30);
-#endif
-//    asm volatile ("int $0xF");
+
+    asm volatile ("int $0xF");
+    asm volatile ("int $0x04");
+    asm volatile ("int $0x06");
     int initial = 1;
     while(1){
         //initial = 0;
@@ -44,5 +47,4 @@ void kmain()
             initial = 0;
         }
     }
-    safe_halt();
 }

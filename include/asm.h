@@ -26,6 +26,7 @@ inline void disable_nmi(void);
 #define local_irq_disable() (native_irq_disable())
 #define local_irq_enable()  (native_irq_enable())
 #define safe_halt()         (native_safe_halt())
+#define halt()              (native_halt())
 
 
 #define first_zerobit(x) (first_onebit(~(x)))
@@ -112,6 +113,9 @@ static inline void native_halt(void)
     do { typecheck(unsigned long, flags);       \
         flags = native_irq_restore();           \
     } while(0);                                 \
+
+
+
 
 
 #endif

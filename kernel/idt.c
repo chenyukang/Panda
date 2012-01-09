@@ -250,6 +250,7 @@ void idt_init()
         "lidt %0"
         :: "m"(idtp));
 
+    asm volatile("sti");
     memset(&irq_routines , 0, sizeof(isq_t)*256);
 }
 

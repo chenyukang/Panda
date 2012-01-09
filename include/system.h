@@ -11,8 +11,23 @@
 
 #include <types.h>
 
+
+//debug option
+#define _DEBUG_ 1
+
 #define abs(x) ((x < 0) ? (-(x)): (x) )
 
+#ifdef _DEBUG_
+#define kassert(_Expression)                                            \
+    if(!(_Expression))                                                  \
+    {                                                                   \
+        printk("FILE:%s LINE:%d  (\"%s\"  FAILED)\n", __FILE__, __LINE__ , #_Expression); \
+        while(1) ;                                                      \
+    }                                                                   \
+
+#else
+#define kassert(_Expression)                
+#endif
 
 /* This defines what the stack looks like after an ISR was running */
 struct registers_t
