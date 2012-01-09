@@ -15,7 +15,7 @@ TOOL="./tool"
 
 do_clean() {
     echo "clean up"
-    rm -rf a.img bochsout.txt $OBJS/*.o;
+    rm -rf a.img bochsout.txt $OBJS/*.o $OBJS/*.bin;
 }
 
 do_compile() {
