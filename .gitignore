@@ -1,0 +1,5 @@
+#ignore these files
+*.o
+TAGS
+cscope.files
+cscope.out
