@@ -6,7 +6,26 @@ jmp setup
 
 	
 [global setup]
-setup:	
+setup:
+	
+	;;check memroy info
+.checkmemory:
+	mov ebx, 0
+	mov di,  memchkinfo
+.loop:
+	mov eax, 0E820h
+	mov ecx, 20
+	mov edx, 0534D4150h
+	int 15h
+	add di, 20
+	inc dword [mem_number]
+	cmp ebx, 0
+	jne .loop
+	xor edx, edx
+	xor eax, eax
+	xor edi, edi
+	xor esi, esi
+
 	mov ax, setupseg
 	mov ds, ax
 	mov es, ax
@@ -17,7 +36,7 @@ setup:
 	mov si, setup_msg
 	call set_print_str		;
 
-	.readfloppy:
+.readfloppy:
 	mov ax, setupseg
 	mov es, ax
 	mov bx, setupoffset+setupsize ; put kernel at here now 
@@ -40,6 +59,7 @@ setup:
 	mov cx, systemsize/4
 	rep movsd
 
+	
 	;;
 	cli
 	lgdt [gdt_addr]
@@ -80,6 +100,9 @@ setupseg 	equ 	0x9000
 setupoffset	equ 	0x0100
 setupsize 	equ 	1024
 
+mem_number      dw      0		
+memchkinfo      equ     0x9300
+	
 systemseg 	equ	0x0000
 systemoffset	equ 	0x0000
 systemsize 	equ 	1024*30 ; this will bigger than kernel.bin

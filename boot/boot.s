@@ -8,19 +8,19 @@ jmp start
 
 [global start]
 start:	
-	mov [bootdriver], dl	;the driver number which boot from
-
-	mov ax, bootseg
-	mov ds, ax
-
 	;; puts loading
 	mov si, msg
 	call print_str
 
+
+	xor edx, edx
+
+	mov [bootdriver], dl	;the driver number which boot from	
+	mov ax, bootseg
+	mov ds, ax
 	;; read the setup code from floppy
 	;; begin with second
-	.readfloppy:
-
+.readfloppy:
 	mov ax, setupseg
 	mov es, ax
 	mov bx, setupoffset
@@ -31,6 +31,7 @@ start:
 	mov al, setupsize/512
 	int 0x13		;interupt to read
 	jc  .readfloppy
+
 
 	;; ok, let finish boot and jump to setup
 	;; 	jmp setupseg:setupoffset
@@ -57,6 +58,8 @@ setupseg 	equ 0x9000    	;setup address
 setupoffset 	equ 0x0100	;
 setupsize 	equ 1024	;
 bootdriver 	db  0		;
+mem_number      dw  0	
+mem_chk_buf     times 256 db 0 	;store memory size info related
 ; Magic number for sector
 times 510-($-$$) db 0
 dw 0xAA55
