@@ -59,6 +59,14 @@ do_all()
     do_compile;
     bochs;
 }
+
+show_help()
+{
+    echo "-clean|x   : do clean"
+    echo "-compile|c : do compile"
+    echo "-all|a     : do everything, and run Bochs"
+}
+
 while [ $# -gt 0 ]
 do
   case $1 in
@@ -69,9 +77,6 @@ do
   shift
 done
 
-
-#bochs;
-
-#rm *.o;
+show_help;
 
 

@@ -33,7 +33,8 @@ start:
 	jc  .readfloppy
 
 	;; ok, let finish boot and jump to setup
-	jmp setupseg:setupoffset
+	;; 	jmp setupseg:setupoffset
+	jmp 0x9000:0x0100
 	
 print_str:
 	mov ah, 0x0E

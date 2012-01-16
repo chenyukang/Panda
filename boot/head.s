@@ -180,5 +180,5 @@ irq_common_stub:
     iret
 
 section .bss
-	resb 8192	; 8 kilobytes for stack
+	resb 8192	; 8KB for stack
 stack_top:	; top of our stack here

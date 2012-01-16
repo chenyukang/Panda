@@ -12,10 +12,10 @@
 #include <types.h>
 
 
+#define abs(x) ((x < 0) ? (-(x)): (x) )
+
 //debug option
 #define _DEBUG_ 1
-
-#define abs(x) ((x < 0) ? (-(x)): (x) )
 
 #ifdef _DEBUG_
 #define kassert(_Expression)                                            \

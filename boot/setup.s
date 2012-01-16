@@ -20,17 +20,18 @@ setup:
 	.readfloppy:
 	mov ax, setupseg
 	mov es, ax
-	mov bx, setupoffset+setupsize
+	mov bx, setupoffset+setupsize ; put kernel at here now 
 	mov ah, 2
 	mov dl, [0]
 	mov ch, 0
-	mov cl, 1+1+setupsize/512
+	mov cl, 1+1+setupsize/512  ;0 , 1 is for boot, setupsize/512 for setup.bin
 	mov al, systemsize/512
 	int 0x13
 	jc .readfloppy
 
 
 	;; move system to 0x0000
+	;; this is OK for our kernel.bin is small
 	cld
 	mov si, setupoffset+setupsize
 	mov ax, systemseg
