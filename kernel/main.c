@@ -25,9 +25,6 @@ void kmain()
     puts("kb init...\n");
     kb_init();
 
-    kassert(1==1);
-    kassert(1==0);
-
     int initial = 1;
     while(1){
         //initial = 0;
