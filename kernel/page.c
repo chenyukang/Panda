@@ -57,9 +57,6 @@ page_t* get_page(page_directory_t* page_dir, u32 addr, int make)
         memset(pte, 0, sizeof(pte_t));
         page_dir->tables[index] = (pte_t*)pte;
         page_dir->tableAddress[index] = (u32)pte | 0x7;
-        //puts("now:");
-        //printk_hex(page_dir->tableAddress[index]);
-        //puts("\n");
         return &(page_dir->tables[index]->pages[addr%1024]);
     }
     else {
