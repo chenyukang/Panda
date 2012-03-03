@@ -34,7 +34,7 @@ setup:
 	
 	;; puts loading
 	mov si, setup_msg
-	call set_print_str		;
+	call print_str		;
 
 .readfloppy:
 	mov ax, setupseg
@@ -49,7 +49,7 @@ setup:
 	jc .readfloppy
 
 
-	;; move system to 0x0000
+	;; move system to 0x10000
 	;; this is OK for our kernel.bin is small
 	cld
 	mov si, setupoffset+setupsize
@@ -59,7 +59,7 @@ setup:
 	mov cx, systemsize/4
 	rep movsd
 
-	
+
 	;;
 	cli
 	lgdt [gdt_addr]
@@ -77,9 +77,28 @@ setup:
 	or  eax, 1
 	mov cr0, eax
 
-	jmp dword 0x8:0x0	;jump to head.s
+	jmp dword 0x8:0x0
+	;; jmp dword 0x8:systemseg
 
-set_print_str:
+
+_start_os:
+
+	;; puts loading	
+	mov si, start_msg
+	call print_str		;
+    ; copy 0x10000 to 0x100000
+    ;; cld
+    ;; mov     esi, 0x0
+    ;; mov     edi, 100000h
+    ;; mov     ecx, systemsize ; copy 64kb
+    ;; rep movsb
+
+    ;; ; jump to C!
+    ;; ; never return it should  be
+    ;; jmp     0x8:100000h
+
+	
+print_str:
 	mov ah, 0x0E
 .next:
 	lodsb
@@ -107,6 +126,8 @@ systemseg 	equ	0x0000
 systemoffset	equ 	0x0000
 systemsize 	equ 	1024*30 ; this will bigger than kernel.bin
 	
+start_msg db "Start Panda OS"	;
+	db 13, 10, 0  		;
 	
 setup_msg db "Setup Panda OS"	;
 	db 13, 10, 0  		;

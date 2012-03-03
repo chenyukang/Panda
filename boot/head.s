@@ -72,6 +72,12 @@ finish:
     jmp irq_common_stub
 %endmacro
 
+global isr14
+isr14:
+	cli                         ; Disable interrupts firstly.
+    push byte 0                 ; Push a dummy error code.
+    push byte 14                ; Push the interrupt number.
+    jmp isr_pagefault_stub         ; Go to our common handler code.
 	
 ISR_NOERRCODE 0
 ISR_NOERRCODE 1
@@ -87,7 +93,6 @@ ISR_ERRCODE   10
 ISR_ERRCODE   11
 ISR_ERRCODE   12
 ISR_ERRCODE   13
-ISR_ERRCODE   14
 ISR_NOERRCODE 15
 ISR_NOERRCODE 16
 ISR_NOERRCODE 17
@@ -168,6 +173,35 @@ irq_common_stub:
 
     push eax
     mov eax, irq_handler
+    call eax
+    pop eax
+
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    popa
+    add esp, 8
+    iret
+
+extern page_fault_handler
+	
+isr_pagefault_stub:
+    pusha
+    push ds
+    push es
+    push fs
+    push gs
+
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov eax, esp
+
+    push eax
+    mov eax, page_fault_handler
     call eax
     pop eax
 

@@ -14,6 +14,8 @@
 
 #define abs(x) ((x < 0) ? (-(x)): (x) )
 
+#define KB  0x1000
+
 //debug option
 #define _DEBUG_ 1
 
@@ -22,12 +24,18 @@
     if(!(_Expression))                                                  \
     {                                                                   \
         printk("FILE:%s LINE:%d  (Assertion: \"%s\" FAILED)\n", __FILE__, __LINE__ , #_Expression); \
+        asm volatile("cli");                                            \
         while(1) ;                                                      \
     }                                                                   \
 
 #else
 #define kassert(_Expression)                
 #endif
+
+#define  PANIC(Expression)                    \
+    printk("FATAL ERROR:%s\n", Expression);    \
+    while(1) ;                                  \
+
 
 /* This defines what the stack looks like after an ISR was running */
 struct registers_t
@@ -39,7 +47,7 @@ struct registers_t
 };
 
 typedef void (*isq_t) (struct registers_t* r);
-
+typedef void (*isr_t) (struct registers_t* r);
 void irq_install_handler(int irq, isq_t handler);
 void idt_set(unsigned char k, unsigned long base,
              unsigned short selector, unsigned char flags);

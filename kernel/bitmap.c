@@ -6,13 +6,9 @@
 //
 // @Brief  :
 
+#include <system.h>
 #include <bitmap.h>
 #include <asm.h>
-
-#define KB  0x1000
-#define INDEX(a)  ((a)/(4*8))
-#define OFFSET(a) ((a)%(4*8))
-
 
 extern u32* frames;   //in page.c
 extern u32  nframes;

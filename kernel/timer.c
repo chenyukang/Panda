@@ -28,6 +28,7 @@ static void timer_callback(void)
 
 void timer_init(u32 frequency)
 {
+    puts("timer init ...\n");
     // Firstly, register our timer callback.
     irq_install_handler(32, (isq_t)(&timer_callback));
 

@@ -7,6 +7,7 @@
 // @Brief  :
 
 #include <system.h>
+#include <string.h>
 
 /* Defines a GDT entry  */
 /*   http://wiki.osdev.org/Global_Descriptor_Table */
@@ -53,6 +54,8 @@ void gdt_set_entry(int num, unsigned long base, unsigned long limit,
 
 void gdt_init(void)
 {
+    puts("gdt_init ...\n");
+    
     /* Setup the GDT pointer and limit */
     gp.limit = (sizeof(struct gdt_entry) * 3) - 1;
     gp.base = (unsigned int)&gdt;

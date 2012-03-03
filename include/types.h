@@ -20,6 +20,7 @@ typedef signed short       s16;
 typedef unsigned char      u8;
 typedef signed char        s8;
 
+#define NULL 0
 
 #endif
 

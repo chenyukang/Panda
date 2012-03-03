@@ -170,6 +170,8 @@ extern isq_t irq_routines[];
 /* Installs the IDT */
 void idt_init()
 {
+    puts("idt_init ...\n");
+    
     /* Sets the special IDT pointer up, just like in 'gdt.c' */
     idtp.limit = (sizeof (struct idt_entry) * 256) - 1;
     idtp.base = (u32)&idt;
@@ -254,14 +256,28 @@ void idt_init()
     memset(&irq_routines , 0, sizeof(isq_t)*256);
 }
 
+extern void page_fault_handler(struct registers_t* regs);
 // This gets called from our ASM interrupt handler stub.
 void isr_handler(struct registers_t* regs)
 {
+    
+#if 0
     puts("recieved interrupt: ");
     printk_hex(regs->int_no);
     puts("\n");
+#endif
 
-     /* Is this a fault whose number is from 0 to 31? */
+    /* Find out if we have a custom handler to run for this
+    *  IRQ, and then finally, run it */
+    isq_t handler = irq_routines[regs->int_no];
+    printk("%s","handler:");
+    printk_hex((unsigned int)handler);
+    if (handler)
+    {
+        handler(regs);
+    }
+
+    /* Is this a fault whose number is from 0 to 31? */
     if (regs->int_no < 32)
     {
         puts(exception_messages[regs->int_no]);

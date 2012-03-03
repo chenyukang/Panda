@@ -10,6 +10,7 @@
 #include <system.h>
 #include <asm.h>
 #include <screen.h>
+#include <string.h>
 
 extern void irq0();
 extern void irq1();

@@ -22,7 +22,7 @@ extern void putch(char);
 
 
 /* ignore overlap */
-void *memcpy(void *dest, const void *src, size_t cnt)
+void* memcpy(void *dest, const void *src, size_t cnt)
 {
     const char *sp = (const char *)src;
     char *dp = (char *)dest;

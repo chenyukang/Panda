@@ -10,6 +10,7 @@
 #include <system.h>
 #include <screen.h>
 #include <kb.h>
+#include <string.h>
 
 static int shift_state = 0 ;
 
@@ -45,6 +46,7 @@ void keyboard_handler(void)
 
 void kb_init()
 {
+    puts("kb init...\n");
     irq_install_handler(33, (isq_t)(&keyboard_handler));
 }
 
