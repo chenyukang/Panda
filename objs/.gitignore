@@ -1,4 +1,5 @@
 #ignore these files
+*.O
 *.o
 *.bin
 TAGS

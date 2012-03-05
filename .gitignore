@@ -1,5 +1,6 @@
 #ignore these files
 *.o
+*.O
 *.bin
 TAGS
 cscope.files
