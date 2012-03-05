@@ -46,10 +46,15 @@ do_compile() {
     ld head.o main.o screen.o gdt.o idt.o asm.o irq.o \
 	timer.o kb.o cpu.o string.o page.o bitmap.o \
 	-o kernel.bin -T ../$TOOL/kernel.ld;
-
-    echo "making a.img"
-    cat boot.bin setup.bin kernel.bin > ../a.img
-    cd ../;
+    
+    if [ $? -ne 0 ]
+	then
+	echo "compile error!"
+    else
+	echo "making a.img"
+	cat boot.bin setup.bin kernel.bin > ../a.img
+	cd ../;
+    fi
 
 }
 
@@ -57,7 +62,11 @@ do_all()
 {
     do_clean;
     do_compile;
-    bochs;
+
+    if [ -f "a.img" ]
+	then 
+	bochs;
+    fi
 }
 
 show_help()

@@ -12,6 +12,7 @@
 
 static u32 ticks = 0;
 static u32 seconds = 0;
+
 static void timer_callback(void)
 {
     ticks++;

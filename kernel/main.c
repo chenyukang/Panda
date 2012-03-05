@@ -12,6 +12,7 @@
 #include <string.h>
 #include <page.h>
 
+
 void kmain()
 {
     init_video();
@@ -22,11 +23,11 @@ void kmain()
     kb_init();
     page_init(0x1000000);//16 MB
     int initial = 1;
-    
+#if 0    
     u32 *ptr = (u32*)0xA0000000;
     u32 do_page_fault = *ptr;
     kassert(do_page_fault != 0);
-    
+#endif 
     while(1){
         if(initial) {
             puts("running\n");
