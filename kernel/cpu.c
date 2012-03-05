@@ -30,11 +30,9 @@ int detect_cpu(void) {
 	cpuid(0, unused, ebx, unused, unused);
 	switch(ebx) {
     case 0x756e6547: /* Intel Magic Code */
-        puts("intel cpu\n");
         do_intel();
 		break;
     case 0x68747541: /* AMD Magic Code */
-        puts("amd cpu\n");
         do_amd();
 		break;
     default:
@@ -287,6 +285,27 @@ int do_amd(void) {
 	family = (eax >> 8) & 0xf;
 	stepping = eax & 0xf;
 	reserved = eax >> 12;
+
+    cpuid(0x80000000, extended, unused, unused, unused);
+	if(extended == 0) {
+		return 0;
+	}
+	if(extended >= 0x80000002) {
+		unsigned int j;
+		puts("Processor Name: ");
+		for(j = 0x80000002; j <= 0x80000004; j++) {
+			cpuid(j, eax, ebx, ecx, edx);
+			printregs(eax, ebx, ecx, edx);
+		}
+		puts("\n");
+	}
+	if(extended >= 0x80000007) {
+		cpuid(0x80000007, unused, unused, unused, edx);
+		if(edx & 1) {
+			puts("Temperature Sensing Diode Detected!\n");
+		}
+	}
+
 	printk("Family: %d Model: %d [", family, model);
 	switch(family) {
     case 4:
@@ -334,27 +353,10 @@ int do_amd(void) {
 			break;
 		}
 		break;
+    default:
+        puts("Unknown model");
+        break;
 	}
 	puts("]\n");
-	cpuid(0x80000000, extended, unused, unused, unused);
-	if(extended == 0) {
-		return 0;
-	}
-	if(extended >= 0x80000002) {
-		unsigned int j;
-		puts("Detected Processor Name: ");
-		for(j = 0x80000002; j <= 0x80000004; j++) {
-			cpuid(j, eax, ebx, ecx, edx);
-			printregs(eax, ebx, ecx, edx);
-		}
-		puts("\n");
-	}
-	if(extended >= 0x80000007) {
-		cpuid(0x80000007, unused, unused, unused, edx);
-		if(edx & 1) {
-			puts("Temperature Sensing Diode Detected!\n");
-		}
-	}
-	printk("Stepping: %d Reserved: %d\n", stepping, reserved);
 	return 0;
 }

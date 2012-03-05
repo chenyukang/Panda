@@ -21,6 +21,7 @@ void kmain()
     timer_init(1);
     kb_init();
     page_init(0x1000000);//16 MB
+    detect_cpu();
     int initial = 1;
 #if 0    
     u32 *ptr = (u32*)0xA0000000;
