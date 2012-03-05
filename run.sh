@@ -1,10 +1,5 @@
 #!/bin/sh
 
-
-
-#build boot bin
-#nasm -o boot.bin boot.S;
-
 BOOT="./boot"
 KERNEL="./kernel"
 INCLUDE="./include"
