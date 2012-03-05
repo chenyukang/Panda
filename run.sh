@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 BOOT="./boot"
 KERNEL="./kernel"
