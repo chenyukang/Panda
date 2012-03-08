@@ -20,14 +20,20 @@ void kmain()
     idt_init();
     timer_init(1);
     kb_init();
-    page_init(0x1000000);//16 MB
+    page_init( 0x1000000 * 2 );//32 MB
+
+#if 1
     detect_cpu();
-    int initial = 1;
-#if 0    
-    u32 *ptr = (u32*)0xA0000000;
+#endif
+    
+#if 0
+    u32 *ptr = (u32*)0x100E000;
     u32 do_page_fault = *ptr;
+    printk("value: %d\n", do_page_fault);
     kassert(do_page_fault != 0);
-#endif 
+#endif
+    
+    int initial = 1;
     while(1){
         if(initial) {
             puts("running\n");

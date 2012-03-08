@@ -12,7 +12,7 @@
 #include <string.h>
 
 extern u32 end;
-u32  begin_address = (u32)(0x100000);
+u32  begin_address = (u32)(0x1000000);
 
 u32* frames;
 u32  nframes;
@@ -76,7 +76,7 @@ void set_page_frame(page_t* page, int is_kernel, int is_write)
             return;
         }
         else {
-            set_frame(addr*0x1000);
+            set_frame( addr * 0x1000);
             page->present = 1;
             page->rw = (is_write)? 1 : 0;
             page->user = (is_kernel)? 1: 0;
@@ -90,8 +90,7 @@ void page_init(u32 end_address)
     printk("%s\n", "page init...");
     printk("%s:", "begin_address");
     printk_hex((u32)begin_address);
-    puts("\n");
-    printk("%s:", "end_address");
+    printk(" %s:", "end_address");
     printk_hex(end_address);
     puts("\n");
     
@@ -117,19 +116,18 @@ void page_init(u32 end_address)
         addr += 0x1000;
     }
 
+    printk("end address:");
+    printk_hex((u32)addr);
+    printk("\n");
+    
     irq_install_handler(13, (isq_t)(&page_fault_handler));
     
-    asm volatile("mov %0, %%cr3":: "r"(&current_page_dir->tableAddress));
-    //kassert(0);
     u32 cr0;
+    asm volatile("mov %0, %%cr3":: "r"(&current_page_dir->tableAddress));
     asm volatile("mov %%cr0, %0": "=r"(cr0));
-    //kassert(0);
     cr0 |= 0x80000000; // Enable paging!
     asm volatile("mov %0, %%cr0":: "r"(cr0));
-    //kassert(0);
-
     puts("end page init...\n");
-    //kassert(0);
 }
 
 void page_fault_handler(struct registers_t* regs)

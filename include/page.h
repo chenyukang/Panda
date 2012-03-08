@@ -23,7 +23,6 @@ typedef struct _page {
     u32 pb_addr : 20; //page base address
 } page_t;
 
-
 //page table entry
 typedef struct _pte {
     page_t pages[1024];
@@ -34,7 +33,6 @@ typedef struct _pde {
     pte_t* tables[1024];
     u32  tableAddress[1024];
 }page_directory_t;
-    
 
 void page_init(u32 end_address);
 

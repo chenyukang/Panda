@@ -15,7 +15,6 @@
 #include <screen.h>
 #include <string.h>
 
-
 /* Required Declarations */
 static int do_intel(void);
 static int do_amd(void);

@@ -57,8 +57,3 @@ inline void disable_nmi(void)
 	write_nmi(DISABLE_NMI);
 }
 
-
-
-
-
-
