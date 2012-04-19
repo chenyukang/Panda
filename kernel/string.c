@@ -126,7 +126,6 @@ inline void printk_int(u32 val)
 }
 
 
-
 //be careful with 1<<32
 inline char* int2str(char* str, const s32 num,
                      const s32 radix)

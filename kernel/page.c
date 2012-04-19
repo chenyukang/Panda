@@ -34,8 +34,10 @@ inline u32 align_addr(u32 addr)
     return addr;
 }
 
+
 //alloc size*4 bytes,
-void* kmalloc(u32 size, int align)
+static void*
+_internel_alloc(u32 size, int align)
 {
     if(align != 0)
         begin_address = align_addr(begin_address);
@@ -43,6 +45,13 @@ void* kmalloc(u32 size, int align)
     begin_address += size;
     return (void*)addr;
 }
+
+
+void* allocM(u32 size)
+{
+    return _internel_alloc(size, 1);
+}
+
 
 
 page_t* get_page(page_directory_t* page_dir, u32 addr, int make)
@@ -53,7 +62,7 @@ page_t* get_page(page_directory_t* page_dir, u32 addr, int make)
         return &(page_dir->tables[index]->pages[addr%1024]);
     }
     else if(make){
-        void* pte = kmalloc(sizeof(pte_t), 1);
+        void* pte = _internel_alloc(sizeof(pte_t), 1);
         memset(pte, 0, sizeof(pte_t));
         page_dir->tables[index] = (pte_t*)pte;
         page_dir->tableAddress[index] = (u32)pte | 0x7;
@@ -95,7 +104,7 @@ void page_init(u32 end_address)
     puts("\n");
     
     nframes = (end_address) / 0x1000; //end_address is aligned
-    frames  = (u32*)kmalloc(INDEX(nframes), 0);
+    frames  = (u32*)_internel_alloc(INDEX(nframes), 0);
     printk("nframes:%d\n", nframes);
     printk("frames address:");
     printk_hex((u32)frames);
@@ -103,7 +112,7 @@ void page_init(u32 end_address)
     
     memset(frames, 0, (INDEX(nframes)) * sizeof(u32));
 
-    page_dir = (page_directory_t*)kmalloc(sizeof(page_directory_t), 1);
+    page_dir = (page_directory_t*)_internel_alloc(sizeof(page_directory_t), 1);
     current_page_dir = page_dir;
     memset(page_dir, 0 , sizeof(page_directory_t));
 

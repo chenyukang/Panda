@@ -11,29 +11,28 @@
 
 #include <types.h>
 
-
 #define abs(x) ((x < 0) ? (-(x)): (x) )
-
 #define KB  0x1000
 
 //debug option
-#define _DEBUG_ 1
+//#define NDEBUG 1
 
-#ifdef _DEBUG_
+#ifndef NDEBUG
 #define kassert(_Expression)                                            \
-    if(!(_Expression))                                                  \
-    {                                                                   \
-        printk("FILE:%s LINE:%d  (Assertion: \"%s\" FAILED)\n", __FILE__, __LINE__ , #_Expression); \
-        asm volatile("cli");                                            \
-        while(1) ;                                                      \
-    }                                                                   \
+  if(!(_Expression))                                                    \
+  {                                                                     \
+      printk("FILE:%s LINE:%d  (Assertion: \"%s\" FAILED)\n",           \
+             __FILE__, __LINE__ , #_Expression);                        \
+      asm volatile("cli");                                              \
+      while(1) ;                                                        \
+  }                                                                     \
 
 #else
 #define kassert(_Expression)                
 #endif
 
-#define  PANIC(Expression)                    \
-    printk("FATAL ERROR:%s\n", Expression);    \
+#define  PANIC(Expression)                      \
+    printk("FATAL ERROR:%s\n", Expression);     \
     while(1) ;                                  \
 
 

@@ -75,7 +75,7 @@ do
   case $1 in
     -all|-a) do_all; exit 0;;
     -clean|-x) do_clean; exit 0;;
-    -compile|-c) do_compile; exit 0;;
+    -compile|-c) do_clean; do_compile; exit 0;;
   esac
   shift
 done

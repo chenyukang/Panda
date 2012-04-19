@@ -11,6 +11,7 @@
 #include <screen.h>
 #include <string.h>
 #include <page.h>
+#include <kheap.h>
 
 void kmain()
 {
@@ -22,7 +23,7 @@ void kmain()
     kb_init();
     page_init( 0x1000000 * 2 );//32 MB
 
-#if 1
+#if 0
     detect_cpu();
 #endif
     
@@ -32,6 +33,9 @@ void kmain()
     printk("value: %d\n", do_page_fault);
     kassert(do_page_fault != 0);
 #endif
+
+    u32 *ptr = (u32*)kmalloc(sizeof(u32));
+    printk("ptr: %d\n", ptr);
     
     int initial = 1;
     while(1){

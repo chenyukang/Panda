@@ -36,4 +36,6 @@ typedef struct _pde {
 
 void page_init(u32 end_address);
 
+void* allocM(u32 size);
+
 #endif
