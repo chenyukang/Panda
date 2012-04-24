@@ -12,6 +12,7 @@
 
 #define MINI_NALLOC 1024
 
+u32 kheap_start_addr = KHEAP_START_ADDR;
 static Header base;
 static Header* freep = NULL;
 
@@ -50,7 +51,16 @@ void kfree(void* ap)
 
     freep = p;
 }
-  
+
+
+static
+void* __real_get_mem(u32 size)
+{
+    void* addr = (void*)kheap_start_addr;
+    kheap_start_addr += size;
+    return addr;
+}
+
 static Header* get_more(u32 size)
 {
     printk("now in get_more: %d\n", size);
@@ -58,7 +68,7 @@ static Header* get_more(u32 size)
     Header* head = NULL;
     if ( size < MINI_NALLOC )
         size = MINI_NALLOC;
-    mem = (char*)(allocM( size * sizeof(Header) ));
+    mem = (char*)(__real_get_mem( size * sizeof(Header) ));
     if ( mem == NULL )
         return NULL;
 

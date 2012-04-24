@@ -8,6 +8,7 @@
 
 #include <system.h>
 #include <page.h>
+#include <kheap.h>
 #include <bitmap.h>
 #include <string.h>
 
@@ -97,9 +98,12 @@ void set_page_frame(page_t* page, int is_kernel, int is_write)
 void page_init(u32 end_address)
 {
     printk("%s\n", "page init...");
+    
     printk("%s:", "begin_address");
     printk_hex((u32)begin_address);
     printk(" %s:", "end_address");
+
+    
     printk_hex(end_address);
     puts("\n");
     
@@ -108,14 +112,20 @@ void page_init(u32 end_address)
     printk("nframes:%d\n", nframes);
     printk("frames address:");
     printk_hex((u32)frames);
+    
     printk("\n");
     
     memset(frames, 0, (INDEX(nframes)) * sizeof(u32));
 
+    /* make page direcotry */
     page_dir = (page_directory_t*)_internel_alloc(sizeof(page_directory_t), 1);
     current_page_dir = page_dir;
     memset(page_dir, 0 , sizeof(page_directory_t));
 
+    u32 k;
+    for( k=KHEAP_START_ADDR; k<KHEAP_START_ADDR+KHEAP_INITIAL_SIZE; k+=0x1000)
+        get_page(page_dir, 1, k);
+        
     u32 addr = 0;
     while(addr < begin_address)
     {
@@ -124,6 +134,10 @@ void page_init(u32 end_address)
         set_page_frame(page, 0, 0);
         addr += 0x1000;
     }
+
+    // Now allocate those pages we mapped earlier.
+    for (k=KHEAP_START_ADDR; k<KHEAP_START_ADDR+KHEAP_INITIAL_SIZE; k+=0x1000)
+        set_page_frame(get_page(page_dir, k, 1), 0, 0);
 
     printk("end address:");
     printk_hex((u32)addr);

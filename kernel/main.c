@@ -35,7 +35,7 @@ void kmain()
 #endif
 
     u32 *ptr = (u32*)kmalloc(sizeof(u32));
-    printk("ptr: %d\n", ptr);
+    printk("ptr: %x\n", ptr);
     
     int initial = 1;
     while(1){
