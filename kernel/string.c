@@ -127,7 +127,7 @@ inline void printk_int(u32 val)
 
 
 //be careful with 1<<32
-inline char* int2str(char* str, const s32 num,
+inline char* int_to_str(char* str, const s32 num,
                      const s32 radix)
 {
     char* ptr = str;
@@ -161,6 +161,29 @@ inline char* int2str(char* str, const s32 num,
     return ret;
 }
 
+inline char* u32_to_str(char* str, const u32 val)
+{
+    char* ptr = str;
+    *ptr++ = '0';
+    *ptr++ = 'x';
+    int k;
+    int initial = 1;
+    u32 t;
+    for(k=28; k>0; k-=4) {
+        t = (val>>k) & 0xF;
+        if( t==0 && initial)
+            continue;
+        if( t > 0xA )
+            *ptr++ = (t-0xA+'A');
+        else
+            *ptr++ = (t+'0');
+    }
+    t = val & 0xF;
+    if( t >= 0xA ) *ptr++ = (t-0xA+'A');
+    else           *ptr++ = (t+'0');
+    return ptr;
+}
+
 int sprintk(char* buf, const char* format, va_list args)
 {
     int len = 0 ;
@@ -178,7 +201,7 @@ int sprintk(char* buf, const char* format, va_list args)
             break;
         case 'd':{
             s32 val = va_arg(args, int);
-            buf = int2str(buf, val, 10);
+            buf = int_to_str(buf, val, 10);
             break;
         }
         case 'f':
@@ -190,8 +213,11 @@ int sprintk(char* buf, const char* format, va_list args)
             }
             break;
         }
-        case 'x':
+        case 'x':{
+            u32 val = va_arg(args, u32);
+            buf = u32_to_str(buf, val);
             break;
+        }
         }
         format++;
     }
@@ -221,4 +247,5 @@ void test_printk()
     printk("%d\n", -32);
     printk("value: %d\n", 1<<31);
     printk("most: %d\n", 1<<30);
+    printk("hex: %x\n", 0xA);
 }

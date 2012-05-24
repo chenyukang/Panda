@@ -19,7 +19,7 @@ static Header* freep = NULL;
 
 void kfree(void* ap)
 {
-    printk("now in kfree: %d\n", (unsigned)ap);
+    //printk("now in kfree: %d\n", (unsigned)ap);
     Header *bp, *p;
     bp = (Header*)ap - 1; /* point back to header */
     p = freep;
@@ -63,7 +63,7 @@ void* __real_get_mem(u32 size)
 
 static Header* get_more(u32 size)
 {
-    printk("now in get_more: %d\n", size);
+    //printk("now in get_more: %d\n", size);
     char* mem = NULL;
     Header* head = NULL;
     if ( size < MINI_NALLOC )
@@ -83,7 +83,7 @@ void* kmalloc(u32 nbytes)
     Header *p, *prev;
     u32 nunits;
 
-    printk("now in kmalloc: %d\n", nbytes);
+    //printk("now in kmalloc: %d\n", nbytes);
     nunits = (nbytes+sizeof(Header)-1) / sizeof(Header) + 1;
     if( (prev = freep ) == NULL ) {
         prev = freep = base.s.next = &base;

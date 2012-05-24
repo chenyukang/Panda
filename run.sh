@@ -29,7 +29,11 @@ do_compile() {
 	`$cmd`;
     done
 
-    echo "linking"
+    do_link;
+}
+
+do_link() {
+    echo "linking kernel"
     cd  $OBJDIR;
     ld boot.O -o boot.bin -T ../$TOOL/boot.ld;
     ld setup.O -o setup.bin -T ../$TOOL/setup.ld;
@@ -48,7 +52,6 @@ do_compile() {
 	cat boot.bin setup.bin kernel.bin > ../a.img
 	cd ../;
     fi
-
 }
 
 do_all()

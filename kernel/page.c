@@ -18,14 +18,11 @@ u32  begin_address = (u32)(0x1000000);
 u32* frames;
 u32  nframes;
 
-
 page_directory_t* page_dir = NULL;
 page_directory_t* current_page_dir = NULL;
 
-
 void page_fault_handler(struct registers_t* regs);
 
-    
 inline u32 align_addr(u32 addr)
 {
     if(addr & 0xFFFFF000) {
@@ -98,22 +95,20 @@ void set_page_frame(page_t* page, int is_kernel, int is_write)
 void page_init(u32 end_address)
 {
     printk("%s\n", "page init...");
-    
-    printk("%s:", "begin_address");
-    printk_hex((u32)begin_address);
-    printk(" %s:", "end_address");
 
+#ifndef NDEBUG
+    printk("begin_address: %x \nend_address  : %x  \n",
+           begin_address, end_address);
+#endif
     
-    printk_hex(end_address);
-    puts("\n");
     
     nframes = (end_address) / 0x1000; //end_address is aligned
     frames  = (u32*)_internel_alloc(INDEX(nframes), 0);
-    printk("nframes:%d\n", nframes);
-    printk("frames address:");
-    printk_hex((u32)frames);
     
-    printk("\n");
+#ifndef NDEBUG
+    printk("nframes:%d\n", nframes);
+    printk("frames address: %x\n", (u32)frames);
+#endif
     
     memset(frames, 0, (INDEX(nframes)) * sizeof(u32));
 
@@ -139,9 +134,9 @@ void page_init(u32 end_address)
     for (k=KHEAP_START_ADDR; k<KHEAP_START_ADDR+KHEAP_INITIAL_SIZE; k+=0x1000)
         set_page_frame(get_page(page_dir, k, 1), 0, 0);
 
-    printk("end address:");
-    printk_hex((u32)addr);
-    printk("\n");
+#ifndef NDEBUG
+    printk("end address: %x\n", (u32)addr);
+#endif
     
     irq_install_handler(13, (isq_t)(&page_fault_handler));
     
@@ -150,7 +145,10 @@ void page_init(u32 end_address)
     asm volatile("mov %%cr0, %0": "=r"(cr0));
     cr0 |= 0x80000000; // Enable paging!
     asm volatile("mov %0, %%cr0":: "r"(cr0));
+    
+#ifndef NDEBUG
     puts("end page init...\n");
+#endif
 }
 
 void page_fault_handler(struct registers_t* regs)

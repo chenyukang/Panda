@@ -12,6 +12,7 @@
 #include <string.h>
 #include <page.h>
 #include <kheap.h>
+#include <test.h>
 
 void kmain()
 {
@@ -24,18 +25,18 @@ void kmain()
     page_init( 0x1000000 * 2 );//32 MB
 
 #if 0
-    detect_cpu();
+    int k;
+    for(k=0; k<10; k++) {
+        u32 *ptr = (u32*)kmalloc(sizeof(u32));
+        printk("ptr: %x\n", ptr);
+        *ptr = 0xA;
+        printk("value: %x\n", (*ptr));
+        char* cp = (char*)kmalloc(sizeof(char));
+        *cp = 'c';
+        printk("value: %c\n", (*cp));
+    }
 #endif
     
-#if 0
-    u32 *ptr = (u32*)0x100E000;
-    u32 do_page_fault = *ptr;
-    printk("value: %d\n", do_page_fault);
-    kassert(do_page_fault != 0);
-#endif
-
-    u32 *ptr = (u32*)kmalloc(sizeof(u32));
-    printk("ptr: %x\n", ptr);
     
     int initial = 1;
     while(1){
