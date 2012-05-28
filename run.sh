@@ -10,7 +10,7 @@ TOOL="./tool"
 
 do_clean() {
     echo "clean up"
-    rm -rf a.img bochsout.txt $OBJDIR/*.bin $OBJDIR/*.[oO];
+    rm -rf a.img hd.img bochsout.txt $OBJDIR/*.bin $OBJDIR/*.[oO];
 }
 
 do_compile() {
@@ -54,11 +54,16 @@ do_link() {
     fi
 }
 
+do_prepare_hd() {
+    echo "prepare hard dist"
+    bximage hd.img -hd -mode=flat -size=10 -q;
+}
+
 do_all()
 {
     do_clean;
     do_compile;
-
+    do_prepare_hd;
     if [ -f "a.img" ]
 	then 
 	bochs;

@@ -12,7 +12,9 @@
 #include <string.h>
 #include <page.h>
 #include <kheap.h>
+#include <hd.h>
 #include <test.h>
+
 
 void kmain()
 {
@@ -23,7 +25,7 @@ void kmain()
     timer_init(1);
     kb_init();
     page_init( 0x1000000 * 2 );//32 MB
-
+    init_hd();
 #if 0
     int k;
     for(k=0; k<10; k++) {
@@ -41,7 +43,7 @@ void kmain()
     int initial = 1;
     while(1){
         if(initial) {
-            puts("running\n");
+            puts("kernel running\n");
             initial = 0;
         }
     }

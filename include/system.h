@@ -31,6 +31,7 @@
 #define kassert(_Expression)                
 #endif
 
+/* this panic just get into dead loop */
 #define  PANIC(Expression)                      \
     printk("FATAL ERROR:%s\n", Expression);     \
     while(1) ;                                  \
