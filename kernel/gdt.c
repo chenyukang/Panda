@@ -36,8 +36,7 @@ extern void gdt_flush();
 
 /* Setup a descriptor in the Global Descriptor Table */
 void gdt_set_entry(int num, unsigned long base, unsigned long limit,
-                  unsigned char access, unsigned char gran)
-{
+                  unsigned char access, unsigned char gran) {
     /* Setup the descriptor base address */
     gdt[num].base_low = (base & 0xFFFF);
     gdt[num].base_middle = (base >> 16) & 0xFF;
@@ -52,8 +51,7 @@ void gdt_set_entry(int num, unsigned long base, unsigned long limit,
     gdt[num].access = access;
 }
 
-void gdt_init(void)
-{
+void gdt_init(void) {
     puts("gdt_init ...\n");
     
     /* Setup the GDT pointer and limit */
@@ -74,7 +72,6 @@ void gdt_init(void)
     *  this entry's access byte says it's a Data Segment */
     gdt_set_entry(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
 
-//    asm volatile( "lgdt %0" :: "m"(gp));
     /* Flush out the old GDT and install the new changes! */
-    gdt_flush();
+    gdt_flush();  // asm volatile( "lgdt %0" :: "m"(gp));
 }
