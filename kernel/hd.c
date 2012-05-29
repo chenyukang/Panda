@@ -35,6 +35,5 @@ void init_hd()
     /* get the number of divers, from the BIOS data area */
     u8* num_of_driver = (u8*)(0x475);
     printk("NrDrivers: %d\n", *num_of_driver);
-
     irq_install_handler(14, (isq_t)(&hd_interupt_handler));
 }
