@@ -20,13 +20,16 @@ setup:
 read_info:
 	mov ax, 0x9000
 	mov ds, ax
-	;; get memory size
+	
+	;; Now get memory size and save at 0x90002
+	;; This may just report up to 64M.
+	;; It only reports contiguous (usable) RAM.
 	mov ah, 0x88
 	int 0x15
 	mov [2], ax
 
-	;; get hd0 data
-	;; save at 0x90080
+	;; just get hd0 info data
+	;; save the disk info at 0x90080
 	mov ax, 0x0000
 	mov ds, ax
 	lds si, [4 * 0x41]
@@ -49,7 +52,7 @@ read_info:
 	mov ah, 2
 	mov dl, [0]
 	mov ch, 0
-	mov cl, 1+1+setupsize/512  ;0 , 1 is for boot, setupsize/512 for setup.bin
+	mov cl, 1+1+setupsize/512  ;0,1 is for boot, setupsize/512 for setup.bin
 	mov al, systemsize/512
 	int 0x13
 	jc .readfloppy
@@ -86,24 +89,6 @@ read_info:
 	jmp dword 0x8:0x0
 	;; jmp dword 0x8:systemseg
 
-
-_start_os:
-
-	;; puts loading	
-	mov si, start_msg
-	call print_str		;
-    ; copy 0x10000 to 0x100000
-    ;; cld
-    ;; mov     esi, 0x0
-    ;; mov     edi, 100000h
-    ;; mov     ecx, systemsize ; copy 64kb
-    ;; rep movsb
-
-    ;; ; jump to C!
-    ;; ; never return it should  be
-    ;; jmp     0x8:100000h
-
-	
 print_str:
 	mov ah, 0x0E
 .next:
