@@ -1,4 +1,4 @@
-megs: 32
+megs: 64
 #romimage: file=$BXSHARE/BIOS-bochs-latest 
 romimage: file=/usr/share/bochs/BIOS-bochs-latest
 #vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest

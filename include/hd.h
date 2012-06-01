@@ -27,7 +27,7 @@
 #define HD_ERR	  0x01 //error
 
 
-void init_hd();
+void init_hd(void* bios);
 
 #endif
 

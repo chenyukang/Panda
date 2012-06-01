@@ -15,6 +15,15 @@
 #include <string.h>
 #include <hd.h>
 
+struct hd_i_struct {
+    unsigned int head;
+    unsigned int sect;
+    unsigned int cyl;
+    unsigned int wpcom,lzone,ctl;
+};
+
+struct hd_i_struct hd_inf[] = {{0,0,0,0,0,0},
+                               {0,0,0,0,0,0}};
 
 static int wait_for_ready(void)
 {
@@ -30,10 +39,18 @@ void hd_interupt_handler(void)
     return ;
 }
 
-void init_hd()
+void init_hd(void* bios)
 {
     /* get the number of divers, from the BIOS data area */
-    u8* num_of_driver = (u8*)(0x475);
-    printk("NrDrivers: %d\n", *num_of_driver);
+    hd_inf[0].cyl = *(unsigned short*)bios;
+    hd_inf[0].head = *(unsigned char*)(2+bios);
+    hd_inf[0].wpcom = *(unsigned short*)(5+bios);
+    hd_inf[0].ctl   = *(unsigned char*)(8+bios);
+    hd_inf[0].lzone = *(unsigned short*)(12+bios);
+    hd_inf[0].sect  = *(unsigned char*)(14+bios);
+    unsigned int hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
+    printk(" hd_size: %d\n", hd_size);
+    printk(" heads: %d\n cyl:%d\n wpcom:%d\n ctl:%d\n lzone:%d\n sect:%d\n",
+           hd_inf[0].head, hd_inf[0].cyl, hd_inf[0].wpcom, hd_inf[0].ctl, hd_inf[0].lzone, hd_inf[0].sect);
     irq_install_handler(14, (isq_t)(&hd_interupt_handler));
 }
