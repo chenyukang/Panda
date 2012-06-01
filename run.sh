@@ -20,12 +20,12 @@ do_compile() {
     $NASM $BOOT/head.s  -o $OBJDIR/head.O;
 
     echo "building kernel"
-    flist=`ls $KERNEL/`
-    for f in $flist
+    flist=`cd $KERNEL/; ls *.c;`
+    `cd ../`
+    for f in $flist;
     do
-
 	cmd="$GCC $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
-	#echo $cmd
+	echo $cmd
 	`$cmd`;
     done
 

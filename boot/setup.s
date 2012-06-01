@@ -7,7 +7,6 @@ jmp setup
 	
 [global setup]
 setup:
-	
 	;;check memroy info
 .checkmemory:
 	mov ebx, 0
@@ -43,7 +42,7 @@ setup:
 	mov ah, 2
 	mov dl, [0]
 	mov ch, 0
-	mov cl, 1+1+setupsize/512  ;0 , 1 is for boot, setupsize/512 for setup.bin
+	mov cl, 1+1+setupsize/512  ;0,1 is for boot, setupsize/512 for setup.bin
 	mov al, systemsize/512
 	int 0x13
 	jc .readfloppy
@@ -81,23 +80,6 @@ setup:
 	;; jmp dword 0x8:systemseg
 
 
-_start_os:
-
-	;; puts loading	
-	mov si, start_msg
-	call print_str		;
-    ; copy 0x10000 to 0x100000
-    ;; cld
-    ;; mov     esi, 0x0
-    ;; mov     edi, 100000h
-    ;; mov     ecx, systemsize ; copy 64kb
-    ;; rep movsb
-
-    ;; ; jump to C!
-    ;; ; never return it should  be
-    ;; jmp     0x8:100000h
-
-	
 print_str:
 	mov ah, 0x0E
 .next:
@@ -124,7 +106,7 @@ memchkinfo      equ     0x9300
 	
 systemseg 	equ	0x0000
 systemoffset	equ 	0x0000
-systemsize 	equ 	1024*30 ; this will bigger than kernel.bin
+systemsize 	equ 	1024*20 ; this will bigger than kernel.bin
 	
 start_msg db "Start Panda OS"	;
 	db 13, 10, 0  		;

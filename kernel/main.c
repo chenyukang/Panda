@@ -26,16 +26,18 @@ void kmain()
     kb_init();
     page_init( 0x1000000 * 2 );//32 MB
     init_hd();
+    
 #if 0
     int k;
     for(k=0; k<10; k++) {
-        u32 *ptr = (u32*)kmalloc(sizeof(u32));
+        u32 *ptr = (u32*)kmalloc(sizeof(u32)*100);
         printk("ptr: %x\n", ptr);
         *ptr = 0xA;
         printk("value: %x\n", (*ptr));
-        char* cp = (char*)kmalloc(sizeof(char));
+        char* cp = (char*)kmalloc(sizeof(char)*100);
         *cp = 'c';
         printk("value: %c\n", (*cp));
+        kfree(cp);
     }
 #endif
     

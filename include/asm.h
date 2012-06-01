@@ -115,8 +115,16 @@ static inline void native_halt(void)
     } while(0);                                 \
 
 
+void	port_read(u16 port, void* buf, int n);
+void	port_write(u16 port, void* buf, int n);
 
+#if 0
+#define port_read(port, buf, nr)                                        \
+    __asm__("cld;rep;insw"::"d"(port), "D"(buf), "c"(nr):"cx", "di")
 
+#define port_write(port, buf, nr) \
+    __asm__("cld;rep;outsw"::"d"(port), "S"(buf), "c"(nr):"cx", "si")
+#endif
 
 #endif
 

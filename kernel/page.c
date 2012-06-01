@@ -100,8 +100,7 @@ void page_init(u32 end_address)
     printk("begin_address: %x \nend_address  : %x  \n",
            begin_address, end_address);
 #endif
-    
-    
+
     nframes = (end_address) / 0x1000; //end_address is aligned
     frames  = (u32*)_internel_alloc(INDEX(nframes), 0);
     
@@ -119,11 +118,10 @@ void page_init(u32 end_address)
 
     u32 k;
     for( k=KHEAP_START_ADDR; k<KHEAP_START_ADDR+KHEAP_INITIAL_SIZE; k+=0x1000)
-        get_page(page_dir, 1, k);
+        get_page(page_dir, k, 1);
         
-    u32 addr = 0;
-    while(addr < begin_address)
-    {
+    u32 addr = 0x0;
+    while(addr < begin_address) {
         page_t* page = get_page(page_dir, addr, 1);
         kassert(page != NULL);
         set_page_frame(page, 0, 0);
@@ -134,10 +132,6 @@ void page_init(u32 end_address)
     for (k=KHEAP_START_ADDR; k<KHEAP_START_ADDR+KHEAP_INITIAL_SIZE; k+=0x1000)
         set_page_frame(get_page(page_dir, k, 1), 0, 0);
 
-#ifndef NDEBUG
-    printk("end address: %x\n", (u32)addr);
-#endif
-    
     irq_install_handler(13, (isq_t)(&page_fault_handler));
     
     u32 cr0;
@@ -163,7 +157,7 @@ void page_fault_handler(struct registers_t* regs)
     int rw = regs->err_code & 0x2;           // Write operation?
     int us = regs->err_code & 0x4;           // Processor was in user-mode?
     int reserved = regs->err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
-    //int id = regs->err_code & 0x10;          // Caused by an instruction fetch?
+    //int id = regs->err_code & 0x10;        // Caused by an instruction fetch?
 
     // Output an error message.
     puts("Page fault! ( ");
