@@ -33,7 +33,7 @@ do_compile() {
 }
 
 do_link() {
-    echo "linking kernel"
+    echo "linking ..."
     cd  $OBJDIR;
     ld boot.O -o boot.bin -T ../$TOOL/boot.ld;
     ld setup.O -o setup.bin -T ../$TOOL/setup.ld;
@@ -55,7 +55,7 @@ do_link() {
 }
 
 do_prepare_hd() {
-    echo "prepare hard dist"
+    echo "making hard disk"
     bximage hd.img -hd -mode=flat -size=10 -q;
 }
 

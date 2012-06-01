@@ -50,7 +50,8 @@ struct hd_cmd {
     ((drv << 4) |                               \
      (lba_high & 0xF ) | 0xA0)))
     
-void init_hd();
+
+void init_hd(void* bios);
 
 #endif
 

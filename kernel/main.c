@@ -15,7 +15,6 @@
 #include <hd.h>
 #include <test.h>
 
-
 void kmain()
 {
     init_video();
@@ -24,9 +23,13 @@ void kmain()
     idt_init();
     timer_init(1);
     kb_init();
-    page_init( 0x1000000 * 2 );//32 MB
-    init_hd();
-    
+
+    long mem_end = (1<<20) + ((*(unsigned short*)0x90002)<<10);
+    printk("mem_end:%x\n", mem_end);
+    page_init( mem_end ); 
+
+    init_hd((void*)0x90080);
+
 #if 0
     int k;
     for(k=0; k<10; k++) {

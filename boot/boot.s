@@ -54,7 +54,7 @@ msg	db "Loading Panda OS"	;
 bootseg 	equ 0x0000	;boot begin address
 setupseg 	equ 0x9000    	;setup address
 setupoffset 	equ 0x0100	;
-setupsize 	equ 1024	;
+setupsize 	equ 512	;
 bootdriver 	db  0		;
 ; Magic number for sector
 times 510-($-$$) db 0

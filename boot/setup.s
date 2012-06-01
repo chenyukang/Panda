@@ -7,33 +7,43 @@ jmp setup
 	
 [global setup]
 setup:
-	;;check memroy info
-.checkmemory:
-	mov ebx, 0
-	mov di,  memchkinfo
-.loop:
-	mov eax, 0E820h
-	mov ecx, 20
-	mov edx, 0534D4150h
-	int 15h
-	add di, 20
-	inc dword [mem_number]
-	cmp ebx, 0
-	jne .loop
-	xor edx, edx
-	xor eax, eax
-	xor edi, edi
-	xor esi, esi
+	mov ax, setupseg
+	mov ds, ax
+	mov es, ax
+	mov ss, ax
+	mov sp, 0xffff
+
+	;; puts loading
+	mov si, setup_msg
+	call print_str		;
+
+read_info:
+	mov ax, 0x9000
+	mov ds, ax
+	
+	;; Now get memory size and save at 0x90002
+	;; This may just report up to 64M.
+	;; It only reports contiguous (usable) RAM.
+	mov ah, 0x88
+	int 0x15
+	mov [2], ax
+
+	;; just get hd0 info data
+	;; save the disk info at 0x90080
+	mov ax, 0x0000
+	mov ds, ax
+	lds si, [4 * 0x41]
+	mov ax, 0x9000
+	mov es, ax
+	mov di, 0x80
+	mov cx, 0x10
+	rep movsb
 
 	mov ax, setupseg
 	mov ds, ax
 	mov es, ax
 	mov ss, ax
 	mov sp, 0xffff
-	
-	;; puts loading
-	mov si, setup_msg
-	call print_str		;
 
 .readfloppy:
 	mov ax, setupseg
@@ -79,7 +89,6 @@ setup:
 	jmp dword 0x8:0x0
 	;; jmp dword 0x8:systemseg
 
-
 print_str:
 	mov ah, 0x0E
 .next:
@@ -99,7 +108,7 @@ empty_8042:
 
 setupseg 	equ 	0x9000
 setupoffset	equ 	0x0100
-setupsize 	equ 	1024
+setupsize 	equ 	512
 
 mem_number      dw      0		
 memchkinfo      equ     0x9300
@@ -138,4 +147,4 @@ gdt_syste_data:
 	
 	
 ; Magic number for sector
-times 1024-($-$$) db 0
+times 512-($-$$) db 0
