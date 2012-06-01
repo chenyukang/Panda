@@ -14,6 +14,7 @@
 #include <kheap.h>
 #include <hd.h>
 #include <test.h>
+#include <task.h>
 
 void kmain()
 {
@@ -29,7 +30,8 @@ void kmain()
     page_init( mem_end ); 
 
     init_hd((void*)0x90080);
-
+    
+    init_task();
 #if 0
     int k;
     for(k=0; k<10; k++) {

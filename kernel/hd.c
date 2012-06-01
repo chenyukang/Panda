@@ -94,16 +94,21 @@ static void print_identify_info(u16* hdinfo) {
 void init_hd(void* bios)
 {
     /* get the number of divers, from the BIOS data area */
-    hd_inf[0].cyl = *(unsigned short*)bios;
-    hd_inf[0].head = *(unsigned char*)(2+bios);
-    hd_inf[0].wpcom = *(unsigned short*)(5+bios);
-    hd_inf[0].ctl   = *(unsigned char*)(8+bios);
-    hd_inf[0].lzone = *(unsigned short*)(12+bios);
-    hd_inf[0].sect  = *(unsigned char*)(14+bios);
+    hd_inf[0].cyl = *(u16*)bios;
+    hd_inf[0].head = *(u8*)(2+bios);
+    hd_inf[0].wpcom = *(u16*)(5+bios);
+    hd_inf[0].ctl   = *(u8*)(8+bios);
+    hd_inf[0].lzone = *(u16*)(12+bios);
+    hd_inf[0].sect  = *(u8*)(14+bios);
+    
     unsigned int hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
-    printk(" hd_size: %d\n", hd_size);
+    printk("hd_size: %d\n", hd_size);
+    
+#if 0
     printk(" heads: %d\n cyl:%d\n wpcom:%d\n ctl:%d\n lzone:%d\n sect:%d\n",
            hd_inf[0].head, hd_inf[0].cyl, hd_inf[0].wpcom, hd_inf[0].ctl, hd_inf[0].lzone, hd_inf[0].sect);
+#endif
+    
     irq_install_handler(14, (isq_t)(&hd_interupt_handler));
 
     struct hd_cmd cmd;
