@@ -4,7 +4,7 @@
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-03 17:33:50
 //
-// @Brief  : The kernel entry point
+// @Brief  : The kernel main entry point
 
 #include <asm.h>
 #include <cpu.h>
@@ -31,11 +31,14 @@ void kmain()
     init_hd((void*)0x90080);
     
     init_task();
-    
+
     test_all();
     
-    unsigned long cnt = 0;
+    int init = 0;
     while(1){
-        printk("kernel running: %x\n", cnt++);
+        if(!init){
+            init = 1;
+            puts("kernel running\n");
+        }
     }
 }

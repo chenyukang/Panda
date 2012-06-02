@@ -98,8 +98,8 @@ show_help()
 {
     echo "-clean|x   : do clean"
     echo "-compile|c : do compile"
-    echo "-all|a     : do everything, and run Bochs"
-    echo "-commit|u  : do commit"
+    echo "-all|a     : do above two, and run simulation"
+    echo "-commit|u  : do git commit"
 }
 
 while [ $# -gt 0 ]

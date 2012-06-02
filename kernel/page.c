@@ -24,7 +24,7 @@ void page_fault_handler(struct registers_t* regs);
 
 inline u32 align_addr(u32 addr)
 {
-    if(addr & 0xFFFFF000) {
+    if(addr % 0x1000) {
         addr &= 0xFFFFF000;
         addr += 0x1000;
     }
