@@ -31,7 +31,10 @@ void kmain()
     init_hd((void*)0x90080);
     
     init_task();
+
+#ifndef NDEBUG
     test_all();
+#endif
     
     int initial = 1;
     while(1){

@@ -74,9 +74,9 @@ do_commit() {
     cmd="git commit -a -m\"$log\""
     echo $cmd
     do_clean;
-    git add .;
+    `git add .`;
     $cmd;
-    git push;
+    `git push`;
 }
 
 show_help()
