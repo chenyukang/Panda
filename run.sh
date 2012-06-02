@@ -76,7 +76,7 @@ do_commit() {
     do_clean;
     `git add .`;
     $cmd;
-    `git push`;
+    `git push`; 
 }
 
 show_help()
