@@ -11,7 +11,7 @@
 #include <asm.h>
 
 extern u32* frames;   //in page.c
-extern u32  nframes;
+extern u32  frame_cnt;
 
 inline static void INIT(u32 addr, u32* frame,
                         u32* index, u32* offset)
@@ -45,7 +45,7 @@ int test_frame(u32 addr)
 u32 first_frame()
 {
     u32 index, cnt;
-    for(index=0; index<INDEX(nframes); index++){
+    for(index=0; index<INDEX(frame_cnt); index++){
         if(frames[index] == 0xFFFFFFFF) //full
             continue;
         cnt = 0;

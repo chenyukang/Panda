@@ -12,9 +12,18 @@
 
 #include <types.h>
 #include <task.h>
+#include <kheap.h>
 #include <string.h>
+
+volatile task_t* current_task;
+
+volatile task_t* task_list;
+
+static u32 next_valid_pid = 0;
 
 void init_task() {
     printk("init task...\n");
-    return;
+    asm volatile("cli");
+    next_valid_pid++;
+    asm volatile("sti");
 }

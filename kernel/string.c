@@ -167,13 +167,10 @@ inline char* u32_to_str(char* str, const u32 val)
     *ptr++ = '0';
     *ptr++ = 'x';
     int k;
-    int initial = 1;
     u32 t;
     for(k=28; k>0; k-=4) {
         t = (val>>k) & 0xF;
-        if( t==0 && initial)
-            continue;
-        if( t > 0xA )
+        if( t >= 0xA )
             *ptr++ = (t-0xA+'A');
         else
             *ptr++ = (t+'0');
@@ -200,7 +197,7 @@ int sprintk(char* buf, const char* format, va_list args)
             *buf++ = va_arg(args, char);
             break;
         case 'd':{
-            s32 val = va_arg(args, int);
+            s32 val = va_arg(args, s32);
             buf = int_to_str(buf, val, 10);
             break;
         }

@@ -15,12 +15,18 @@
 #include <page.h>
 
 struct task {
-    int id;
+    u32 id;        /* process id */
+    s32 priority;  /* process priority */
+    s32 exit_code; /* exit code process exit */
+    
+    char name[24]; /* process name*/
     u32 esp, ebp;  /* stack and base pointers */
     u32 eip;       /* instruction pointer */
-    page_directory_t* page_dict; /* page directory */
+    page_dir_t* page_dict; /* page directory */
     struct task* next;
 };
+
+typedef struct task task_t;
 
 void init_task();
 void task_switch();

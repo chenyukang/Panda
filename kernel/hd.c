@@ -100,11 +100,11 @@ void init_hd(void* bios)
     hd_inf[0].ctl   = *(u8*)(8+bios);
     hd_inf[0].lzone = *(u16*)(12+bios);
     hd_inf[0].sect  = *(u8*)(14+bios);
-    
+
+#if 0
     unsigned int hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
     printk("hd_size: %d\n", hd_size);
     
-#if 0
     printk(" heads: %d\n cyl:%d\n wpcom:%d\n ctl:%d\n lzone:%d\n sect:%d\n",
            hd_inf[0].head, hd_inf[0].cyl, hd_inf[0].wpcom, hd_inf[0].ctl, hd_inf[0].lzone, hd_inf[0].sect);
 #endif

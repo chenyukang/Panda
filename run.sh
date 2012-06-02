@@ -66,7 +66,7 @@ do_all()
     do_prepare_hd;
     if [ -f "a.img" ]
 	then 
-	bochs;
+	`qemu -fda a.img`
     fi
 }
 

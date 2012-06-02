@@ -26,26 +26,23 @@ void kmain()
     kb_init();
 
     long mem_end = (1<<20) + ((*(unsigned short*)0x90002)<<10);
-    printk("mem_end:%x\n", mem_end);
     page_init( mem_end ); 
 
     init_hd((void*)0x90080);
     
     init_task();
-#if 0
+
     int k;
-    for(k=0; k<10; k++) {
+    for(k=0; k<4; k++) {
         u32 *ptr = (u32*)kmalloc(sizeof(u32)*100);
-        printk("ptr: %x\n", ptr);
         *ptr = 0xA;
-        printk("value: %x\n", (*ptr));
+        kfree(ptr);
         char* cp = (char*)kmalloc(sizeof(char)*100);
         *cp = 'c';
-        printk("value: %c\n", (*cp));
+        printk("ptr1:%x ptr2:%x \n",ptr,  cp);
         kfree(cp);
     }
-#endif
-    
+
     
     int initial = 1;
     while(1){

@@ -32,10 +32,7 @@ typedef struct _pte {
 typedef struct _pde {
     pte_t* tables[1024];
     u32  tableAddress[1024];
-}page_directory_t;
+}page_dir_t;
 
 void page_init(u32 end_address);
-
-void* allocM(u32 size);
-
 #endif

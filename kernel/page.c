@@ -12,14 +12,13 @@
 #include <bitmap.h>
 #include <string.h>
 
-extern u32 end;
 u32  begin_address = (u32)(0x1000000);
 
 u32* frames;
-u32  nframes;
+u32  frame_cnt;
 
-page_directory_t* page_dir = NULL;
-page_directory_t* current_page_dir = NULL;
+page_dir_t* page_dir = NULL;
+page_dir_t* current_page_dir = NULL;
 
 void page_fault_handler(struct registers_t* regs);
 
@@ -44,15 +43,8 @@ _internel_alloc(u32 size, int align)
     return (void*)addr;
 }
 
-
-void* allocM(u32 size)
-{
-    return _internel_alloc(size, 1);
-}
-
-
-
-page_t* get_page(page_directory_t* page_dir, u32 addr, int make)
+/* set addr used, and make a new pte if neccessary */
+page_t* get_page(page_dir_t* page_dir, u32 addr, int make)
 {
     addr /= 0x1000;
     u32 index = addr/1024;
@@ -70,7 +62,6 @@ page_t* get_page(page_directory_t* page_dir, u32 addr, int make)
         return 0;
     }
 }
-
 
 void set_page_frame(page_t* page, int is_kernel, int is_write)
 {
@@ -101,20 +92,20 @@ void page_init(u32 end_address)
            begin_address, end_address);
 #endif
 
-    nframes = (end_address) / 0x1000; //end_address is aligned
-    frames  = (u32*)_internel_alloc(INDEX(nframes), 0);
+    frame_cnt = (end_address) / 0x1000; //end_address is aligned
+    frames  = (u32*)_internel_alloc(INDEX(frame_cnt), 0);
     
 #ifndef NDEBUG
-    printk("nframes:%d\n", nframes);
+    printk("frame_cnt:%d\n", frame_cnt);
     printk("frames address: %x\n", (u32)frames);
 #endif
     
-    memset(frames, 0, (INDEX(nframes)) * sizeof(u32));
+    memset(frames, 0, (INDEX(frame_cnt)) * sizeof(u32));
 
     /* make page direcotry */
-    page_dir = (page_directory_t*)_internel_alloc(sizeof(page_directory_t), 1);
+    page_dir = (page_dir_t*)_internel_alloc(sizeof(page_dir_t), 1);
+    memset(page_dir, 0 , sizeof(page_dir_t));
     current_page_dir = page_dir;
-    memset(page_dir, 0 , sizeof(page_directory_t));
 
     u32 k;
     for( k=KHEAP_START_ADDR; k<KHEAP_START_ADDR+KHEAP_INITIAL_SIZE; k+=0x1000)
@@ -171,3 +162,11 @@ void page_fault_handler(struct registers_t* regs)
     PANIC("Page fault");
 }
 
+
+page_dir_t* copy_page_dir(page_dir_t* src) {
+    kassert(src);
+    //page_dir_t* dir = (page_dir_t*);
+    if(src)
+        return src;
+    return NULL;
+}
