@@ -17,7 +17,7 @@
 
 int test_all()
 {
-    test_print();
+    //test_print();
 //    test_detect_cpu();
 //    test_page_fault();
     test_kmalloc();
@@ -58,7 +58,7 @@ int test_detect_cpu()
 int test_kmalloc()
 {
     int k;
-    for(k=0; k<4; k++) {
+    for(k=0; k<10; k++) {
         u32 *ptr = (u32*)kmalloc(sizeof(u32)*100);
         *ptr = 0xA;
         kfree(ptr);
@@ -67,6 +67,11 @@ int test_kmalloc()
         printk("ptr1:%x ptr2:%x \n",ptr,  cp);
         kfree(cp);
     }
+    for(k=0; k<10; k++){
+        u32* ptr2 = (u32*)kmalloc_align(sizeof(u32)*100, 1);
+        printk("align ptr: %x => %x\n", ptr2, ((u32)ptr2) & 0xFFFFF000);
+    }
+    
 
     return 1;
 }
