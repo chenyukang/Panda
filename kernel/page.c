@@ -17,7 +17,7 @@ u32  begin_address = (u32)(0x1000000);
 u32* frames;
 u32  nr_frames;
 
-page_dir_t* page_dir = NULL;
+page_dir_t* kernel_page_dir = NULL;
 page_dir_t* current_page_dir = NULL;
 
 void page_fault_handler(struct registers_t* regs);
@@ -87,6 +87,7 @@ void page_init(u32 end_address)
 {
     puts("page init...\n");
 
+    u32 k, addr, cr0;
 #ifndef NDEBUG
     printk("begin_address: %x \nend_address  : %x  \n",
            begin_address, end_address);
@@ -103,28 +104,27 @@ void page_init(u32 end_address)
     memset(frames, 0, (INDEX(nr_frames)) * sizeof(u32));
 
     /* make page direcotry */
-    page_dir = (page_dir_t*)_internel_alloc(sizeof(page_dir_t), 1);
-    memset(page_dir, 0 , sizeof(page_dir_t));
-    current_page_dir = page_dir;
+    kernel_page_dir = (page_dir_t*)_internel_alloc(sizeof(page_dir_t), 1);
+    kernel_page_dir->physicalAddr = (u32)kernel_page_dir->tableAddress;
+    
+    memset(kernel_page_dir, 0 , sizeof(page_dir_t));
+    current_page_dir = kernel_page_dir;
 
-    u32 k;
     for( k=KHEAP_START_ADDR; k<KHEAP_END_ADDR; k+=0x1000)
-        get_page(page_dir, k, 1);
+        get_page(kernel_page_dir, k, 1);
         
-    u32 addr = 0x0;
     while(addr < begin_address) {
-        set_page_frame(get_page(page_dir, addr, 1), 0, 0);
+        set_page_frame(get_page(kernel_page_dir, addr, 1), 0, 0);
         addr += 0x1000;
     }
 
     // Now allocate those pages we mapped earlier.
     for (k=KHEAP_START_ADDR; k<KHEAP_END_ADDR; k+=0x1000)
-        set_page_frame(get_page(page_dir, k, 1), 0, 0);
+        set_page_frame(get_page(kernel_page_dir, k, 1), 0, 0);
 
     irq_install_handler(13, (isq_t)(&page_fault_handler));
 
     //switch to page directory
-    u32 cr0;
     asm volatile("mov %0, %%cr3":: "r"(&current_page_dir->tableAddress));
     asm volatile("mov %%cr0, %0": "=r"(cr0));
     cr0 |= 0x80000000; // Enable paging!
@@ -163,10 +163,29 @@ void page_fault_handler(struct registers_t* regs)
 }
 
 
+void* get_page_align(u32* phys) {
+    page_dir_t* dir_addr = kmalloc_align(sizeof(page_dir_t), 1);
+    kassert(dir_addr);
+    kassert((dir_addr%0x1000) == 0);
+    if(phys!=0) {
+        page_t* page = get_page(kernel_page_dir, (u32)dir_addr, 0);
+        *phys = page->pb_addr*0x1000 + ((u32)dir_addr&0xFFF);
+    }
+    return dir_addr;
+}
+
+
 page_dir_t* copy_page_dir(page_dir_t* src) {
     kassert(src);
-    //page_dir_t* dir = (page_dir_t*);
+    u32 phys;
+    u32 offset;
+    page_dir_t* dir = (page_dir_t*)get_page_align(&phys);
+    memset(dir, 0, sizeof(page_dir_t));
+    offset = (u32)dir->tableAddress  - (u32)dir;
+    dir->physicalAddr = phys + offset;
     if(src)
         return src;
     return NULL;
 }
+
+

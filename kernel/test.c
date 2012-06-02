@@ -17,7 +17,7 @@
 
 int test_all()
 {
-    //test_print();
+    test_print();
 //    test_detect_cpu();
 //    test_page_fault();
     test_kmalloc();

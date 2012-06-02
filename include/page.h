@@ -31,7 +31,8 @@ typedef struct _pte {
 //page directory entry
 typedef struct _pde {
     pte_t* tables[1024];
-    u32  tableAddress[1024];
+    u32    tableAddress[1024];
+    u32    physicalAddr;
 }page_dir_t;
 
 void page_init(u32 end_address);

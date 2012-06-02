@@ -34,9 +34,9 @@ void kmain()
     
     init_task();
 
-//#ifndef NDEBUG
+#ifndef NDEBUG
     test_all();
-//#endif
+#endif
     
     int initial = 1;
     while(1){

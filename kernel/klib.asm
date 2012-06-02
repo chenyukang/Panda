@@ -27,4 +27,3 @@ port_write:
 	cld
 	rep	outsw
 	ret
-	
