@@ -20,6 +20,19 @@ do_compile() {
     $NASM $BOOT/head.s  -o $OBJDIR/head.O;
 
     echo "building kernel"
+    flist=`cd $KERNEL/; ls *.asm;`
+    `cd ../`
+    for f in $flist;
+    do
+	cmd="$NASM $KERNEL/$f -o $OBJDIR/${f/.asm/.o}"
+	echo $cmd
+	`$cmd`
+	if [ $? -ne 0 ]
+	    then 
+	    exit;
+	fi
+    done
+
     flist=`cd $KERNEL/; ls *.c;`
     `cd ../`
     for f in $flist;
@@ -45,7 +58,7 @@ do_link() {
     #head.O must puted at first
     objs=`ls *.o`
     cmd="ld head.O $objs -o kernel.bin -T ../$TOOL/kernel.ld"
-    #echo $cmd
+    echo $cmd
     `$cmd`;
 
     if [ $? -ne 0 ]
