@@ -235,36 +235,3 @@ int printk(const char* format, ... )
     return cnt;
 }
 
-#if 0
-int printk(const char *fmt, ...) {
-    va_list args;
-    int i;
- 
-    va_start(args, fmt);
-    i=vsprintf(buf,fmt,args);
-    va_end(args);
-    __asm__("push %%fs\n\t"
-            "push %%ds\n\t"
-            "pop %%fs\n\t"
-            "pushl %0\n\t"
-            "pushl $_buf\n\t"
-            "pushl $0\n\t"
-            "call _tty_write\n\t"
-            "addl $8,%%esp\n\t"
-            "popl %0\n\t"
-            "pop %%fs"
-            ::"r" (i):"ax","cx","dx");
-    return i;
-}
-#endif
- 
-void test_printk()
-{
-    printk("%s\n", "hello world");
-    printk("%c\n", 'y');
-    printk("%d\n", 32);
-    printk("%d\n", -32);
-    printk("value: %d\n", 1<<31);
-    printk("most: %d\n", 1<<30);
-    printk("hex: %x\n", 0xA);
-}

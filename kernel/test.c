@@ -34,6 +34,9 @@ int test_print()
     printk("value: %d\n", 9);
     printk("value: %d\n", 1<<31);
     printk("value: %d\n", 0x7fffffff);
+    printk("value: %s\n", "hello world");
+    printk("value: %c\n", 'k');
+    printk("value: %x\n", 0xA);
     return 1;
 }
 
