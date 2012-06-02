@@ -77,7 +77,7 @@ do_commit() {
     echo $cmd
     do_clean;
     git add .;
-    git commit -a -m\"`$log`\"
+    git commit -a -m\"`log`\"
     git push;
 }
 
