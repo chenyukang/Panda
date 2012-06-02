@@ -100,6 +100,11 @@ show_help()
     echo "-compile|c : do compile"
     echo "-all|a     : do above two, and run simulation"
     echo "-commit|u  : do git commit"
+    echo "-line|l    : do count code line :)"
+}
+
+do_wc_line() {
+    find ./ -name *.[chs] -or -name *.asm| xargs cat | wc -l;
 }
 
 while [ $# -gt 0 ]
@@ -108,7 +113,8 @@ do
     -all|-a) do_all; exit 0;;
     -clean|-x) do_clean; exit 0;;
     -compile|-c) do_clean; do_compile; exit 0;;
-    -commit |-u) shift; log=$1; do_commit; exit 0;
+    -commit |-u) shift; log=$1; do_commit; exit 0;;
+    -line |-l) do_wc_line; exit 0;
   esac
   shift
 done
