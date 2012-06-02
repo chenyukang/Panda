@@ -94,8 +94,7 @@ do
     -all|-a) do_all; exit 0;;
     -clean|-x) do_clean; exit 0;;
     -compile|-c) do_clean; do_compile; exit 0;;
-    -log|-l)     shift; log=$1; echo $log;;
-    -commit |-u) do_commit; exit 0;
+    -commit |-u) shift; log=$1; do_commit; exit 0;
   esac
   shift
 done
