@@ -24,10 +24,11 @@ union header {
 
 typedef union header Header;
 
-#define KHEAP_START_ADDR    0xC0000000
+#define KHEAP_START_ADDR    0xF0000000
 #define KHEAP_INITIAL_SIZE  0x100000
-#define KHEAP_END_ADDR      0xC0100000
+#define KHEAP_END_ADDR      0xF0100000
 
+void kheap_init(void* start_addr, void* end_addr);
 void kfree(void* ap);
 void* kmalloc(u32 nbytes);
 

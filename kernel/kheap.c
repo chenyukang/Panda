@@ -1,4 +1,3 @@
-
 // @Name   : sortlink.c 
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
@@ -12,11 +11,17 @@
 
 #define MINI_NALLOC 1024
 
-u32 kheap_start_addr = KHEAP_START_ADDR;
-
+static u32 kheap_start_addr;
+static u32 kheap_end_addr;
 static Header base;
 static Header* freep = NULL;
 
+
+void kheap_init(void* start_addr, void* end_addr) {
+    kheap_start_addr = (u32)start_addr;
+    kheap_end_addr = (u32)end_addr;
+    freep = NULL;
+}
 
 void kfree(void* ap)
 {
@@ -57,9 +62,14 @@ void kfree(void* ap)
 static
 void* __real_get_mem(u32 size)
 {
-    void* addr = (void*)kheap_start_addr;
-    kheap_start_addr += size;
-    return addr;
+    if(kheap_start_addr + size < kheap_end_addr) {
+        void* addr = (void*)kheap_start_addr;
+        kheap_start_addr += size;
+        return addr;
+    } else {
+        puts("out of kheap memory\n");
+        return NULL;
+    }
 }
 
 static Header* get_more(u32 size)

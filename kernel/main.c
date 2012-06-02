@@ -31,18 +31,7 @@ void kmain()
     init_hd((void*)0x90080);
     
     init_task();
-
-    int k;
-    for(k=0; k<4; k++) {
-        u32 *ptr = (u32*)kmalloc(sizeof(u32)*100);
-        *ptr = 0xA;
-        kfree(ptr);
-        char* cp = (char*)kmalloc(sizeof(char)*100);
-        *cp = 'c';
-        printk("ptr1:%x ptr2:%x \n",ptr,  cp);
-        kfree(cp);
-    }
-
+    test_all();
     
     int initial = 1;
     while(1){

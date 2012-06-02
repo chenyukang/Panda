@@ -15,7 +15,7 @@
 #define KB  0x1000
 
 //debug option
-#define NDEBUG 1
+//#define NDEBUG 1
 
 #ifndef NDEBUG
 #define kassert(_Expression)                                            \

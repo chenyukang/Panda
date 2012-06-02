@@ -18,14 +18,22 @@
 int test_all()
 {
     test_print();
-    test_detect_cpu();
-    test_page_fault();
+//    test_detect_cpu();
+//    test_page_fault();
     test_kmalloc();
     return 1;
 }
 
 int test_print()
 {
+    printk("value: %d\n", -2);
+    printk("value: %d\n", -10);
+    printk("value: %d\n", 10);
+    printk("value: %d\n", 11);
+    printk("value: %d\n", -1);
+    printk("value: %d\n", 9);
+    printk("value: %d\n", 1<<31);
+    printk("value: %d\n", 0x7fffffff);
     return 1;
 }
 
@@ -46,8 +54,17 @@ int test_detect_cpu()
 
 int test_kmalloc()
 {
-    u32 *ptr = (u32*)kmalloc(sizeof(u32));
-    printk("ptr: %x\n", ptr);
+    int k;
+    for(k=0; k<4; k++) {
+        u32 *ptr = (u32*)kmalloc(sizeof(u32)*100);
+        *ptr = 0xA;
+        kfree(ptr);
+        char* cp = (char*)kmalloc(sizeof(char)*100);
+        *cp = 'c';
+        printk("ptr1:%x ptr2:%x \n",ptr,  cp);
+        kfree(cp);
+    }
+
     return 1;
 }
 
