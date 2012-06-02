@@ -32,7 +32,9 @@ void kmain()
     
     init_task();
 
+//#if 0
     test_all();
+//#endif
     
     int init = 0;
     while(1){
