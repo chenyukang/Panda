@@ -19,9 +19,7 @@
 void kmain()
 {
     init_video();
-    
     puts("booting Panda OS ...\n");
-    
     gdt_init();
     idt_init();
     timer_init(1);
@@ -33,16 +31,11 @@ void kmain()
     init_hd((void*)0x90080);
     
     init_task();
-
-#ifndef NDEBUG
-    test_all();
-#endif
     
-    int initial = 1;
+    test_all();
+    
+    unsigned long cnt = 0;
     while(1){
-        if(initial) {
-            puts("kernel running\n");
-            initial = 0;
-        }
+        printk("kernel running: %x\n", cnt++);
     }
 }

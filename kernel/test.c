@@ -71,7 +71,6 @@ int test_kmalloc()
         u32* ptr2 = (u32*)kmalloc_align(sizeof(u32)*100, 1);
         printk("align ptr: %x => %x\n", ptr2, ((u32)ptr2) & 0xFFFFF000);
     }
-    
 
     return 1;
 }

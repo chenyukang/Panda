@@ -105,14 +105,14 @@ void page_init(u32 end_address)
 
     /* make page direcotry */
     kernel_page_dir = (page_dir_t*)_internel_alloc(sizeof(page_dir_t), 1);
-    kernel_page_dir->physicalAddr = (u32)kernel_page_dir->tableAddress;
-    
+    //kernel_page_dir->physicalAddr = (u32)kernel_page_dir->tableAddress;
     memset(kernel_page_dir, 0 , sizeof(page_dir_t));
     current_page_dir = kernel_page_dir;
 
     for( k=KHEAP_START_ADDR; k<KHEAP_END_ADDR; k+=0x1000)
         get_page(kernel_page_dir, k, 1);
         
+    addr = 0x0;
     while(addr < begin_address) {
         set_page_frame(get_page(kernel_page_dir, addr, 1), 0, 0);
         addr += 0x1000;
@@ -125,6 +125,7 @@ void page_init(u32 end_address)
     irq_install_handler(13, (isq_t)(&page_fault_handler));
 
     //switch to page directory
+    cr0;
     asm volatile("mov %0, %%cr3":: "r"(&current_page_dir->tableAddress));
     asm volatile("mov %%cr0, %0": "=r"(cr0));
     cr0 |= 0x80000000; // Enable paging!
@@ -166,7 +167,7 @@ void page_fault_handler(struct registers_t* regs)
 void* get_page_align(u32* phys) {
     page_dir_t* dir_addr = kmalloc_align(sizeof(page_dir_t), 1);
     kassert(dir_addr);
-    kassert((dir_addr%0x1000) == 0);
+    kassert(((u32)dir_addr%0x1000) == 0);
     if(phys!=0) {
         page_t* page = get_page(kernel_page_dir, (u32)dir_addr, 0);
         *phys = page->pb_addr*0x1000 + ((u32)dir_addr&0xFFF);
