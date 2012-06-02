@@ -27,6 +27,10 @@ do_compile() {
 	cmd="$GCC $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
 	echo $cmd
 	`$cmd`;
+	if [ $? -ne 0 ]
+	    then 
+	    exit;
+	fi
     done
 
     do_link;
@@ -61,9 +65,7 @@ do_prepare_hd() {
 
 do_all()
 {
-    do_clean;
-    do_compile;
-    do_prepare_hd;
+    do_clean && do_compile && do_prepare_hd
     if [ -f "a.img" ]
 	then 
 	`qemu -fda a.img`
@@ -75,7 +77,7 @@ do_commit() {
     echo $cmd
     do_clean;
     `git add .`;
-    $cmd;
+    `$cmd`;
     `git push`;
 }
 
