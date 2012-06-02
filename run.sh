@@ -72,10 +72,11 @@ do_all()
 
 do_commit() {
     echo $log
-    msg="\"$log\""
+    cmd="git commit -a -m\"$log\""
+    echo $cmd
     do_clean;
     `git add .`
-    `git commit -a -m$msg`
+    `$cmd`
     `git push`
 }
 
