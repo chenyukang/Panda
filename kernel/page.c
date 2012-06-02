@@ -125,7 +125,6 @@ void page_init(u32 end_address)
     irq_install_handler(13, (isq_t)(&page_fault_handler));
 
     //switch to page directory
-    cr0;
     asm volatile("mov %0, %%cr3":: "r"(&current_page_dir->tableAddress));
     asm volatile("mov %%cr0, %0": "=r"(cr0));
     cr0 |= 0x80000000; // Enable paging!
