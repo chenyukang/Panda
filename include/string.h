@@ -11,6 +11,7 @@
 
 #include <system.h>
 
+void strcpy(char* dest, char* src);
 void puts(const char* text);
 void printk_hex(u32 val);
 void printk_int(u32 val);

@@ -21,6 +21,13 @@ extern void putch(char);
 #define va_arg(ap, type) ( *(type*) ((ap += INTSIZEOF(type)) - INTSIZEOF(type)))
 
 
+void strcpy(char* dest, char* src) {
+    char* p = src;
+    while(*p) {
+        *dest++ = *p++;
+    }
+}
+
 /* ignore overlap */
 void* memcpy(void *dest, const void *src, size_t cnt)
 {

@@ -31,10 +31,10 @@ void kmain()
     init_hd((void*)0x90080);
     
     init_task();
-
-//#if 0
+    
+#if 0
     test_all();
-//#endif
+#endif
     
     int init = 0;
     while(1){

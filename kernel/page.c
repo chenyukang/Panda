@@ -130,14 +130,13 @@ void page_init(u32 end_address)
 
     kheap_init((void*)KHEAP_START_ADDR, (void*)KHEAP_END_ADDR);
 
-    printk("now before copy page table\n");
-
     current_page_dir = copy_page_dir(kernel_page_dir);
-    printk("new dir: %x\n", &(current_page_dir->tableAddress));
-    printk("kernel  : %x\n", &(kernel_page_dir->tableAddress));
     switch_page_directory(current_page_dir);
     
 #ifndef NDEBUG
+    printk("new dir: %x\n", &(current_page_dir->tableAddress));
+    printk("kernel  : %x\n", &(kernel_page_dir->tableAddress));
+
     puts("end page init...\n");
 #endif
 

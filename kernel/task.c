@@ -19,11 +19,19 @@ volatile task_t* current_task;
 
 volatile task_t* task_list;
 
+extern page_dir_t* current_page_dir;
 static u32 next_valid_pid = 0;
 
 void init_task() {
     printk("init task...\n");
     asm volatile("cli");
-    next_valid_pid++;
+    current_task = task_list =
+        (task_t*)kmalloc(sizeof(task_t));
+    current_task->id = next_valid_pid++;
+    current_task->esp = current_task->ebp = 0;
+    current_task->eip = 0;
+    current_task->page_dir = current_page_dir;
+    current_task->next = 0;
+    strcpy(current_task->name, "kernel");
     asm volatile("sti");
 }
