@@ -15,9 +15,12 @@ do_clean() {
 
 do_compile() {
     echo "building boot"
-    $NASM $BOOT/boot.s  -o $OBJDIR/boot.O;
-    $NASM $BOOT/setup.s -o $OBJDIR/setup.O;
-    $NASM $BOOT/head.s  -o $OBJDIR/head.O;
+    flist=`cd $BOOT/; ls *.s;`
+    for f in $flist;
+    do 
+	cmd="$NASM $BOOT/$f -o $OBJDIR/${f/.s/.O}"
+	echo $cmd; `$cmd`
+    done
 
     echo "building kernel"
     flist=`cd $KERNEL/; ls *.asm;`
@@ -25,8 +28,7 @@ do_compile() {
     for f in $flist;
     do
 	cmd="$NASM $KERNEL/$f -o $OBJDIR/${f/.asm/.o}"
-	echo $cmd
-	`$cmd`
+	echo $cmd ; `$cmd`
 	if [ $? -ne 0 ]
 	    then 
 	    exit;
@@ -38,8 +40,7 @@ do_compile() {
     for f in $flist;
     do
 	cmd="$GCC $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
-	echo $cmd
-	`$cmd`;
+	echo $cmd; `$cmd`;
 	if [ $? -ne 0 ]
 	    then 
 	    exit;
@@ -58,15 +59,15 @@ do_link() {
     #head.O must puted at first
     objs=`ls *.o`
     cmd="ld head.O $objs -o kernel.bin -T ../$TOOL/kernel.ld"
-    echo $cmd
-    `$cmd`;
+    echo $cmd; `$cmd`;
 
     if [ $? -ne 0 ]
 	then
 	echo "compile error!"
     else
 	echo "making a.img"
-	cat boot.bin setup.bin kernel.bin > ../a.img
+	cmd="cat boot.bin setup.bin kernel.bin > ../a.img"
+	echo $cmd; cat boot.bin setup.bin kernel.bin > ../a.img;
 	cd ../;
     fi
 }
