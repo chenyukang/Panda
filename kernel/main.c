@@ -37,12 +37,6 @@ void kmain(u32 init_stack)
     init_task();
     printk("init stack: %x\n", init_stack);
     
-    u32 old_stack_pointer, old_base_pointer;
-    asm volatile("mov %%esp, %0" : "=r"(old_stack_pointer));
-    asm volatile("mov %%ebp, %0" : "=r"(old_base_pointer));
-    
-    printk("esp:%x ebp:%x\n", old_stack_pointer, old_base_pointer);
-
 #if 0
     test_all();
 #endif
