@@ -32,6 +32,6 @@ void init_task() {
     current_task->eip = 0;
     current_task->page_dir = current_page_dir;
     current_task->next = 0;
-    strcpy(current_task->name, "kernel");
+    strcpy((char*)current_task->name, "kernel");
     asm volatile("sti");
 }

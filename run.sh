@@ -63,7 +63,8 @@ do_link() {
 
     if [ $? -ne 0 ]
 	then
-	echo "compile error!"
+	echo "link error!"
+	exit
     else
 	echo "making a.img"
 	cmd="cat boot.bin setup.bin kernel.bin > ../a.img"

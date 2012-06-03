@@ -19,7 +19,7 @@
 void kmain()
 {
     init_video();
-    puts("booting Panda OS ...\n");
+    puts_color_str("Booting Panda OS ...\n", 0x04);
     gdt_init();
     idt_init();
     timer_init(1);

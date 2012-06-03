@@ -28,7 +28,7 @@ port_write:
 	rep	outsw
 	ret
 
-[GLOBAL copy_page_physical]
+[global copy_page_physical]
 copy_page_physical:
     push ebx              ; According to __cdecl, we must preserve the contents of EBX.
     pushf                 ; push EFLAGS, so we can pop it and reenable interrupts
@@ -59,4 +59,5 @@ copy_page_physical:
     popf                  ; Pop EFLAGS back.
     pop ebx               ; Get the original value of EBX back.
     ret
+
 	

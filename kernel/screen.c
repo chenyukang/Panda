@@ -13,12 +13,11 @@
 
 /* These define our textpointer, our background and foreground
 *  colors (attributes), and x and y cursor coordinates */
-u16 *textmemptr;
-s32 attrib = 0x0F, csr_x = 10, csr_y = 0;
-
+static u16 *textmemptr;
+static s32 attrib = 0x0F, csr_x = 10, csr_y = 0;
 
 /* Scrolls the screen */
-void scroll(void)
+static void scroll(void)
 {
     unsigned blank, temp;
 
@@ -43,7 +42,7 @@ void scroll(void)
 
 /* Updates the hardware cursor: the little blinking line
 *  on the screen under the last character pressed! */
-void move_csr(void)
+static void move_csr(void)
 {
     unsigned temp;
 
@@ -142,7 +141,6 @@ void putch(char c)
     move_csr();
 }
 
-
 /* Sets the forecolor and backcolor that we will use */
 void settextcolor(unsigned char forecolor, unsigned char backcolor)
 {
@@ -158,3 +156,15 @@ void init_video(void)
     cls();
 }
 
+void puts_color_str(char* str, unsigned color) {
+    char* ptr = str;
+    attrib = color & 0xFF;
+    //attrib = (backcolor << 4) | (forecolor & 0x0F);
+    while(*ptr != '\0'){
+        putch(*ptr);
+        ptr++;
+    }
+    attrib = 0x0F;
+}
+
+    
