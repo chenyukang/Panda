@@ -164,7 +164,7 @@ void puts_color_str(char* str, unsigned color) {
         putch(*ptr);
         ptr++;
     }
-    attrib = 0x0F;
+    attrib = 0x0E;
 }
 
     
