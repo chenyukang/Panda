@@ -31,9 +31,10 @@ void strcpy(char* dest, char* src) {
 /* ignore overlap */
 void* memcpy(void *dest, const void *src, size_t cnt)
 {
-    const char *sp = (const char *)src;
-    char *dp = (char *)dest;
+    const unsigned char *sp = (const unsigned char *)src;
+    unsigned char *dp = (unsigned char *)dest;
     while(cnt--){
+        //printk("now copy\n");
         *dp++ = *sp++;
     }
     return dest;

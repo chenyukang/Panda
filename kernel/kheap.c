@@ -15,17 +15,17 @@ static u32 kheap_start_addr;
 static u32 kheap_end_addr;
 static Header base;
 static Header* freep = NULL;
-
+u32 kheap_inited = 0;
 
 void kheap_init(void* start_addr, void* end_addr) {
     kheap_start_addr = (u32)start_addr;
     kheap_end_addr = (u32)end_addr;
     freep = NULL;
+    kheap_inited = 1;
 }
 
 void kfree(void* ap)
 {
-    //printk("now in kfree: %d\n", (unsigned)ap);
     Header *bp, *p;
     bp = (Header*)ap - 1; /* point back to header */
     p = freep;
@@ -59,9 +59,7 @@ void kfree(void* ap)
 }
 
 
-static
-void* __real_get_mem(u32 size)
-{
+static void* __real_get_mem(u32 size) {
     if(kheap_start_addr + size < kheap_end_addr) {
         void* addr = (void*)kheap_start_addr;
         kheap_start_addr += size;

@@ -24,6 +24,7 @@ void page_fault_handler(struct registers_t* regs);
 void switch_page_directory(page_dir_t *dir);
 page_dir_t* copy_page_dir(page_dir_t* src);
 extern void copy_page_physical(u32 src, u32 dest);
+extern u32 kheap_inited;
 
 inline u32 align_addr(u32 addr)
 {
@@ -46,6 +47,28 @@ _internel_alloc(u32 size, int align)
     return (void*)addr;
 }
 
+static inline void get_phys_addr(page_dir_t* dir, u32 addr, u32* phys) {
+    kassert(phys!=0);
+    page_t* page = get_page(dir, addr, 0);
+    *phys = page->pb_addr*0x1000 + ((u32)addr&0xFFF);
+}
+
+
+void* alloc_align(u32 size, u32* phys) {
+    if(kheap_inited){
+        page_dir_t* dir_addr = kmalloc_align(size, 1);
+        kassert(dir_addr);
+        kassert(((u32)dir_addr%0x1000) == 0);
+        get_phys_addr(kernel_page_dir, (u32)dir_addr, phys);
+        return dir_addr;
+    }
+    else {
+        void* addr =  _internel_alloc(size, 1);
+        *phys = (u32)addr;
+        return addr;
+    }
+}
+
 /* set addr used, and make a new pte if neccessary */
 page_t* get_page(page_dir_t* page_dir, u32 addr, int make)
 {
@@ -55,10 +78,11 @@ page_t* get_page(page_dir_t* page_dir, u32 addr, int make)
         return &(page_dir->tables[index]->pages[addr%1024]);
     }
     else if(make){
-        void* pte = _internel_alloc(sizeof(pte_t), 1);
+        u32 phys;
+        void* pte = alloc_align(sizeof(pte_t), &phys);
         memset(pte, 0, sizeof(pte_t));
         page_dir->tables[index] = (pte_t*)pte;
-        page_dir->tableAddress[index] = (u32)pte | 0x7;
+        page_dir->tableAddress[index] = (u32)phys | 0x7;
         return &(page_dir->tables[index]->pages[addr%1024]);
     }
     else {
@@ -130,6 +154,7 @@ void page_init(u32 end_address)
 
     kheap_init((void*)KHEAP_START_ADDR, (void*)KHEAP_END_ADDR);
 
+    //current_page_dir = kernel_page_dir;
     current_page_dir = copy_page_dir(kernel_page_dir);
     switch_page_directory(current_page_dir);
     
@@ -177,19 +202,7 @@ void page_fault_handler(struct registers_t* regs)
 }
 
 
-static inline void get_phys_addr(page_dir_t* dir, u32 addr, u32* phys) {
-    kassert(phys!=0);
-    page_t* page = get_page(dir, addr, 0);
-    *phys = page->pb_addr*0x1000 + ((u32)addr&0xFFF);
-}
 
-void* get_page_align(u32* phys) {
-    page_dir_t* dir_addr = kmalloc_align(sizeof(page_dir_t), 1);
-    kassert(dir_addr);
-    kassert(((u32)dir_addr%0x1000) == 0);
-    get_phys_addr(kernel_page_dir, (u32)dir_addr, phys);
-    return dir_addr;
-}
 
 static pte_t* copy_pte(pte_t* src, u32* phys) {
     printk("in copy_pte\n");
@@ -219,12 +232,8 @@ static pte_t* copy_pte(pte_t* src, u32* phys) {
     
 
 page_dir_t* copy_page_dir(page_dir_t* src) {
-    
-    //  printk("in copy_page_dir\n");
-    u32 phys;
-    u32 offset;
-    u32 k;
-    page_dir_t* dir = (page_dir_t*)get_page_align(&phys);
+    u32 phys, offset, k;
+    page_dir_t* dir = (page_dir_t*)alloc_align(sizeof(page_dir_t), &phys);
     memset(dir, 0, sizeof(page_dir_t));
     offset = (u32)dir->tableAddress  - (u32)dir;
     dir->physicalAddr = phys + offset;
@@ -240,7 +249,6 @@ page_dir_t* copy_page_dir(page_dir_t* src) {
             dir->tableAddress[k] = phys | 0x07;
         }
     }
-//    printk("out copy_page_dir\n");
     return dir;
 }
 

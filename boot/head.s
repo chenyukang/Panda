@@ -1,11 +1,8 @@
-	
+
+extern kmain
 [BITS 32]
 	mov esp, stack_top		
-	jmp Main
 
-	
-[global Main]			;
-Main:	
 	mov ax, 0x10
 	mov ds, ax
 	mov cl, '2'
@@ -21,7 +18,7 @@ Main:
 	;; je lb
 	
 	;; Finally, we goto real OS
-	extern kmain
+	push esp
 	call kmain
 	jmp $
 ;----------------------------------------------------------------------------------------------
@@ -40,6 +37,18 @@ gdt_flush:
 finish:
     ret
 
+global move_vedio_mode
+move_vedio_mode:
+	mov ah, 0x0
+	mov al, 0x13
+	int 0x10
+
+global move_text_mode
+move_text_mode:
+	mov ah, 0x0
+	mov al, 0x03
+	int 0x10
+	
 ; 导出函数
 
 ;; global	port_read

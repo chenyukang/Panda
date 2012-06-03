@@ -1,5 +1,5 @@
 OUTPUT_FORMAT("binary")
-ENTRY(Main)
+
 
 SECTIONS {
     .text 0x0 : 

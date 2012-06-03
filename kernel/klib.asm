@@ -60,4 +60,3 @@ copy_page_physical:
     pop ebx               ; Get the original value of EBX back.
     ret
 
-	
