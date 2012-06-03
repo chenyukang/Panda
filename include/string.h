@@ -15,6 +15,7 @@ void strcpy(char* dest, char* src);
 void puts(const char* text);
 void printk_hex(u32 val);
 void printk_int(u32 val);
+size_t strlen(const char* str);
 void* memset(void* addr, unsigned char v, size_t cnt);
 void* memcpy(void *dest, const void *src, size_t cnt);
 void* memmove(void* dest, const void* src, size_t cnt);

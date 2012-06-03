@@ -88,7 +88,7 @@ void set_page_frame(page_t* page, int is_kernel, int is_write)
 
 void page_init(u32 end_address)
 {
-    puts("page init...\n");
+    puts("page init ...\n");
 
     u32 k, addr;
 #ifndef NDEBUG
@@ -136,7 +136,6 @@ void page_init(u32 end_address)
 #ifndef NDEBUG
     printk("new dir: %x\n", &(current_page_dir->tableAddress));
     printk("kernel  : %x\n", &(kernel_page_dir->tableAddress));
-
     puts("end page init...\n");
 #endif
 

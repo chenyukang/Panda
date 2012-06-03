@@ -23,7 +23,7 @@ extern page_dir_t* current_page_dir;
 static u32 next_valid_pid = 0;
 
 void init_task() {
-    printk("init task...\n");
+    puts("init task ...\n");
     asm volatile("cli");
     current_task = task_list =
         (task_t*)kmalloc(sizeof(task_t));

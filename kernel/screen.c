@@ -6,15 +6,15 @@
 //
 // @Brief  : Desc: Screen output functions for Console I/O
 
+// detail can found at
+// http://atschool.eduweb.co.uk/camdean/pupils/amac/vga.htm
 
 #include <system.h>
 #include <string.h>
 #include <asm.h>
 
-/* These define our textpointer, our background and foreground
-*  colors (attributes), and x and y cursor coordinates */
 static u16 *textmemptr;
-static s32 attrib = 0x0F, csr_x = 10, csr_y = 0;
+static s32 attrib = 0x0E, csr_x = 10, csr_y = 0;
 
 /* Scrolls the screen */
 static void scroll(void)
@@ -159,12 +159,23 @@ void init_video(void)
 void puts_color_str(char* str, unsigned color) {
     char* ptr = str;
     attrib = color & 0xFF;
-    //attrib = (backcolor << 4) | (forecolor & 0x0F);
     while(*ptr != '\0'){
         putch(*ptr);
         ptr++;
     }
     attrib = 0x0E;
+}
+
+void puts_mid_str(char* str)
+{
+    int len = strlen(str);
+    int offset = (80-len)/2;
+    int k;
+    for(k=0;k<offset;k++)
+        putch(' ');
+    for(k=0;k<len;k++)
+        putch(str[k]);
+    putch('\n');
 }
 
     

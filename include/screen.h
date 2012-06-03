@@ -14,6 +14,7 @@
 void init_video(void);
 void putch(char c);
 void puts_color_str(char* str, unsigned color);
+void puts_mid_str(char* str);
 
 #endif
 

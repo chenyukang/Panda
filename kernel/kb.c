@@ -46,7 +46,7 @@ void keyboard_handler(void)
 
 void kb_init()
 {
-    puts("kb init...\n");
+    puts("kb init ...\n");
     irq_install_handler(33, (isq_t)(&keyboard_handler));
 }
 
