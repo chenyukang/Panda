@@ -48,7 +48,6 @@ void kmain(u32 init_stack)
     else
         printk("I am parent: %d\n", getpid());
 
-    u32 cnt = 0;
     while(1){
         //printk("now running(%d): %d name: %s\n",cnt++, getpid(), get_current_name());
     }
