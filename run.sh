@@ -10,10 +10,14 @@ TOOL="./tool"
 
 do_clean() {
     echo "clean up"
-    rm -rf a.img hd.img bochsout.txt $OBJDIR/*.bin $OBJDIR/*.[oO];
+    rm -rf a.img bochsout.txt $OBJDIR/;
 }
 
 do_compile() {
+    if [ ! -d "$OBJDIR" ]; then
+	mkdir $OBJDIR;
+    fi
+       
     echo "building boot"
     flist=`cd $BOOT/; ls *.s;`
     for f in $flist;
@@ -74,8 +78,10 @@ do_link() {
 }
 
 do_prepare_hd() {
+    if [ ! -f "hd.img" ]; then
     echo "making hard disk"
     bximage hd.img -hd -mode=flat -size=10 -q;
+    fi
 }
 
 do_all()
