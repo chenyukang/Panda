@@ -1,4 +1,3 @@
-
 align 4
 [bits 16]
 	
@@ -58,7 +57,7 @@ read_info:
 	jc .readfloppy
 
 
-	;; move system to 0x10000
+	;; move system to 0x00000
 	;; this is OK for our kernel.bin is small
 	cld
 	mov si, setupoffset+setupsize
@@ -86,6 +85,7 @@ read_info:
 	or  eax, 1
 	mov cr0, eax
 
+        ;; jump into head, which puted at 0x00000
 	jmp dword 0x8:0x0
 	;; jmp dword 0x8:systemseg
 
