@@ -18,10 +18,12 @@ static u32 seconds = 0;
 static void timer_callback(void)
 {
     ticks++;
-    
-    if (ticks % 70 == 0) {
+
+    if(ticks%10==0)
         switch_task();
-        printk("timer:%d\n" ,seconds);
+    if (ticks % 2 == 0) {
+        printk("timer:%d %s\n" ,seconds, get_current_name());
+        //switch_task();
         seconds++;
     }
 }

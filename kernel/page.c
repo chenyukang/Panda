@@ -158,11 +158,11 @@ void page_init(u32 end_address)
     current_page_dir = copy_page_dir(kernel_page_dir);
     switch_page_directory(current_page_dir);
     
-//#ifndef NDEBUG
+#ifndef NDEBUG
     printk("new dir: %x %x\n",current_page_dir, &(current_page_dir->tableAddress));
     printk("kernel  : %x\n", &(kernel_page_dir->tableAddress));
     puts("end page init...\n");
-//#endif
+#endif
 
 }
 
@@ -226,7 +226,6 @@ static pte_t* copy_pte(pte_t* src, u32* phys) {
 }
 
 page_dir_t* copy_page_dir(page_dir_t* src) {
-    printk("before copy page:%x\n", src);
     u32 phys, offset, k;
     page_dir_t* dir = (page_dir_t*)alloc_align(sizeof(page_dir_t), &phys);
     memset(dir, 0, sizeof(page_dir_t));
@@ -244,7 +243,6 @@ page_dir_t* copy_page_dir(page_dir_t* src) {
             dir->tableAddress[k] = phys | 0x07;
         }
     }
-    printk("return dir: %x addr:%x\n", dir, dir->physicalAddr);
     return dir;
 }
 

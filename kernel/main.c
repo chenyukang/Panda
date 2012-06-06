@@ -40,15 +40,16 @@ void kmain(u32 init_stack)
     printk("init stack: %x\n", init_stack);
 
     test_all();
-#if 0
+    
     int ret = fork();
     if(ret == 0){
         printk("I am child: %d\n", getpid());
     }
     else
         printk("I am parent: %d\n", getpid());
-#endif
+
+    u32 cnt = 0;
     while(1){
-        printk("now running: %d\n", getpid());
+        //printk("now running(%d): %d name: %s\n",cnt++, getpid(), get_current_name());
     }
 }
