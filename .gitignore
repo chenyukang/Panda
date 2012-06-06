@@ -4,6 +4,7 @@
 *.bin
 *.img
 *.swp
+*.elf
 TAGS
 cscope.files
 cscope.out
