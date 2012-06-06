@@ -3,7 +3,8 @@
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-03-20 05:38:33
 //
-// @Brief  :
+// @Brief  : this is according to K&R, simple and elegant
+//           align is malloc memory align to 0x1000
 
 #include <kheap.h>
 #include <page.h>
