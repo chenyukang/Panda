@@ -38,5 +38,7 @@ typedef struct _pde {
 void page_init(u32 end_address);
 page_t* get_page(page_dir_t* page_dir, u32 addr, int make);
 void set_page_frame(page_t* page, int is_kernel, int is_write);
+page_dir_t* copy_page_dir(page_dir_t* src);
+void switch_page_directory(page_dir_t *dir);
 
 #endif

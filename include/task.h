@@ -29,7 +29,7 @@ struct task {
 typedef struct task task_t;
 
 void init_task();
-void task_switch();
+void switch_task();
 void move_stack(void* new_stack_pos, u32 size);
 int fork();
 int getpid();

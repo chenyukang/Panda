@@ -4,7 +4,7 @@ BOOT="./boot"
 KERNEL="./kernel"
 INCLUDE="./include"
 NASM="nasm -f elf"
-GCC="gcc -c -W -Wall -I./include/ -fno-stack-protector -fno-builtin"
+GCC="gcc -c -g -Wall -I./include/ -fno-stack-protector -fno-builtin"
 OBJDIR="./objs"
 TOOL="./tool"
 
@@ -58,7 +58,7 @@ do_link() {
     
     #head.O must puted at first
     objs=`ls *.o`
-    cmd="ld head.O $objs -o kernel.bin -T ../$TOOL/kernel.ld"
+    cmd="ld head.O -g $objs -o kernel.bin -T ../$TOOL/kernel.ld"
     echo $cmd; `$cmd`;
 
     if [ $? -ne 0 ]

@@ -17,10 +17,10 @@
 
 int test_all()
 {
-    test_print();
+    //test_print();
 //    test_detect_cpu();
-//    test_page_fault();
-    test_kmalloc();
+    test_page_fault();
+    //test_kmalloc();
     return 1;
 }
 
@@ -40,9 +40,9 @@ int test_print()
     return 1;
 }
 
-int test_page_fault()
-{
-    u32 *ptr = (u32*)0x100E000;
+int test_page_fault() {
+    //u32 *ptr = (u32*)0x100E000;
+    u32* ptr = (u32*)0x0;
     u32 do_page_fault = *ptr;
     printk("value: %d\n", do_page_fault);
     kassert(do_page_fault != 0);

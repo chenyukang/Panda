@@ -26,26 +26,29 @@ void kmain(u32 init_stack)
 
     gdt_init();
     idt_init();
-    timer_init(1);
+    
+    //asm volatile("sti");
+    timer_init(50);
     kb_init();
-
+    
     long mem_end = (1<<20) + ((*(unsigned short*)0x90002)<<10);
-    page_init( mem_end ); 
-
+    page_init( mem_end );
+    
     init_hd((void*)0x90080);
     
     init_task();
     printk("init stack: %x\n", init_stack);
-    
-#if 0
+
     test_all();
+#if 0
+    int ret = fork();
+    if(ret == 0){
+        printk("I am child: %d\n", getpid());
+    }
+    else
+        printk("I am parent: %d\n", getpid());
 #endif
-    
-    int init = 0;
     while(1){
-        if(!init){
-            init = 1;
-            puts("kernel running\n");
-        }
+        printk("now running: %d\n", getpid());
     }
 }

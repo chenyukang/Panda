@@ -9,6 +9,8 @@
 #include <system.h>
 #include <string.h>
 #include <asm.h>
+#include <task.h>
+
 
 static u32 ticks = 0;
 static u32 seconds = 0;
@@ -16,14 +18,11 @@ static u32 seconds = 0;
 static void timer_callback(void)
 {
     ticks++;
-    /* Every 18 clocks (approximately 1 second), we will
-     *  display a message on the screen */
-    if (ticks % 70 == 0)
-    {
-//        puts("now:");
-//        printk_int(seconds++);
+    
+    if (ticks % 70 == 0) {
+        switch_task();
+        printk("timer:%d\n" ,seconds);
         seconds++;
-//        puts("\n");
     }
 }
 

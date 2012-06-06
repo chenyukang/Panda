@@ -270,19 +270,16 @@ void isr_handler(struct registers_t* regs)
     /* Find out if we have a custom handler to run for this
     *  IRQ, and then finally, run it */
     isq_t handler = irq_routines[regs->int_no];
-    printk("%s","handler:");
-    printk_hex((unsigned int)handler);
-    if (handler)
-    {
+    if (handler) {
+        printk("handler: %x\n", (u32)handler);
         handler(regs);
     }
 
     /* Is this a fault whose number is from 0 to 31? */
     if (regs->int_no < 32)
     {
-        puts(exception_messages[regs->int_no]);
-        puts("\n");
-        //        for (;;);
+        printk("no handler : %s\n", exception_messages[regs->int_no]);
+        for (;;);
     }
 }
 

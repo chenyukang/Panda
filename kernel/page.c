@@ -47,7 +47,9 @@ _internel_alloc(u32 size, int align)
     return (void*)addr;
 }
 
-static inline void get_phys_addr(page_dir_t* dir, u32 addr, u32* phys) {
+//get phys addr from linear addr
+static inline
+void get_phys_addr(page_dir_t* dir, u32 addr, u32* phys) {
     kassert(phys!=0);
     page_t* page = get_page(dir, addr, 0);
     *phys = page->pb_addr*0x1000 + ((u32)addr&0xFFF);
@@ -57,8 +59,6 @@ static inline void get_phys_addr(page_dir_t* dir, u32 addr, u32* phys) {
 void* alloc_align(u32 size, u32* phys) {
     if(kheap_inited){
         page_dir_t* dir_addr = kmalloc_align(size, 1);
-        kassert(dir_addr);
-        kassert(((u32)dir_addr%0x1000) == 0);
         get_phys_addr(kernel_page_dir, (u32)dir_addr, phys);
         return dir_addr;
     }
@@ -158,11 +158,11 @@ void page_init(u32 end_address)
     current_page_dir = copy_page_dir(kernel_page_dir);
     switch_page_directory(current_page_dir);
     
-#ifndef NDEBUG
-    printk("new dir: %x\n", &(current_page_dir->tableAddress));
+//#ifndef NDEBUG
+    printk("new dir: %x %x\n",current_page_dir, &(current_page_dir->tableAddress));
     printk("kernel  : %x\n", &(kernel_page_dir->tableAddress));
     puts("end page init...\n");
-#endif
+//#endif
 
 }
 
@@ -201,11 +201,7 @@ void page_fault_handler(struct registers_t* regs)
     PANIC("Page fault");
 }
 
-
-
-
 static pte_t* copy_pte(pte_t* src, u32* phys) {
-    printk("in copy_pte\n");
     u32 k;
     pte_t* pte = (pte_t*)kmalloc_align(sizeof(pte_t), 1);
     get_phys_addr(kernel_page_dir, (u32)pte, phys);
@@ -226,12 +222,11 @@ static pte_t* copy_pte(pte_t* src, u32* phys) {
                                pte->pages[k].pb_addr*0x1000);
         }
     }
-    printk("out copy_pte\n");
     return pte;
 }
-    
 
 page_dir_t* copy_page_dir(page_dir_t* src) {
+    printk("before copy page:%x\n", src);
     u32 phys, offset, k;
     page_dir_t* dir = (page_dir_t*)alloc_align(sizeof(page_dir_t), &phys);
     memset(dir, 0, sizeof(page_dir_t));
@@ -249,6 +244,7 @@ page_dir_t* copy_page_dir(page_dir_t* src) {
             dir->tableAddress[k] = phys | 0x07;
         }
     }
+    printk("return dir: %x addr:%x\n", dir, dir->physicalAddr);
     return dir;
 }
 
