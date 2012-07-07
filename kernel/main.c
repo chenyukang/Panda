@@ -47,28 +47,5 @@ void kmain(u32 init_stack)
     while(1){
         //printk("runing: %d\n", get_sys_ticks());
     }
-    
-    /* if(ret == 0){ */
-    /*     printk("I am child: %d\n", getpid()); */
-    /* } */
-    /* else { */
-    /*     printk("I am parent: %d\n", getpid()); */
-    /* } */
 
-/*     while(1) { */
-/*         //printk("running\n"); */
-/* #if 0 */
-/*         u32 ticks = get_sys_ticks(); */
-/*         printk("ticks: %d\n", ticks); */
-/*         if(ticks%10 == 0){ */
-/*             switch_task(); */
-/*         } */
-/* #endif */
-/*     } */
-
-/*     while(1){ */
-/*         //printk("now running(%d): %d name: %s\n",cnt++, getpid(), get_current_name()); */
-/* //        printk("now running\n");; */
-/*         ; */
-/*     } */
 }
