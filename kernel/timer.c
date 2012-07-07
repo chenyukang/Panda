@@ -11,19 +11,22 @@
 #include <asm.h>
 #include <task.h>
 
-
 static u32 ticks = 0;
 static u32 seconds = 0;
+
+extern task_t* current_task;
+
+u32 get_sys_ticks(void) {
+    return ticks;
+}
 
 static void timer_callback(void)
 {
     ticks++;
-
-    if(ticks%10==0)
-        switch_task();
-    if (ticks % 2 == 0) {
-        printk("timer:%d %s\n" ,seconds, get_current_name());
-        //switch_task();
+    switch_task();
+    if ( ticks%2 == 0 ) {
+        if(current_task)
+            printk("timer:%d %s\n" ,seconds, get_current_name());
         seconds++;
     }
 }

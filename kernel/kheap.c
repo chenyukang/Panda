@@ -103,7 +103,8 @@ void* kmalloc_align(u32 nbytes, u32 align) {
     u32 offset;
     u32 old_size;
     u32 loc;
-    
+
+    printk("now in kmalloc_align: %d\n", nbytes);
     nunits = (nbytes+sizeof(Header)-1) / sizeof(Header) + 1;
     
     if( (prev = freep ) == NULL ) {

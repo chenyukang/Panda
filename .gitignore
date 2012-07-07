@@ -6,6 +6,10 @@
 *.swp
 *.elf
 TAGS
+GPATH
+GRTAGS
+GTAGS
+gtags.files
 cscope.files
 cscope.out
 bochsrc.txt

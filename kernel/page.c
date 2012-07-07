@@ -52,7 +52,7 @@ static inline
 void get_phys_addr(page_dir_t* dir, u32 addr, u32* phys) {
     kassert(phys!=0);
     page_t* page = get_page(dir, addr, 0);
-    *phys = page->pb_addr*0x1000 + ((u32)addr&0xFFF);
+    *phys = page->pb_addr*0x1000 + ((u32)addr & 0xFFF);
 }
 
 
@@ -60,6 +60,7 @@ void* alloc_align(u32 size, u32* phys) {
     if(kheap_inited){
         page_dir_t* dir_addr = kmalloc_align(size, 1);
         get_phys_addr(kernel_page_dir, (u32)dir_addr, phys);
+        printk("alloc_align return:%x\n", dir_addr);
         return dir_addr;
     }
     else {
@@ -115,19 +116,16 @@ void page_init(u32 end_address)
     puts("page init ...\n");
 
     u32 k, addr;
-#ifndef NDEBUG
+
     printk("begin_address: %x \nend_address  : %x  \n",
            begin_address, end_address);
-#endif
 
     nr_frames = (end_address) / 0x1000; //end_address is aligned
     frames  = (u32*)_internel_alloc(INDEX(nr_frames), 0);
-    
-#ifndef NDEBUG
+
     printk("nr_frames:%d\n", nr_frames);
     printk("frames address: %x\n", (u32)frames);
-#endif
-    
+
     memset(frames, 0, (INDEX(nr_frames)) * sizeof(u32));
 
     /* make page direcotry */
@@ -137,7 +135,7 @@ void page_init(u32 end_address)
 
     for( k=KHEAP_START_ADDR; k<KHEAP_END_ADDR; k+=0x1000)
         get_page(kernel_page_dir, k, 1);
-        
+
     addr = 0x0;
     while(addr < begin_address) {
         set_page_frame(get_page(kernel_page_dir, addr, 1), 0, 0);
@@ -158,15 +156,14 @@ void page_init(u32 end_address)
     current_page_dir = copy_page_dir(kernel_page_dir);
     switch_page_directory(current_page_dir);
     
-#ifndef NDEBUG
-    printk("new dir: %x %x\n",current_page_dir, &(current_page_dir->tableAddress));
-    printk("kernel  : %x\n", &(kernel_page_dir->tableAddress));
+    //printk("new dir: %x %x\n",current_page_dir, &(current_page_dir->tableAddress));
+    //printk("kernel  : %x\n", &(kernel_page_dir->tableAddress));
     puts("end page init...\n");
-#endif
 
 }
 
 void switch_page_directory(page_dir_t *dir) {
+    printk("now in switch_page_directory\n");
     u32 cr0;
     current_page_dir = dir;
     asm volatile("mov %0, %%cr3":: "r"(dir->physicalAddr));

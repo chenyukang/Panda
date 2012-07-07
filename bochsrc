@@ -1,4 +1,4 @@
-megs: 64
+megs: 32
 #romimage: file=$BXSHARE/BIOS-bochs-latest 
 romimage: file=/usr/share/bochs/BIOS-bochs-latest
 #vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
@@ -10,6 +10,6 @@ boot: floppy
 log: bochsout.txt
 mouse: enabled=0
 clock: sync=slowdown
-vga_update_interval: 150000
+#vga_update_interval: 150000
 screenmode: name="Panda"
 #gdbstub: enabled=1, port=1234, text_base=0, data_base=0, bss_base=0

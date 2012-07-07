@@ -278,12 +278,10 @@ void printregs(int eax, int ebx, int ecx, int edx) {
 int do_amd(void) {
 	puts("AMD Specific Features:\n");
 	unsigned long extended, eax, ebx, ecx, edx, unused;
-	int family, model, stepping, reserved;
+	int family, model;
 	cpuid(1, eax, unused, unused, unused);
 	model = (eax >> 4) & 0xf;
 	family = (eax >> 8) & 0xf;
-	stepping = eax & 0xf;
-	reserved = eax >> 12;
 
     cpuid(0x80000000, extended, unused, unused, unused);
 	if(extended == 0) {

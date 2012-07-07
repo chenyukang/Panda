@@ -1,10 +1,13 @@
 #!/bin/bash
-
 BOOT="./boot"
 KERNEL="./kernel"
 INCLUDE="./include"
 NASM="nasm -f elf"
-GCC="gcc -c -g -Wall -I./include/ -fno-stack-protector -fno-builtin"
+#GCC="gcc -c -g -Wall -I./include/ -fno-stack-protector -fno-builtin"
+GCC="gcc -Wall   -nostdinc -fno-builtin -fno-stack-protector  
+-finline-functions -finline-small-functions -findirect-inlining 
+-finline-functions -finline-functions-called-once -I./include/ "
+
 OBJDIR="./objs"
 TOOL="./tool"
 
@@ -27,11 +30,11 @@ do_compile() {
     done
 
     echo "building kernel"
-    flist=`cd $KERNEL/; ls *.asm;`
+    flist=`cd $KERNEL/; ls *.s;`
     `cd ../`
     for f in $flist;
     do
-	cmd="$NASM $KERNEL/$f -o $OBJDIR/${f/.asm/.o}"
+	cmd="$NASM $KERNEL/$f -o $OBJDIR/${f/.s/.o}"
 	echo $cmd ; `$cmd`
 	if [ $? -ne 0 ]
 	    then 
@@ -43,8 +46,9 @@ do_compile() {
     `cd ../`
     for f in $flist;
     do
-	cmd="$GCC $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
-	echo $cmd; `$cmd`;
+	cmd="$GCC -c $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
+	#echo $cmd; 
+	`$cmd`;
 	if [ $? -ne 0 ]
 	    then 
 	    exit;
@@ -62,7 +66,10 @@ do_link() {
     
     #head.O must puted at first
     objs=`ls *.o`
-    cmd="ld head.O -g $objs -o kernel.bin -T ../$TOOL/kernel.ld"
+    cmd="ld head.O $objs -o kernel.elf -T ../$TOOL/kernel.ld"
+    echo $cmd; `$cmd`;
+
+    cmd="objcopy -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin"
     echo $cmd; `$cmd`;
 
     if [ $? -ne 0 ]
@@ -90,6 +97,7 @@ do_all()
     if [ -f "a.img" ]
 	then 
 	`qemu -fda a.img`
+	#`bochs -q`
     fi
 }
 

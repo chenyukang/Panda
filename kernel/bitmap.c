@@ -44,11 +44,10 @@ int test_frame(u32 addr)
 
 u32 first_frame()
 {
-    u32 index, cnt;
+    u32 index;
     for(index=0; index<INDEX(nr_frames); index++){
         if(frames[index] == 0xFFFFFFFF) //full
             continue;
-        cnt = 0;
         u32 v = frames[index];
         return 32*index + first_zerobit(v) - 1;
     }

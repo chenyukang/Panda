@@ -22,24 +22,26 @@ volatile task_t* task_list;
 volatile task_t* wait_list;
 
 extern u32 read_eip();
+
 extern page_dir_t* current_page_dir;
 extern u32         init_esp_start;
-u32         next_valid_pid = 0;
+u32                next_valid_pid = 0;
 
 void move_stack(void* new_esp_start, u32 size);
 
 
 int getpid(void) {
+    kassert(current_task);
     return current_task->pid;
 }
 
 char* get_current_name() {
+    kassert(current_task);
     return (char*)current_task->name;
 }
 
 void init_task() {
     puts("init task ...\n");
-    asm volatile("cli");
     move_stack((void*)0xE0000000, 0x2000);
     current_task =
         (task_t*)kmalloc(sizeof(task_t));
@@ -51,8 +53,6 @@ void init_task() {
     current_task->next = 0;
     strcpy((char*)current_task->name, "kernel");
     task_list = current_task;
-    
-    asm volatile("sti");
 }
 
 void move_stack(void* new_esp_start, u32 size) {
@@ -86,20 +86,20 @@ void move_stack(void* new_esp_start, u32 size) {
             *addr = t;
         }
     }
-    
     asm volatile("mov %0, %%esp" :: "r" (new_esp));
-    asm volatile("mov %0, %%esp" :: "r" (new_ebp));
+    asm volatile("mov %0, %%ebp" :: "r" (new_ebp));
 }
 
 
 int fork() {
-    task_t *parent, *new_task, *t;
-    u32 eip, esp, ebp;
-    
-    page_dir_t* dir = copy_page_dir(current_task->page_dir);
-    parent = (task_t*)current_task;
-    
     asm volatile("cli");
+    
+    task_t *parent, *new_task, *t;
+    u32 eip;
+    
+    //page_dir_t* dir = copy_page_dir(current_task->page_dir);
+    page_dir_t* dir = current_task->page_dir;
+    parent = (task_t*)current_task;
     new_task = (task_t*)kmalloc(sizeof(task_t));
 
 repeat:
@@ -124,30 +124,30 @@ repeat:
     t->next = new_task;
 
     eip = read_eip();
-    if(current_task == parent) {
+    if(current_task == parent) { //this is parent
+        u32 esp, ebp;
         asm volatile("mov %%esp, %0" : "=r"(esp));
         asm volatile("mov %%ebp, %0" : "=r"(ebp));
         new_task->esp = esp;
         new_task->ebp = ebp;
         new_task->eip = eip;
+        printk("set new_task: %x\n", eip);
         asm volatile("sti");
-
-#if 0
-        printk("now return child: %x \neip:%x ebp:%x esp:%x dir:%x addr:%x\n",
-               new_task, new_task->eip, new_task->ebp, new_task->esp,
-               new_task->page_dir, 
-               new_task->page_dir->physicalAddr);
-#endif
         return new_task->pid;
     } else {
-        printk("\nchild return\n");
+        printk("child return\n");
         return 0;
     }
 }
 
 void switch_task() {
-    //printk("from %d(%s) %x ==> Switch to\n", getpid(),
-    //get_current_name(), current_task);
+#if 0
+    printk("from %d(%s) %x ==> Switch to\n", getpid(),
+           get_current_name(), current_task);
+#endif
+
+    if(current_task == 0)
+        return;
     kassert(current_task);
 
     u32 eip;
@@ -157,34 +157,38 @@ void switch_task() {
     asm volatile("mov %%ebp, %0" : "=r"(ebp));
 
     eip = read_eip();
-
-    task_t* next = current_task->next;
-    if(!next)
-        next = (task_t*)task_list;
-
-    if(next == current_task) {
+    if(eip == 0x12345)
         return;
-    }
-    current_task = next;
+
     current_task->eip = eip;
     current_task->esp = esp;
     current_task->ebp = ebp;
+
+    //find the next task to run
+    task_t* next = current_task->next;
+    if(next == 0)
+        next = (task_t*)task_list;
+
+    if(current_task == next)
+        return;
     
+    current_task = next;
     current_page_dir = current_task->page_dir;
 
-#if 0
     printk("real switch (%s): %x \neip:%x ebp:%x esp:%x addr:%x\n",
            (char*)current_task->name,current_task,
-           eip, ebp, esp, current_task->page_dir->physicalAddr);
-#endif
+           current_task->eip, ebp, esp, current_task->page_dir->physicalAddr);
 
     asm volatile("         \
                 cli;       \
-        mov %0, %%esp;     \
-      mov %1, %%ebp;       \
-      mov %2, %%cr3;       \
-      mov $0x12345, %%eax; \
-      sti;                 "
-      :: "r"(current_task->esp), "r"(current_task->ebp), "r"(current_page_dir->physicalAddr));
+        mov %0, %%ecx;     \
+        mov %1, %%esp;     \
+        mov %2, %%ebp;       \
+        mov %3, %%cr3;       \
+        mov $0x12345, %%eax; \
+        sti;                 \
+        jmp *%%ecx           "
+                 :: "r"(current_task->eip), "r"(current_task->esp),
+                  "r"(current_task->ebp), "r"(current_page_dir->physicalAddr));
 }
 

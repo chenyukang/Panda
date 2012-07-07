@@ -16,7 +16,7 @@
 })
 
 #define out(port, value) \
-    __asm__ __volatile__ ("outb %%al, %%dx" :: "a" (value),     \
+__asm__ __volatile__ ("outb %%al, %%dx" :: "a" (value),     \
                           "d" (port))                           \
 
 

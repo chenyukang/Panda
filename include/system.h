@@ -15,7 +15,7 @@
 #define KB  0x1000
 
 //debug option
-#define NDEBUG 1
+//#define NDEBUG 1
 
 #ifndef NDEBUG
 #define kassert(_Expression)                                            \
@@ -54,10 +54,12 @@ void idt_set(unsigned char k, unsigned long base,
 
 void timer_init(u32 frequency);
 void timer_wait(int ticks);
+u32 get_sys_ticks(void);
 
 extern void gdt_init(void);
 extern void idt_init(void);
 extern void kb_init(void);
 extern void test_idt();
+
 #endif
 

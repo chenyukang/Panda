@@ -116,6 +116,3 @@ void init_hd(void* bios)
     do_hd_cmd(&cmd);
     wait_for_ready();
 }
-
-
-
