@@ -37,15 +37,10 @@ void kmain(u32 init_stack)
     init_task();
     asm volatile("sti");
     
-    int ret = fork();
-    printk("fork ret: %d\n", ret);
+//    int ret = fork();
+    //printk("fork ret: %d\n", ret);
     
-    /* if(ret) { */
-    /*     printk("child\n"); */
-    /* }else { */
-    /*     printk("parent\n"); */
-    /* } */
-    
+
 
     while(1){
         //printk("runing: %s\n", get_current_name());
