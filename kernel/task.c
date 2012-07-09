@@ -97,8 +97,7 @@ int fork() {
     task_t *parent, *new_task, *t;
     u32 eip;
     
-    //page_dir_t* dir = copy_page_dir(current_task->page_dir);
-    page_dir_t* dir = current_task->page_dir;
+    page_dir_t* dir = copy_page_dir(current_task->page_dir);
     parent = (task_t*)current_task;
     new_task = (task_t*)kmalloc(sizeof(task_t));
 
@@ -134,7 +133,8 @@ repeat:
         printk("set new_task: %x\n", eip);
         asm volatile("sti");
         return new_task->pid;
-    } else {
+    }
+    else {
         printk("child return\n");
         return 0;
     }

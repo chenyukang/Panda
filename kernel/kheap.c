@@ -61,12 +61,15 @@ void kfree(void* ap)
 
 
 static void* __real_get_mem(u32 size) {
+    asm volatile("cli");    
     if(kheap_start_addr + size < kheap_end_addr) {
         void* addr = (void*)kheap_start_addr;
         kheap_start_addr += size;
+        asm volatile("sti");
         return addr;
     } else {
         puts("out of kheap memory\n");
+        asm volatile("sti");
         return NULL;
     }
 }
@@ -104,7 +107,6 @@ void* kmalloc_align(u32 nbytes, u32 align) {
     u32 old_size;
     u32 loc;
 
-    printk("now in kmalloc_align: %d\n", nbytes);
     nunits = (nbytes+sizeof(Header)-1) / sizeof(Header) + 1;
     
     if( (prev = freep ) == NULL ) {

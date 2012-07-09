@@ -17,7 +17,7 @@ extern kmain
 	;; cmp eax, 0x100000
 	;; je lb
 	
-	;; Finally, we goto real OS
+	;; Finally, we goto OS's c world
 	push esp
 	call kmain
 	jmp $
@@ -27,14 +27,13 @@ global gdt_flush
 extern gp
 gdt_flush:
     lgdt [gp]
+;;; set ds/es etc to data seg
     mov ax, 0x10
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
     mov ss, ax
-    jmp finish			
-finish:
     ret
 
 global move_vedio_mode

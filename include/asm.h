@@ -16,9 +16,10 @@
 #define DISABLE_NMI 0x80
 
 unsigned short inw (unsigned short _port);
-unsigned char inb (unsigned short _port);
 
+unsigned char inb (unsigned short _port);
 inline void outb (unsigned short _port, unsigned char _data);
+
 inline void write_nmi(unsigned char nmi);
 inline void enable_nmi(void);
 inline void disable_nmi(void);

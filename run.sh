@@ -2,9 +2,8 @@
 BOOT="./boot"
 KERNEL="./kernel"
 INCLUDE="./include"
-NASM="nasm -f elf"
-#GCC="gcc -c -g -Wall -I./include/ -fno-stack-protector -fno-builtin"
-GCC="gcc -Wall   -nostdinc -fno-builtin -fno-stack-protector  
+NASM="nasm -f elf -g"
+GCC="gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector  
 -finline-functions -finline-small-functions -findirect-inlining 
 -finline-functions -finline-functions-called-once -I./include/ "
 
@@ -66,7 +65,7 @@ do_link() {
     
     #head.O must puted at first
     objs=`ls *.o`
-    cmd="ld head.O $objs -o kernel.elf -T ../$TOOL/kernel.ld"
+    cmd="ld head.O $objs -g -o kernel.elf -T ../$TOOL/kernel.ld"
     echo $cmd; `$cmd`;
 
     cmd="objcopy -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin"

@@ -11,9 +11,9 @@
 #include <kheap.h>
 #include <bitmap.h>
 #include <string.h>
+#include <task.h>
 
 u32  begin_address = (u32)(0x1000000);
-
 u32* frames;
 u32  nr_frames;
 
@@ -23,6 +23,7 @@ page_dir_t* current_page_dir = NULL;
 void page_fault_handler(struct registers_t* regs);
 void switch_page_directory(page_dir_t *dir);
 page_dir_t* copy_page_dir(page_dir_t* src);
+
 extern void copy_page_physical(u32 src, u32 dest);
 extern u32 kheap_inited;
 
@@ -60,7 +61,6 @@ void* alloc_align(u32 size, u32* phys) {
     if(kheap_inited){
         page_dir_t* dir_addr = kmalloc_align(size, 1);
         get_phys_addr(kernel_page_dir, (u32)dir_addr, phys);
-        printk("alloc_align return:%x\n", dir_addr);
         return dir_addr;
     }
     else {
@@ -111,21 +111,25 @@ void set_page_frame(page_t* page, int is_kernel, int is_write)
     }
 }
 
-void page_init(u32 end_address)
+void page_init()
 {
     puts("page init ...\n");
+    long end_address = (1<<20) + ((*(unsigned short*)0x90002)<<10);
 
     u32 k, addr;
-
+#if 0
     printk("begin_address: %x \nend_address  : %x  \n",
            begin_address, end_address);
-
+#endif
+    
     nr_frames = (end_address) / 0x1000; //end_address is aligned
     frames  = (u32*)_internel_alloc(INDEX(nr_frames), 0);
 
+#if 0
     printk("nr_frames:%d\n", nr_frames);
     printk("frames address: %x\n", (u32)frames);
-
+#endif
+    
     memset(frames, 0, (INDEX(nr_frames)) * sizeof(u32));
 
     /* make page direcotry */
@@ -138,9 +142,10 @@ void page_init(u32 end_address)
 
     addr = 0x0;
     while(addr < begin_address) {
-        set_page_frame(get_page(kernel_page_dir, addr, 1), 0, 0);
+        set_page_frame(get_page(kernel_page_dir, addr, 1), 1, 0);
         addr += 0x1000;
     }
+    
     // Now allocate those pages we mapped earlier.
     for (k=KHEAP_START_ADDR; k<KHEAP_END_ADDR; k+=0x1000)
         set_page_frame(get_page(kernel_page_dir, k, 1), 0, 0);
@@ -158,12 +163,11 @@ void page_init(u32 end_address)
     
     //printk("new dir: %x %x\n",current_page_dir, &(current_page_dir->tableAddress));
     //printk("kernel  : %x\n", &(kernel_page_dir->tableAddress));
-    puts("end page init...\n");
+    //puts("end page init...\n");
 
 }
 
 void switch_page_directory(page_dir_t *dir) {
-    printk("now in switch_page_directory\n");
     u32 cr0;
     current_page_dir = dir;
     asm volatile("mov %0, %%cr3":: "r"(dir->physicalAddr));
@@ -214,7 +218,6 @@ static pte_t* copy_pte(pte_t* src, u32* phys) {
             pte->pages[k].dirty   = src->pages[k].dirty;
             pte->pages[k].pcd     = src->pages[k].pcd;
             pte->pages[k].pwt     = src->pages[k].pwt;
-
             copy_page_physical(src->pages[k].pb_addr*0x1000,
                                pte->pages[k].pb_addr*0x1000);
         }

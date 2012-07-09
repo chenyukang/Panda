@@ -8,6 +8,7 @@
 
 #include <asm.h>
 
+#if 0
 #define in(port) ({                                             \
             unsigned char v;                                    \
             __asm__ __volatile__ ("inb %%dx, %%al"              \
@@ -19,6 +20,7 @@
 __asm__ __volatile__ ("outb %%al, %%dx" :: "a" (value),     \
                           "d" (port))                           \
 
+#endif
 
 
 unsigned short inw (unsigned short _port) {
@@ -39,8 +41,8 @@ void outb (unsigned short _port, unsigned char _data) {
 
 
 inline void write_nmi(unsigned char nmi) {
-	out(0x70, nmi);
-	in(0x71);
+	outb(0x70, nmi);
+	inb(0x71);
 }
 
 inline void enable_nmi(void) {
