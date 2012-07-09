@@ -30,11 +30,10 @@ static int month[12] = {
 };
 
 
-long kernel_mktime(struct tm * tm)
-{
+long kernel_mktime(struct tm * tm) {
     long res;
     int year;
-    year = tm->tm_year - 70;
+    year = tm->tm_year - 1970;
     /* magic offsets (y+1) needed to get leapyears right.*/
     res = YEAR*year + DAY*((year+1)/4);
     res += month[tm->tm_mon];
@@ -48,17 +47,17 @@ long kernel_mktime(struct tm * tm)
     return res;
 }
 
-void time_init(void)
-{
+void time_init(void) {
     struct tm time;
- 
+    unsigned centry;
     do {
-        time.tm_sec = CMOS_READ(0);
-        time.tm_min = CMOS_READ(2);
+        time.tm_sec  = CMOS_READ(0);
+        time.tm_min  = CMOS_READ(2);
         time.tm_hour = CMOS_READ(4);
         time.tm_mday = CMOS_READ(7);
-        time.tm_mon = CMOS_READ(8);
+        time.tm_mon  = CMOS_READ(8);
         time.tm_year = CMOS_READ(9); //year 1980~2099
+        time.tm_centry = CMOS_READ(0x32);
     } while (time.tm_sec != CMOS_READ(0));
     BCD_TO_BIN(time.tm_sec);
     BCD_TO_BIN(time.tm_min);
@@ -66,10 +65,9 @@ void time_init(void)
     BCD_TO_BIN(time.tm_mday);
     BCD_TO_BIN(time.tm_mon);
     BCD_TO_BIN(time.tm_year);
+    BCD_TO_BIN(time.tm_centry);
     
-    if ((time.tm_year += 1900) < 1970) //adjust year
-        time.tm_year += 100;
-    
+    time.tm_year = time.tm_centry*100 + time.tm_year;
     kern_setup_time = kernel_mktime(&time);
     kern_time = time;
     print_time_local();
