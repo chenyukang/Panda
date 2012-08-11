@@ -21,9 +21,7 @@ u32 get_sys_ticks(void) {
 
 static void timer_callback(void) {
     ticks++;
-    switch_task();
     if ( ticks%2 == 0 ) {
-        if(current_task)
             ;
         //printk("timer:%d %s\n" ,seconds, get_current_name());
         seconds++;

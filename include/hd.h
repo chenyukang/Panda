@@ -51,7 +51,7 @@ struct hd_cmd {
      (lba_high & 0xF ) | 0xA0)))
     
 
-void init_hd(void* bios);
+void init_hd(void);
 
 #endif
 

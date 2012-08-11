@@ -91,8 +91,8 @@ static void print_identify_info(u16* hdinfo) {
 }
 #endif
 
-void init_hd(void* bios)
-{
+void init_hd() {
+    void* bios = (void*)0x90080;
     /* get the number of divers, from the BIOS data area */
     hd_inf[0].cyl = *(u16*)bios;
     hd_inf[0].head = *(u8*)(2+bios);
@@ -106,7 +106,8 @@ void init_hd(void* bios)
     printk("hd_size: %d\n", hd_size);
     
     printk(" heads: %d\n cyl:%d\n wpcom:%d\n ctl:%d\n lzone:%d\n sect:%d\n",
-           hd_inf[0].head, hd_inf[0].cyl, hd_inf[0].wpcom, hd_inf[0].ctl, hd_inf[0].lzone, hd_inf[0].sect);
+           hd_inf[0].head, hd_inf[0].cyl, hd_inf[0].wpcom,
+           hd_inf[0].ctl, hd_inf[0].lzone, hd_inf[0].sect);
 #endif
     
     irq_install_handler(14, (isq_t)(&hd_interupt_handler));

@@ -13,15 +13,27 @@
 #include <string.h>
 #include <task.h>
 
+#define  PAGE        0x1000
+#define  PG_DIR_NR 1024
+
+struct pde pg_dir0[1024] __attribute__((aligned(4096)));
+struct pde* cu_pg_dir;
+
+
+u32  pg_nr; //this is real page number
+
 u32  begin_address = (u32)(0x1000000);
 u32* frames;
 u32  nr_frames;
 
+
 page_dir_t* kernel_page_dir = NULL;
 page_dir_t* current_page_dir = NULL;
 
+void init_pg_dir(struct pde* pg_dir);
 void page_fault_handler(struct registers_t* regs);
-void switch_page_directory(page_dir_t *dir);
+
+
 page_dir_t* copy_page_dir(page_dir_t* src);
 
 extern void copy_page_physical(u32 src, u32 dest);
@@ -107,15 +119,56 @@ void set_page_frame(page_t* page, int is_kernel, int is_write) {
     }
 }
 
+
+void switch_pg_dir(struct pde* pg_dir) {
+    u32 cr0, cr4;
+    cu_pg_dir = pg_dir;
+    asm volatile("mov %0, %%cr3":: "r"((u32)pg_dir));
+
+    asm volatile("mov %%cr4, %0": "=r"(cr4));
+    cr4 |= 0x10;                              // enable 4MB page
+    asm volatile("mov %0, %%cr4":: "r"(cr4));
+
+    asm volatile("mov %%cr0, %0": "=r"(cr0));
+    cr0 |= 0x80000000;                        // enable paging!
+    asm volatile("mov %0, %%cr0":: "r"(cr0));
+}
+
+
+/* init memory, end_addr is the max physical addr on machine */
+void mm_init() {
+    puts("mm init ...\n");
+    /* note we put the end_addr at 0x90002 when booting, so got it */
+    long end_addr = (1<<20) + ((*(unsigned short*)0x90002)<<10);
+    printk("end_addr: %x\n", end_addr);
+    pg_nr = end_addr/(PAGE*1024);
+    printk("nr: %d\n", pg_nr);
+    init_pg_dir(&(pg_dir0[0])); //init the kernel pg_dir
+    irq_install_handler(13, (isq_t)(&page_fault_handler));
+    switch_pg_dir(&(pg_dir0[0]));
+}
+
+void init_pg_dir(struct pde* pg_dir) {
+    u32 k;
+    for(k=0; k<pg_nr; k++) {
+        pg_dir[k].pt_base = k<<10;
+        pg_dir[k].pt_p = 1;
+        pg_dir[k].pt_pgsize = 1;
+        pg_dir[k].pt_priv = 0;
+    }
+    for(k=pg_nr; k<1024; k++) {
+        pg_dir[k].pt_base = k<<10;
+        pg_dir[k].pt_priv = 1; //user
+    }
+}
+    
 void page_init() {
     puts("page init ...\n");
     long end_address = (1<<20) + ((*(unsigned short*)0x90002)<<10);
 
     u32 k, addr;
-#if 0
     printk("begin_address: %x \nend_address  : %x  \n",
            begin_address, end_address);
-#endif
     
     nr_frames = (end_address) / 0x1000; //end_address is aligned
     frames  = (u32*)_internel_alloc(INDEX(nr_frames), 0);
@@ -161,6 +214,7 @@ void page_init() {
     //puts("end page init...\n");
 
 }
+
 
 void switch_page_directory(page_dir_t *dir) {
     u32 cr0;

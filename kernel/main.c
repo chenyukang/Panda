@@ -22,28 +22,24 @@ u32 init_esp_start;
 void kmain(u32 init_stack)
 {
     init_esp_start = init_stack;
-    
     init_video();
     puts_color_str("Booting Panda OS ...\n", 0x0B);
-    
     time_init();    
     cli();
     gdt_init();
     idt_init();
     timer_init(50);
     kb_init();
-    page_init();
-    init_hd((void*)0x90080);
-    init_task();
+    mm_init();
+    init_hd();
+//    init_task();
     sti();
-    
-//    int ret = fork();
-    //printk("fork ret: %d\n", ret);
-    
 
-
-    while(1){
-        //printk("runing: %s\n", get_current_name());
+    int init = 0;
+    while(1) {
+        if(!init) {
+            init = 1;
+            printk("kernel running ...\n");
+        }
     }
-
 }

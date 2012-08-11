@@ -35,7 +35,27 @@ typedef struct _pde {
     u32    physicalAddr;
 }page_dir_t;
 
+
+
+struct pde {
+    u32 pt_p      : 1;
+    u32 pt_rw     : 1;
+    u32 pt_priv   : 1;
+    u32 pt_write  : 1;
+    u32 pt_cache  : 1;
+    u32 pt_access : 1;
+    u32 pt_resv   : 1;
+    u32 pt_pgsize : 1;  //0 means 4KB
+    u32 pt_gloabl : 1;  //ignored
+    u32 pt_avial  : 3;  //for system programmer
+    u32 pt_base   : 20; //base addr
+};
+
+//so struct pde* (with 1024) == pg_dir
+
+
 void page_init();
+void mm_init();
 page_t* get_page(page_dir_t* page_dir, u32 addr, int make);
 void set_page_frame(page_t* page, int is_kernel, int is_write);
 page_dir_t* copy_page_dir(page_dir_t* src);
