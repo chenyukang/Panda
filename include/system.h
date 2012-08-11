@@ -51,7 +51,7 @@ void irq_install_handler(int irq, isq_t handler);
 void idt_set(unsigned char k, unsigned long base,
              unsigned short selector, unsigned char flags);
 
-void timer_init(u32 frequency);
+void timer_init(void);
 void timer_wait(int ticks);
 u32 get_sys_ticks(void);
 
