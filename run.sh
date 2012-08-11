@@ -134,5 +134,6 @@ do
   shift
 done
 
-#show_help;
+
 do_all;
+show_help;

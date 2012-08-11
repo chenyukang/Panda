@@ -14,36 +14,31 @@ extern u32* frames;   //in page.c
 extern u32  nr_frames;
 
 inline static void INIT(u32 addr, u32* frame,
-                        u32* index, u32* offset)
-{
+                        u32* index, u32* offset) {
     *frame  = addr/KB;
     *index  = INDEX(*frame);
     *offset = OFFSET(*frame);
 }
 
-void set_frame(u32 addr)
-{
+void set_frame(u32 addr) {
     u32 frame, index, offset;
     INIT(addr, &frame, &index, &offset);
     frames[index] |= (0x1<<offset);
 }
 
-void clear_frame(u32 addr)
-{
+void clear_frame(u32 addr) {
     u32 frame, index, offset;
     INIT(addr, &frame, &index, &offset);
     frames[index] &= ~(0x1<<offset);
 }
 
-int test_frame(u32 addr)
-{
+int test_frame(u32 addr) {
     u32 frame, index, offset;
     INIT(addr, &frame, &index, &offset);
     return frames[index] & (0x1<<offset);
 }
 
-u32 first_frame()
-{
+u32 first_frame() {
     u32 index;
     for(index=0; index<INDEX(nr_frames); index++){
         if(frames[index] == 0xFFFFFFFF) //full

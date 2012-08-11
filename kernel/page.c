@@ -122,7 +122,7 @@ void set_page_frame(page_t* page, int is_kernel, int is_write) {
 void switch_pg_dir(struct pde* pg_dir) {
     u32 cr0, cr4;
     cu_pg_dir = pg_dir;
-    asm volatile("mov %0, %%cr3":: "r"((u32)pg_dir));
+    asm volatile("mov %0, %%cr3":: "r"((u32)pg_dir)); // put page table addr
 
     asm volatile("mov %%cr4, %0": "=r"(cr4));
     cr4 |= 0x10;                              // enable 4MB page
@@ -136,7 +136,6 @@ void switch_pg_dir(struct pde* pg_dir) {
 
 /* init memory, end_addr is the max physical addr on machine */
 void mm_init() {
-    
     puts("mm init ...\n");
     
     //we put the end_addr at 0x90002

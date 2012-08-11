@@ -5,13 +5,11 @@
 *.img
 *.swp
 *.elf
+*.files
+*.txt
 TAGS
 GPATH
 GRTAGS
 GTAGS
-gtags.files
-cscope.files
 cscope.out
-bochsrc.txt
-bochsout.txt
 panda.cfg
