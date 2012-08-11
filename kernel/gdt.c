@@ -13,8 +13,8 @@
 #define NR_GDTENTRY 5
 
 /* Defines a GDT entry  */
-/*   this page is a good refence */
-/*   http://wiki.osdev.org/Global_Descriptor_Table */
+/* this page is a good refence */
+/* http://wiki.osdev.org/Global_Descriptor_Table */
 struct gdt_entry
 {
     unsigned short limit;
@@ -55,8 +55,7 @@ void gdt_init(void) {
     gp.limit = (sizeof(struct gdt_entry) * NR_GDTENTRY) - 1;
     gp.base = (unsigned int)&gdt;
 
-    //Null gdt, this is needed for some simulator 
-    gdt_set_entry(0, 0, 0, 0, 0); //NULL gdt, this is needed for s
+    gdt_set_entry(0, 0, 0, 0, 0);    //Null gdt, this is just needed for some simulator 
     gdt_set_entry(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); //code
     gdt_set_entry(2, 0, 0xFFFFFFFF, 0x92, 0xCF); //data
 
