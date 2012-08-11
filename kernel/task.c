@@ -14,6 +14,7 @@
 #include <task.h>
 #include <kheap.h>
 #include <page.h>
+#include <asm.h>
 #include <string.h>
 
 volatile task_t* current_task;
@@ -28,7 +29,6 @@ extern u32         init_esp_start;
 u32                next_valid_pid = 0;
 
 void move_stack(void* new_esp_start, u32 size);
-
 
 int getpid(void) {
     kassert(current_task);
@@ -92,8 +92,7 @@ void move_stack(void* new_esp_start, u32 size) {
 
 
 int fork() {
-    asm volatile("cli");
-    
+    cli();
     task_t *parent, *new_task, *t;
     u32 eip;
     
@@ -131,7 +130,7 @@ repeat:
         new_task->ebp = ebp;
         new_task->eip = eip;
         printk("set new_task: %x\n", eip);
-        asm volatile("sti");
+        sti();
         return new_task->pid;
     }
     else {

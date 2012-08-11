@@ -10,7 +10,6 @@
  *
  *******************************************************************************/
 
-
 #include <time.h>
 
 /* interestingly, we assume leap-years */
@@ -49,7 +48,6 @@ long kernel_mktime(struct tm * tm) {
 
 void time_init(void) {
     struct tm time;
-    unsigned centry;
     do {
         time.tm_sec  = CMOS_READ(0);
         time.tm_min  = CMOS_READ(2);
@@ -74,8 +72,7 @@ void time_init(void) {
 }
 
 void print_time_local(void) {
-    printk("kernel: %x\n", kern_setup_time);
-    printk("year:%d month:%d day:%d hour:%d min:%d sec:%d\n",
+    printk("%d-%d-%d %d:%d:%d\n",
            kern_time.tm_year, kern_time.tm_mon, kern_time.tm_mday,
            kern_time.tm_hour+8, kern_time.tm_min, kern_time.tm_sec);
 }    

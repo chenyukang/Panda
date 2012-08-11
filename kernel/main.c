@@ -27,7 +27,7 @@ void kmain(u32 init_stack)
     puts_color_str("Booting Panda OS ...\n", 0x0B);
     
     time_init();    
-    asm volatile("cli");    
+    cli();
     gdt_init();
     idt_init();
     timer_init(50);
@@ -35,7 +35,7 @@ void kmain(u32 init_stack)
     page_init();
     init_hd((void*)0x90080);
     init_task();
-    asm volatile("sti");
+    sti();
     
 //    int ret = fork();
     //printk("fork ret: %d\n", ret);

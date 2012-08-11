@@ -32,6 +32,8 @@ inline void disable_nmi(void);
 
 #define first_zerobit(x) (first_onebit(~(x)))
 
+#define sti() __asm__ ("sti"::)
+#define cli() __asm__ ("cli"::)
 /* ffs: if ret == 0 : no one bit found
    return index is begin with 1 */
 static inline int first_onebit(int x)

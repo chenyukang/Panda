@@ -13,26 +13,24 @@
 
 static u32 ticks = 0;
 static u32 seconds = 0;
-
 extern task_t* current_task;
 
 u32 get_sys_ticks(void) {
     return ticks;
 }
 
-static void timer_callback(void)
-{
+static void timer_callback(void) {
     ticks++;
     switch_task();
     if ( ticks%2 == 0 ) {
         if(current_task)
-            printk("timer:%d %s\n" ,seconds, get_current_name());
+            ;
+        //printk("timer:%d %s\n" ,seconds, get_current_name());
         seconds++;
     }
 }
 
-void timer_init(u32 frequency)
-{
+void timer_init(u32 frequency) {
     puts("timer init ...\n");
     // Firstly, register our timer callback.
     irq_install_handler(32, (isq_t)(&timer_callback));
@@ -57,8 +55,7 @@ void timer_init(u32 frequency)
 
 /* This will continuously loop until the given time has
 *  been reached */
-void timer_wait(int wait)
-{
+void timer_wait(int wait) {
     unsigned long eticks;
 
     eticks = ticks + wait;
