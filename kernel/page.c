@@ -151,6 +151,7 @@ void mm_init() {
 
 void init_pg_dir(struct pde* pg_dir) {
     u32 k;
+    memset(pg_dir, 0, sizeof(pg_dir[0])*1024);
     for(k=0; k<pg_nr; k++) {
         pg_dir[k].pt_base = k<<10;
         pg_dir[k].pt_p = 1;
@@ -233,7 +234,7 @@ void page_fault_handler(struct registers_t* regs) {
     asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
     
     // The error code gives us details of what happened.
-    int present   = !(regs->err_code & 0x1); // Page not present
+    int present = !(regs->err_code & 0x1); // Page not present
     int rw = regs->err_code & 0x2;           // Write operation?
     int us = regs->err_code & 0x4;           // Processor was in user-mode?
     int reserved = regs->err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?

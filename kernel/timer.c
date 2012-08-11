@@ -59,8 +59,8 @@ void timer_init(u32 frequency) {
 /* This will continuously loop until the given time has
 *  been reached */
 void timer_wait(int wait) {
-    unsigned long eticks;
+    unsigned long end_tic;
 
-    eticks = ticks + wait;
-    while(ticks < eticks);
+    end_tic = ticks + wait;
+    while(ticks < end_tic);
 }
