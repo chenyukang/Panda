@@ -54,7 +54,7 @@ struct tm {
     int tm_sec;
     int tm_min;
     int tm_hour;
-    int tm_mday;
+    int tm_day;
     int tm_mon;
     int tm_year;
     int tm_wday;
@@ -76,6 +76,7 @@ struct tm kern_time;
 long kernel_mktime(struct tm * tm);
 void time_init(void);
 void print_time_local(void);
+void update_time();
 
 #endif
 

@@ -9,6 +9,7 @@
 #include <system.h>
 #include <string.h>
 #include <asm.h>
+#include <time.h>
 #include <task.h>
 
 static u32 ticks = 0;
@@ -21,6 +22,10 @@ u32 get_sys_ticks(void) {
 
 static void timer_callback(void) {
     ticks++;
+    if (ticks % 18 ==0){
+        update_time();
+        print_time_local();
+    }
     if ( ticks%2 == 0 ) {
             ;
         //printk("timer:%d %s\n" ,seconds, get_current_name());
@@ -36,7 +41,7 @@ void timer_init(u32 frequency) {
     // The value we send to the PIT is the value to divide it's input clock
     // (1193180 Hz) by, to get our required frequency. Important to note is
     // that the divisor must be small enough to fit into 16-bits.
-    u32 divisor = 1193180 / frequency;
+    u32 divisor = 1193180 ;
 
     // Send the command byte.
     outb(0x43, 0x36);

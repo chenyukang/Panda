@@ -17,8 +17,7 @@ static u16 *textmemptr;
 static s32 attrib = 0x0E, csr_x = 10, csr_y = 0;
 
 /* Scrolls the screen */
-static void scroll(void)
-{
+static void scroll(void) {
     unsigned blank, temp;
 
     /* A blank is defined as a space... we need to give it
@@ -26,8 +25,7 @@ static void scroll(void)
     blank = 0x20 | (attrib << 8);
 
     /* Row 25 is the end, this means we need to scroll up */
-    if(csr_y >= 25)
-    {
+    if(csr_y >= 25) {
         /* Move the current text chunk that makes up the screen
         *  back in the buffer by a line */
         temp = csr_y - 25 + 1;
@@ -42,8 +40,7 @@ static void scroll(void)
 
 /* Updates the hardware cursor: the little blinking line
 *  on the screen under the last character pressed! */
-static void move_csr(void)
-{
+static void move_csr(void) {
     unsigned temp;
 
     /* The equation for finding the index in a linear
@@ -65,8 +62,7 @@ static void move_csr(void)
 }
 
 /* Clears the screen */
-void cls()
-{
+void cls() {
     unsigned blank;
     int i;
 
@@ -87,33 +83,28 @@ void cls()
 }
 
 /* Puts a single character on the screen */
-void putch(char c)
-{
+void putch(char c) {
     unsigned short *where;
     unsigned att = attrib << 8;
 
     /* Handle a backspace, by moving the cursor back one space */
-    if(c == 0x08)
-    {
+    if(c == 0x08) {
         if(csr_x != 0) csr_x--;
     }
     /* Handles a tab by incrementing the cursor's x, but only
     *  to a point that will make it divisible by 8 */
-    else if(c == 0x09)
-    {
+    else if(c == 0x09) {
         csr_x = (csr_x + 8) & ~(8 - 1);
     }
     /* Handles a 'Carriage Return', which simply brings the
     *  cursor back to the margin */
-    else if(c == '\r')
-    {
+    else if(c == '\r') {
         csr_x = 0;
     }
     /* We handle our newlines the way DOS and the BIOS do: we
     *  treat it as if a 'CR' was also there, so we bring the
     *  cursor to the margin and we increment the 'y' value */
-    else if(c == '\n')
-    {
+    else if(c == '\n') {
         csr_x = 0;
         csr_y++;
     }
@@ -121,8 +112,7 @@ void putch(char c)
     *  printable character. The equation for finding the index
     *  in a linear chunk of memory can be represented by:
     *  Index = [(y * width) + x] */
-    else if(c >= ' ')
-    {
+    else if(c >= ' ') {
         where = textmemptr + (csr_y * 80 + csr_x);
         *where = c | att;	/* Character AND attributes: color */
         csr_x++;
@@ -130,8 +120,7 @@ void putch(char c)
 
     /* If the cursor has reached the edge of the screen's width, we
     *  insert a new line in there */
-    if(csr_x >= 80)
-    {
+    if(csr_x >= 80){
         csr_x = 0;
         csr_y++;
     }
@@ -142,16 +131,14 @@ void putch(char c)
 }
 
 /* Sets the forecolor and backcolor that we will use */
-void settextcolor(unsigned char forecolor, unsigned char backcolor)
-{
+void settextcolor(unsigned char forecolor, unsigned char backcolor) {
     /* Top 4 bytes are the background, bottom 4 bytes
     *  are the foreground color */
     attrib = (backcolor << 4) | (forecolor & 0x0F);
 }
 
 /* Sets our text-mode VGA pointer, then clears the screen for us */
-void init_video(void)
-{
+void init_video(void) {
     textmemptr = (unsigned short *)0xB8000;
     cls();
 }
@@ -166,8 +153,7 @@ void puts_color_str(char* str, unsigned color) {
     attrib = 0x0E;
 }
 
-void puts_mid_str(char* str)
-{
+void puts_mid_str(char* str) {
     int len = strlen(str);
     int offset = (80-len)/2;
     int k;

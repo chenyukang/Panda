@@ -23,7 +23,7 @@
   {                                                                     \
       printk("FILE:%s LINE:%d  (Assertion: \"%s\" FAILED)\n",           \
              __FILE__, __LINE__ , #_Expression);                        \
-      asm volatile("cli");                                              \
+      __asm__ volatile("cli");                                          \
       while(1) ;                                                        \
   }                                                                     \
 
@@ -38,8 +38,7 @@
 
 
 /* This defines what the stack looks like after an ISR was running */
-struct registers_t
-{
+struct registers_t {
     unsigned int gs, fs, es, ds;
     unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
     unsigned int int_no, err_code;

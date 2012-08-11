@@ -20,7 +20,6 @@ extern void putch(char);
 #define va_end(ap) ( ap=(va_list)0 )
 #define va_arg(ap, type) ( *(type*) ((ap += INTSIZEOF(type)) - INTSIZEOF(type)))
 
-
 void strcpy(char* dest, char* src) {
     char* p = src;
     while(*p) {
@@ -29,20 +28,17 @@ void strcpy(char* dest, char* src) {
 }
 
 /* ignore overlap */
-void* memcpy(void *dest, const void *src, size_t cnt)
-{
+void* memcpy(void *dest, const void *src, size_t cnt) {
     const unsigned char *sp = (const unsigned char *)src;
     unsigned char *dp = (unsigned char *)dest;
     while(cnt--){
-        //printk("now copy\n");
         *dp++ = *sp++;
     }
     return dest;
 }
 
 
-void* memset(void* addr, unsigned char v, size_t cnt)
-{
+void* memset(void* addr, unsigned char v, size_t cnt) {
     char* t = (char*)addr;
     while(cnt--){
         *t++ = v;
@@ -50,8 +46,7 @@ void* memset(void* addr, unsigned char v, size_t cnt)
     return addr;
 }
 
-void* memmove(void* dest, const void* src, size_t cnt)
-{
+void* memmove(void* dest, const void* src, size_t cnt) {
     void* ret = dest;
     char* d = (char*)dest;
     const char* s = src;
@@ -70,15 +65,14 @@ void* memmove(void* dest, const void* src, size_t cnt)
     return ret;
 }
 
-unsigned short *memsetw(unsigned short *dest, unsigned short val, size_t count)
-{
+unsigned short *memsetw(unsigned short *dest,
+                        unsigned short val, size_t count) {
     unsigned short *temp = (unsigned short *)dest;
     for( ; count != 0; count--) *temp++ = val;
     return dest;
 }
 
-size_t strlen(const char *str)
-{
+size_t strlen(const char *str) {
     size_t retval;
     for(retval = 0; *str != '\0'; str++)
         retval++;
@@ -86,10 +80,8 @@ size_t strlen(const char *str)
 }
 
 
-
 /* Uses the above routine to output a string... */
-inline void puts(const char* text)
-{
+inline void puts(const char* text) {
     u32 i;
     for (i = 0; i < strlen(text); i++)
     {
@@ -97,8 +89,7 @@ inline void puts(const char* text)
     }
 }
 
-inline void printk_hex(u32 val)
-{
+inline void printk_hex(u32 val) {
     int initial = 1;
     int k;
     u32 t;
@@ -116,8 +107,7 @@ inline void printk_hex(u32 val)
     else          putch( t+'0');
 }
 
-inline void printk_int(u32 val)
-{
+inline void printk_int(u32 val) {
     char buf[12];
     int cnt = 0;
     while(val>0) {
@@ -133,11 +123,9 @@ inline void printk_int(u32 val)
     }
 }
 
-
 //be careful with 1<<32
 inline char* int_to_str(char* str, const s32 num,
-                        const s32 radix)
-{
+                        const s32 radix) {
     char* ptr = str;
     char* ret ;
     int i, j;
@@ -168,8 +156,7 @@ inline char* int_to_str(char* str, const s32 num,
     return ret;
 }
 
-inline char* u32_to_str(char* str, const u32 val)
-{
+inline char* u32_to_str(char* str, const u32 val) {
     char* ptr = str;
     *ptr++ = '0';
     *ptr++ = 'x';
@@ -188,8 +175,8 @@ inline char* u32_to_str(char* str, const u32 val)
     return ptr;
 }
 
-int sprintk(char* buf, const char* format, va_list args)
-{
+/* print according format */
+int sprintk(char* buf, const char* format, va_list args) {
     int len = 0 ;
     char* prev = buf;
     while(*format){
@@ -229,9 +216,8 @@ int sprintk(char* buf, const char* format, va_list args)
     return len = strlen(prev);
 }
 
-
-int printk(const char* format, ... )
-{
+/* NOTE: there is no error check */
+int printk(const char* format, ... ) {
     va_list ap;
     char buf[1024];
     u32  cnt = 0, k = 0;

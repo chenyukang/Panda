@@ -39,7 +39,7 @@ long kernel_mktime(struct tm * tm) {
     /* and (y+2) here. If it wasn't a leap-year, we have to adjust */
     if (tm->tm_mon>1 && ((year+2)%4))
         res -= DAY;
-    res += DAY*(tm->tm_mday-1);
+    res += DAY*(tm->tm_day-1);
     res += HOUR*tm->tm_hour;
     res += MINUTE*tm->tm_min;
     res += tm->tm_sec;
@@ -52,7 +52,7 @@ void time_init(void) {
         time.tm_sec  = CMOS_READ(0);
         time.tm_min  = CMOS_READ(2);
         time.tm_hour = CMOS_READ(4);
-        time.tm_mday = CMOS_READ(7);
+        time.tm_day = CMOS_READ(7);
         time.tm_mon  = CMOS_READ(8);
         time.tm_year = CMOS_READ(9); //year 1980~2099
         time.tm_centry = CMOS_READ(0x32);
@@ -60,7 +60,7 @@ void time_init(void) {
     BCD_TO_BIN(time.tm_sec);
     BCD_TO_BIN(time.tm_min);
     BCD_TO_BIN(time.tm_hour);
-    BCD_TO_BIN(time.tm_mday);
+    BCD_TO_BIN(time.tm_day);
     BCD_TO_BIN(time.tm_mon);
     BCD_TO_BIN(time.tm_year);
     BCD_TO_BIN(time.tm_centry);
@@ -73,6 +73,30 @@ void time_init(void) {
 
 void print_time_local(void) {
     printk("%d-%d-%d %d:%d:%d\n",
-           kern_time.tm_year, kern_time.tm_mon, kern_time.tm_mday,
-           kern_time.tm_hour+8, kern_time.tm_min, kern_time.tm_sec);
+           kern_time.tm_year, kern_time.tm_mon, kern_time.tm_day,
+           kern_time.tm_hour, kern_time.tm_min, kern_time.tm_sec);
 }    
+
+/* add one second */
+void update_time() {
+    struct tm* t = &kern_time;
+    if(t->tm_sec + 1 <= 59) {
+        t->tm_sec++;
+    } else if(t->tm_min + 1 <= 59) {
+        t->tm_min++;
+        t->tm_sec = 0;
+    } else if(t->tm_hour + 1 <= 23) {
+        t->tm_hour++;
+        t->tm_min = 0;
+        t->tm_sec = 0;
+    } else if(t->tm_day + 1 <= 29) {
+        t->tm_day++;
+        t->tm_hour = 0;
+        t->tm_min = 0;
+        t->tm_sec = 0;
+    }
+    
+    //update a day
+}
+
+    

@@ -95,7 +95,7 @@ do_all()
     do_clean && do_compile && do_prepare_hd
     if [ -f "a.img" ]
 	then 
-	`qemu -fda a.img`
+	`qemu -fda a.img -localtime`
 	#`bochs -q`
     fi
 }
@@ -134,4 +134,5 @@ do
   shift
 done
 
-show_help;
+#show_help;
+do_all;

@@ -19,7 +19,6 @@
 struct pde pg_dir0[1024] __attribute__((aligned(4096)));
 struct pde* cu_pg_dir;
 
-
 u32  pg_nr; //this is real page number
 
 u32  begin_address = (u32)(0x1000000);
@@ -137,12 +136,14 @@ void switch_pg_dir(struct pde* pg_dir) {
 
 /* init memory, end_addr is the max physical addr on machine */
 void mm_init() {
+    
     puts("mm init ...\n");
-    /* note we put the end_addr at 0x90002 when booting, so got it */
-    long end_addr = (1<<20) + ((*(unsigned short*)0x90002)<<10);
-    printk("end_addr: %x\n", end_addr);
+    
+    //we put the end_addr at 0x90002
+    //during booting process, so got it */
+    long end_addr = (1<<20) + ((*(u16*)0x90002)<<10);
     pg_nr = end_addr/(PAGE*1024);
-    printk("nr: %d\n", pg_nr);
+    
     init_pg_dir(&(pg_dir0[0])); //init the kernel pg_dir
     irq_install_handler(13, (isq_t)(&page_fault_handler));
     switch_pg_dir(&(pg_dir0[0]));

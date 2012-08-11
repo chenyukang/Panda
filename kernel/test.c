@@ -24,8 +24,7 @@ int test_all()
     return 1;
 }
 
-int test_print()
-{
+int test_print() {
     printk("value: %d\n", -2);
     printk("value: %d\n", -10);
     printk("value: %d\n", 10);
@@ -41,22 +40,29 @@ int test_print()
 }
 
 int test_page_fault() {
-    //u32 *ptr = (u32*)0x100E000;
-    u32* ptr = (u32*)0x0;
+    u32 *ptr = (u32*)0x0;
+    //u32* ptr = (u32*)0x0;
     u32 do_page_fault = *ptr;
     printk("value: %d\n", do_page_fault);
-    kassert(do_page_fault != 0);
+    //kassert(do_page_fault != 0);
+    *ptr = 0x10;
+    do_page_fault = *ptr;
+    printk("value: %d\n", do_page_fault);
+    u32 k;
+    for(k=0; k<0x1000000; k++) {
+        u32* addr = (u32*)k;
+        printk("addr: %x ==> %x\n", addr, *addr);
+        //*addr = 0;
+    }
     return 1;
 }
 
-int test_detect_cpu()
-{
+int test_detect_cpu() {
     detect_cpu();
     return 1;
 }
 
-int test_kmalloc()
-{
+int test_kmalloc() {
     int k;
     for(k=0; k<10; k++) {
         u32 *ptr = (u32*)kmalloc(sizeof(u32)*100);
