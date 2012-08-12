@@ -13,14 +13,16 @@
 
 struct pde {
     u32 pt_p      : 1;
-    u32 pt_rw     : 1;
-    u32 pt_priv   : 1;
-    u32 pt_write  : 1;
-    u32 pt_cache  : 1;
-    u32 pt_access : 1;
-    u32 pt_resv   : 1;
-    u32 pt_pgsize : 1;  //0 means 4KB
-    u32 pt_gloabl : 1;  //ignored
+    u32 pt_flag   : 6;
+    /* u32 pt_rw     : 1; */
+    /* u32 pt_priv   : 1; */
+    /* u32 pt_write  : 1; */
+    /* u32 pt_cache  : 1; */
+    /* u32 pt_access : 1; */
+    /* u32 pt_resv   : 1; */
+
+    u32 pt_pgsz   : 1;  //0 means 4KB
+    u32 pt_global : 1;  //ignored
     u32 pt_avial  : 3;  //for system programmer
     u32 pt_base   : 20; //base addr
 };
@@ -28,12 +30,14 @@ struct pde {
 
 struct pte {
     u32 pt_p      : 1;
-    u32 pt_rw     : 1;
-    u32 pt_priv   : 1;
-    u32 pt_write  : 1;
-    u32 pt_cache  : 1;
-    u32 pt_access : 1;
-    u32 pt_resv   : 1;
+    u32 pt_flag   : 6;
+    /* u32 pt_rw     : 1; */
+    /* u32 pt_priv   : 1; */
+    /* u32 pt_write  : 1; */
+    /* u32 pt_cache  : 1; */
+    /* u32 pt_access : 1; */
+    /* u32 pt_resv   : 1; */
+    
     u32 pt_pgsize : 1;  //0 means 4KB
     u32 pt_gloabl : 1;  //ignored
     u32 pt_avial  : 3;  //for system programmer
@@ -47,7 +51,12 @@ struct page {
 };
 
 void mm_init();
+
 struct page* alloc_page();
+struct page* find_page(u32 nr);
+
 void free_page(struct page* pg);
+void copy_pgd(struct pde* from, struct pde* targ);
+
 
 #endif

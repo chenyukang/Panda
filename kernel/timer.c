@@ -22,7 +22,9 @@ u32 get_sys_ticks(void) {
 static void timer_callback(void) {
     ticks++;
     if (ticks % 18 ==0){
+        cli();
         update_time();
+        sti();
         print_time_local();
     }
 }

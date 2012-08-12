@@ -30,6 +30,7 @@ u32 end_addr;
 u32 ini_addr;
 u32 use_addr;
 u32 page_nr;
+u32 free_page_nr;
 u32 k_dir_nr; //this is real page number
 
 void init_pgd(struct pde* pg_dir);
@@ -69,7 +70,7 @@ void switch_pgd(struct pde* pg_dir) {
 void init_pgs() {    //init free page list
     u32 k, cnt = 0;
     page_nr = (end_addr)/(PAGE);
-    u32 free_page_nr = (ini_addr)/0x1000;
+    free_page_nr = (ini_addr)/0x1000 + 1;
     for(k=free_page_nr; k<page_nr; k++) {
         cnt++;
     }
@@ -98,6 +99,13 @@ void init_pgs() {    //init free page list
 #endif
 }
 
+
+struct page* find_page(u32 nr) {
+    kassert(nr > free_page_nr &&
+            nr < 1024);
+    return &pages[nr];
+}
+
 struct page* alloc_page() {
     struct page* pg = &freepg_list;
     if(pg->pg_next) {
@@ -111,6 +119,48 @@ struct page* alloc_page() {
     return 0;
 }
 
+
+
+static inline
+void* trans_vm(void* pdir) {
+    struct pde* addr = (struct pde*)pdir;
+    kassert(pdir);
+    return (void*)(addr->pt_base * PAGE);
+}
+
+void copy_pgd(struct pde* from, struct pde* targ) {
+    kassert(from &&
+            targ &&
+            "error copy_pgd");
+    struct pde *fpde, *tpde;
+    struct pte *fpte, *tpte;
+    struct page *page;
+    u32 idx, k;
+    for(idx=k_dir_nr; idx<1024; idx++) {
+        fpde = &(from[idx]);
+        tpde = &(targ[idx]);
+        tpde->pt_p  = fpde->pt_p;
+        tpde->pt_flag = fpde->pt_flag;
+        tpde->pt_pgsz = fpde->pt_pgsz;
+        if(fpde->pt_p) {
+            fpte = (struct pte*)(fpde->pt_base*PAGE);
+            tpte = (struct pte*)(trans_vm(alloc_page()));
+            tpte->pt_base = ((u32)tpte>>12);
+            for(k=0; k<1024; k++) {
+                tpte[k].pt_base = fpte[k].pt_base;
+                tpte[k].pt_flag = fpte[k].pt_flag;
+                if(fpte[k].pt_p) {
+                    fpte[k].pt_flag &= ~(0x001);
+                    tpte[k].pt_flag &= ~(0x001);
+                    page = find_page(fpte->pt_base);
+                    page->pg_refcnt++;
+                }
+            }
+        }
+    }
+}
+        
+            
 void free_page(struct page* pg) {
     kassert(pg &&
             pg->pg_refcnt > 0 &&
@@ -146,16 +196,16 @@ void mm_init() {
 void init_pgd(struct pde* pg_dir) {
     u32 k;
     memset(pg_dir, 0, sizeof(pg_dir[0])*1024);
-    k_dir_nr = end_addr/(PAGE*1024);
+    k_dir_nr = (end_addr)/(PAGE*1024);
     for(k=0; k<k_dir_nr; k++) {
         pg_dir[k].pt_base = k<<10;
         pg_dir[k].pt_p = 1;
-        pg_dir[k].pt_pgsize = 1;
-        pg_dir[k].pt_priv = 0;
+        pg_dir[k].pt_pgsz = 1;
+        pg_dir[k].pt_flag = 0;
     }
     for(k=k_dir_nr; k<1024; k++) {
         pg_dir[k].pt_base = k<<10;
-        pg_dir[k].pt_priv = 1; //user
+        pg_dir[k].pt_flag = 1; //user
     }
 }
 

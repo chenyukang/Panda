@@ -19,12 +19,11 @@ struct task {
     u32 ppid;       /* parent id */
     s32 priority;   /* process priority */
     s32 exit_code;  /* exit code process exit */
-    
-    char name[24];  /* process name*/
     u32 esp, ebp;   /* stack and base pointers */
     u32 eip;        /* instruction pointer */
-    //page_dir_t* page_dir; /* page directory */
+    u32* pg_dir;
     struct task* next;
+    char name[24];  /* process name*/
 };
 
 typedef struct task task_t;
