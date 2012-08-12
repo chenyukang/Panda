@@ -87,7 +87,6 @@ read_info:
 
         ;; jump into head, which puted at 0x00000
 	jmp dword 0x8:0x0
-	;; jmp dword 0x8:systemseg
 
 print_str:
 	mov ah, 0x0E

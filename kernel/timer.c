@@ -13,7 +13,6 @@
 #include <task.h>
 
 static u32 ticks = 0;
-static u32 seconds = 0;
 extern task_t* current_task;
 
 u32 get_sys_ticks(void) {
@@ -25,11 +24,6 @@ static void timer_callback(void) {
     if (ticks % 18 ==0){
         update_time();
         print_time_local();
-    }
-    if ( ticks%2 == 0 ) {
-            ;
-        //printk("timer:%d %s\n" ,seconds, get_current_name());
-        seconds++;
     }
 }
 

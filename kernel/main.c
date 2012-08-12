@@ -18,11 +18,11 @@
 #include <time.h>
 
 u32 init_esp_start;
+extern char __kimg_end__;
 
 void kmain(u32 init_stack)
 {
     init_esp_start = init_stack;
-    
     init_video();
     puts_color_str("Booting Panda OS ...\n", 0x0B);
     puts_color_str("Welcome ...\n", 0x0A);
@@ -39,7 +39,6 @@ void kmain(u32 init_stack)
 //    init_task();
     
     sti();
-
     int init = 0;
     while(1) {
         if(!init) {

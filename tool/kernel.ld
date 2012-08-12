@@ -22,5 +22,5 @@ SECTIONS {
         ebss = .;
     }
 
-    end = .; _end = .; __end = .;
+    __kimg_end__ = .;
 }

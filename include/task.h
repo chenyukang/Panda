@@ -23,7 +23,7 @@ struct task {
     char name[24];  /* process name*/
     u32 esp, ebp;   /* stack and base pointers */
     u32 eip;        /* instruction pointer */
-    page_dir_t* page_dir; /* page directory */
+    //page_dir_t* page_dir; /* page directory */
     struct task* next;
 };
 

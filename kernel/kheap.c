@@ -25,8 +25,7 @@ void kheap_init(void* start_addr, void* end_addr) {
     kheap_inited = 1;
 }
 
-void kfree(void* ap)
-{
+void kfree(void* ap) {
     Header *bp, *p;
     bp = (Header*)ap - 1; /* point back to header */
     p = freep;
@@ -74,8 +73,7 @@ static void* __real_get_mem(u32 size) {
     }
 }
 
-static Header* get_more(u32 size)
-{
+static Header* get_more(u32 size) {
     char* mem = NULL;
     Header* head = NULL;
     if ( size < MINI_NALLOC )
@@ -90,23 +88,12 @@ static Header* get_more(u32 size)
     return freep;
 }
 
-
-inline int valid_align(int align, u32 location) {
-    if(align == 0)
-        return 1;
-    return (location % 0x1000) == 0;
-}
-
 /* notes: align is default return addr align 0x1000,
    this may cost more time for search a free slot,
    and do not call this align=1 requently */
 void* kmalloc_align(u32 nbytes, u32 align) {
     Header *p, *prev;
     u32 nunits;
-    u32 offset;
-    u32 old_size;
-    u32 loc;
-
     nunits = (nbytes+sizeof(Header)-1) / sizeof(Header) + 1;
     
     if( (prev = freep ) == NULL ) {
@@ -114,35 +101,17 @@ void* kmalloc_align(u32 nbytes, u32 align) {
         base.s.size = 0;
     }
     for( p = prev->s.next; ; prev=p, p=p->s.next ) {
-        loc = (u32)(p+1);
-        if(!valid_align(align, loc)) { //need align, recompute nunits
-            offset = 0x1000 - (loc%0x1000);
-            nunits = (nbytes + offset + sizeof(Header) - 1) /
-                     sizeof(Header) + 1;
-        }
         if(p->s.size >= nunits ) {
-            if(valid_align(align, loc)) { //aligned
-                if (p->s.size == nunits )
-                    prev->s.next = p->s.next;
-                else {
-                    p->s.size -= nunits ;
-                    p += p->s.size;
-                    p->s.size = nunits;
-                }
-                freep = prev;
-                return (void*)(p+1);
-            } else { //not aligned, skip offset
-                old_size = p->s.size;
-                p->s.size = offset/sizeof(Header); //need check?
-                p += (offset/sizeof(Header));      //just skip
-                p->s.size = old_size - offset/sizeof(Header);
-                freep = prev;
-                return (void*)(p+1);
+            if (p->s.size == nunits )
+                prev->s.next = p->s.next;
+            else {
+                p->s.size -= nunits ;
+                p += p->s.size;
+                p->s.size = nunits;
             }
             freep = prev;
             return (void*)(p+1);
         }
-
         if ( p == freep ){
             if ((p = get_more(nunits)) == NULL) {
                 return NULL;
@@ -152,8 +121,7 @@ void* kmalloc_align(u32 nbytes, u32 align) {
 }
 
 
-void* kmalloc(u32 nbytes)
-{
+void* kmalloc(u32 nbytes) {
     return kmalloc_align(nbytes, 0);
 }
 

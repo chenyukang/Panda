@@ -248,5 +248,5 @@ isr_pagefault_stub:
     iret
 
 section .bss
-	resb 8192	; 8KB for stack
+	resb 8192	; 80KB for stack
 stack_top:	; top of our stack here
