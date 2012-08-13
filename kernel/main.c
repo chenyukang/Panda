@@ -36,7 +36,7 @@ void kmain(u32 init_stack)
     kb_init();
     mm_init();
     init_hd();
-//    init_task();
+    init_task();
     
     sti();
     int init = 0;

@@ -17,18 +17,19 @@
 #include <asm.h>
 #include <string.h>
 
-volatile task_t* current_task;
+struct task procs[126];
+
+task_t* current_task;
 
 volatile task_t* task_list;
 volatile task_t* wait_list;
 
 extern u32 read_eip();
 
-extern page_dir_t* current_page_dir;
+extern struct pde* cu_pg_dir;
+
 extern u32         init_esp_start;
 u32                next_valid_pid = 0;
-
-void move_stack(void* new_esp_start, u32 size);
 
 int getpid(void) {
     kassert(current_task);
@@ -42,34 +43,29 @@ char* get_current_name() {
 
 void init_task() {
     puts("init task ...\n");
-    move_stack((void*)0xE0000000, 0x2000);
-    current_task =
-        (task_t*)kmalloc(sizeof(task_t));
-    
+    current_task = &procs[0];
+#if 0
+    move_stack(current_task, (void*)0xE0000000);
+
     current_task->pid = next_valid_pid++;
     current_task->esp = current_task->ebp = 0;
     current_task->eip = 0;
-    current_task->page_dir = current_page_dir;
+    current_task->pg_dir = (u32)cu_pg_dir;
     current_task->next = 0;
     strcpy((char*)current_task->name, "kernel");
+#endif
     task_list = current_task;
 }
 
-void move_stack(void* new_esp_start, u32 size) {
+void move_stack(task_t* task, void* new_esp_start) {
     u32 i;
     u32 old_esp, old_ebp;
     u32 new_esp, new_ebp;
-    u32 offset, dir_phys_addr;
-    u32 start = (u32)new_esp_start;
-    for( i = start; i >= start-size; i-=0x1000) {
-        page_t* addr = get_page(current_page_dir, i, 1);
-        set_page_frame(addr, 0, 1);
-    }
+    u32 offset;
+    u32 size = 0x1000;
+    struct page* pg = alloc_page();
+    task->stack_base = ((u32)pg)<<10;
 
-    // flush TLB
-    asm volatile("mov %%cr3, %0" : "=r" (dir_phys_addr));
-    asm volatile("mov %0, %%cr3"  :: "r" (dir_phys_addr));
-    
     asm volatile("mov %%esp, %0" : "=r" (old_esp));
     asm volatile("mov %%ebp, %0" : "=r" (old_ebp));
 
@@ -91,13 +87,14 @@ void move_stack(void* new_esp_start, u32 size) {
 }
 
 
+#if 0
 int fork() {
     cli();
     task_t *parent, *new_task, *t;
     u32 eip;
     
     page_dir_t* dir = copy_page_dir(current_task->page_dir);
-    parent = (task_t*)current_task;
+    parent = ( task_t*)current_task;
     new_task = (task_t*)kmalloc(sizeof(task_t));
 
 repeat:
@@ -191,3 +188,4 @@ void switch_task() {
                   "r"(current_task->ebp), "r"(current_page_dir->physicalAddr));
 }
 
+#endif
