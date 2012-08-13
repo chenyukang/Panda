@@ -26,16 +26,14 @@ struct hd_i_struct {
 struct hd_i_struct hd_inf[] = {{0,0,0,0,0,0},
                                {0,0,0,0,0,0}};
 
-static int wait_for_ready(void)
-{
+static int wait_for_ready(void) {
     int retries = 100000;
     while( --retries && (inb(HD_STAT) & 0xc0) != 0x40)
         ;
     return retries;
 }
 
-void hd_interupt_handler(void)
-{
+void hd_interupt_handler(void) {
     wait_for_ready();
     return ;
 }
@@ -101,7 +99,7 @@ void init_hd() {
     hd_inf[0].lzone = *(u16*)(12+bios);
     hd_inf[0].sect  = *(u8*)(14+bios);
 
-#if 1
+#if 0
     unsigned int hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
     printk("hd_size: %d\n", hd_size);
     
