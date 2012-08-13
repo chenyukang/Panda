@@ -34,7 +34,13 @@ struct _tss_ {
     u16      trap, iomb;
 } __attribute__((packed));
 
-
+enum _status {
+    WAIT,
+    RUNNING,
+    ZOMBIE,
+    EXITING
+};
+    
 struct task {
     u32 pid;        /* process id */
     u32 ppid;       /* parent id */
@@ -44,6 +50,7 @@ struct task {
     u32 eip;        /* instruction pointer */
     u32 stack_base; 
     u32 pg_dir;
+    enum _status stat;
     struct _tss_ tss;
     struct task* next;
     char name[24];  /* process name*/
