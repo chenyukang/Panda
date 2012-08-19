@@ -17,9 +17,12 @@
 #include <asm.h>
 #include <string.h>
 
-struct task procs[126];
 
-task_t* current_task;
+extern struct pde pg_dir0;
+struct task init_task;
+struct task* procs[126];
+
+task_t* current_task = 0;
 
 volatile task_t* task_list;
 volatile task_t* wait_list;
@@ -28,8 +31,8 @@ extern u32 read_eip();
 
 extern struct pde* cu_pg_dir;
 
-extern u32         init_esp_start;
-u32                next_valid_pid = 0;
+extern u32   init_esp_start;
+u32          next_pid_nr = 0;
 
 int getpid(void) {
     kassert(current_task);
@@ -41,10 +44,25 @@ char* get_current_name() {
     return (char*)current_task->name;
 }
 
+void init_proc() {
+    struct task* t = current_task = procs[0] = &init_task;
+    next_pid_nr = 1;
+
+    strcpy(t->name, "init");
+    t->pid  = 0;
+    t->ppid = 0;
+    t->pg_dir = &pg_dir0;
+    printk("dir: %x\n", t->pg_dir);
+    t->stat = WAIT;
+    t->tss.ss0 = (2<<3);
+    t->tss.esp0 = 0x1000;
+}
+
+#if 0
 void init_task() {
     puts("init task ...\n");
     current_task = &procs[0];
-#if 0
+
     move_stack(current_task, (void*)0xE0000000);
 
     current_task->pid = next_valid_pid++;
@@ -53,9 +71,10 @@ void init_task() {
     current_task->pg_dir = (u32)cu_pg_dir;
     current_task->next = 0;
     strcpy((char*)current_task->name, "kernel");
-#endif
+
     task_list = current_task;
 }
+#endif
 
 void move_stack(task_t* task, void* new_esp_start) {
     u32 i;

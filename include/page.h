@@ -11,6 +11,12 @@
 
 #include <system.h>
 
+
+#define PG_TO_VADDR(pte_ptr) (((pte_ptr)->pt_base) * PAGE)
+#define PDEX(vaddr)          ((u32) ((vaddr>>22) & 0x3FF))
+#define PTEX(vaddr)          ((u32) ((vaddr>>12) & 0x3FF))
+
+
 struct pde {
     u32 pt_p      : 1;
     u32 pt_flag   : 6;

@@ -1,7 +1,7 @@
 
 extern kmain
 [BITS 32]
-	mov esp, stack_top		
+	mov esp, stack_top
 
 	mov ax, 0x10
 	mov ds, ax
@@ -11,18 +11,20 @@ extern kmain
 	mov [0xb8001], cl
 	
 	;; check A20 enable
-	;; xor eax, eax
-	;; inc eax
-	;; mov 0x000000, eax
-	;; cmp eax, 0x100000
-	;; je lb
+	xor eax, eax
+err:	inc eax
+	mov [0x000000], eax
+	cmp [0x100000], eax
+	je err
 	
 	;; Finally, we goto OS's c world
 	push esp
 	call kmain
 	jmp $
-;----------------------------------------------------------------------------------------------
+;------------------------------------------------------------------------
 
+
+	
 global gdt_flush	
 extern gp
 gdt_flush:

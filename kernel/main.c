@@ -20,13 +20,14 @@
 u32 init_esp_start;
 extern char __kimg_end__;
 
+
 void kmain(u32 init_stack)
 {
     init_esp_start = init_stack;
     init_video();
     puts_color_str("Booting Panda OS ...\n", 0x0B);
     puts_color_str("Welcome ...\n", 0x0A);
-    
+
     cli();
     
     time_init();    
@@ -36,7 +37,7 @@ void kmain(u32 init_stack)
     kb_init();
     mm_init();
     init_hd();
-    init_task();
+    init_proc();
     
     sti();
     int init = 0;

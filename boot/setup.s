@@ -2,7 +2,6 @@ align 4
 [bits 16]
 	
 jmp setup
-
 	
 [global setup]
 setup:
@@ -51,7 +50,8 @@ read_info:
 	mov ah, 2
 	mov dl, [0]
 	mov ch, 0
-	mov cl, 1+1+setupsize/512  ;0,1 is for boot, setupsize/512 for setup.bin
+	;0,1 is for boot, setupsize/512 for setup.bin
+	mov cl, 1+1+setupsize/512  
 	mov al, systemsize/512
 	int 0x13
 	jc .readfloppy
@@ -66,7 +66,6 @@ read_info:
 	mov di, systemoffset
 	mov cx, systemsize/4
 	rep movsd
-
 
 	;;
 	cli
@@ -88,6 +87,14 @@ read_info:
         ;; jump into head, which puted at 0x00000
 	jmp dword 0x8:0x0
 
+
+empty_8042:
+	in al, 0x64
+	test al, 0x2
+	jnz  empty_8042
+	ret
+
+
 print_str:
 	mov ah, 0x0E
 .next:
@@ -99,23 +106,14 @@ print_str:
 .done:
 	ret
 
-empty_8042:
-	in al, 0x64
-	test al, 0x2
-	jnz  empty_8042
-	ret
-
 setupseg 	equ 	0x9000
 setupoffset	equ 	0x0100
 setupsize 	equ 	512
 
-mem_number      dw      0		
-memchkinfo      equ     0x9300
-	
+
 systemseg 	equ	0x0000
 systemoffset	equ 	0x0000
 systemsize 	equ 	1024*32 ; this will bigger than kernel.bin
-	
 
 setup_msg db "Setup Panda OS"	;
 	db 13, 10, 0  		;

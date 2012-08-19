@@ -49,8 +49,8 @@ struct task {
     u32 esp, ebp;   /* stack and base pointers */
     u32 eip;        /* instruction pointer */
     u32 stack_base; 
-    u32 pg_dir;
     enum _status stat;
+    struct pde* pg_dir;
     struct _tss_ tss;
     struct task* next;
     char name[24];  /* process name*/
@@ -58,7 +58,7 @@ struct task {
 
 typedef struct task task_t;
 
-void init_task();
+void init_proc();
 void switch_task();
 void move_stack(task_t* task, void* new_pos);
 int fork();
