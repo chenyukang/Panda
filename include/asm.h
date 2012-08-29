@@ -15,12 +15,15 @@
 #define ENABLE_NMI 0x00
 #define DISABLE_NMI 0x80
 
-unsigned short inw (unsigned short _port);
 
-unsigned char inb (unsigned short _port);
-inline void outb (unsigned short _port, unsigned char _data);
+#define ASM	 __asm__ __volatile__
 
-inline void write_nmi(unsigned char nmi);
+u16 inw (u16 _port);
+
+u8 inb (u16 _port);
+inline void outb (u16 _port, u8 _data);
+
+inline void write_nmi(u8 nmi);
 inline void enable_nmi(void);
 inline void disable_nmi(void);
 
@@ -28,6 +31,7 @@ inline void disable_nmi(void);
 #define local_irq_enable()  (native_irq_enable())
 #define safe_halt()         (native_safe_halt())
 #define halt()              (native_halt())
+
 
 
 #define first_zerobit(x) (first_onebit(~(x)))

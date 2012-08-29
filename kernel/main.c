@@ -19,6 +19,7 @@
 
 u32 init_esp_start;
 extern char __kimg_end__;
+extern u32 end_addr;
 
 
 void kmain(u32 init_stack)
@@ -37,14 +38,34 @@ void kmain(u32 init_stack)
     kb_init();
     mm_init();
     init_hd();
-    init_proc();
+    init_multi_task();
     
     sti();
+
+#if 0
+    int* p = (int*)(end_addr + 0x20);
+    int v = *p;
+    printk("addr: %x %d\n", p, v);
+#endif
+
+
+
+    int pid = fork();
+    if(pid > 0) {
+        //printk("parent \n");
+    }
+    else {
+        kassert(0);
+        printk("child \n");
+    }
+
+#if 0
     int init = 0;
     while(1) {
         if(!init) {
             init = 1;
-            printk("kernel running ...\n");
+            //printk("kernel running ...\n");
         }
     }
+#endif
 }

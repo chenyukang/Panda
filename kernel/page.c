@@ -14,9 +14,11 @@
 #include <task.h>
 
 //4kb
-#define  PAGE      0x1000
-#define  PG_DIR_NR 1024
-#define  MAX_PAGE_NR (0x8000000/PAGE)
+#define  PAGE_SIZE   0x1000
+#define  PG_DIR_NR   1024
+#define  MAX_PAGE_NR (0x8000000/PAGE_SIZE)
+#define  PAGE_ROUND_UP(addr) (((addr + PAGE_SIZE - 1) & (-PAGE_SIZE)))
+#define  PAGE_ROUND_DWON(addr) ((addr) & (-PAGE_SIZE))
 
 extern char __kimg_end__;
 
@@ -27,28 +29,19 @@ struct page* pages;
 struct page  freepg_list;
 
 u32 end_addr;
-u32 ini_addr;
+u32 ker_addr;
 u32 used_addr;
 
 u32 page_nr;
 u32 free_page_nr;
-u32 k_dir_nr; //this is real page number
+u32 k_dir_nr; //this is number of page mapped by kernel
 
-void init_pgd(struct pde* pg_dir);
 void page_fault_handler(struct registers_t* regs);
-
-static inline u32 align_addr(u32 addr) {
-    if(addr % 0x1000) {
-        addr &= 0xFFFFF000;
-        addr += 0x1000;
-    }
-    return addr;
-}
 
 //alloc size*4 bytes
 static void* _alloc(u32 size, int align) {
     if(align != 0) {
-        used_addr = align_addr(used_addr);
+        used_addr = PAGE_ROUND_UP(used_addr);
     }
     u32 addr = used_addr;
     used_addr += size;
@@ -56,6 +49,7 @@ static void* _alloc(u32 size, int align) {
 }
 
 void flush_pgd(struct pde* pg_dir) {
+    cli();
     u32 cr0, cr4;
     // put page table addr
     cu_pg_dir = pg_dir;
@@ -68,19 +62,23 @@ void flush_pgd(struct pde* pg_dir) {
     asm volatile("mov %%cr0, %0": "=r"(cr0));
     cr0 |= 0x80000000;                        // enable paging!
     asm volatile("mov %0, %%cr0":: "r"(cr0));
+    sti();
 }
 
-void init_pgs() {    //init free page list
+void init_pages() {    //init free page list
     u32 k;
-    page_nr = (end_addr)/(PAGE);
-    pages = (struct page*)_alloc(sizeof(struct page)*page_nr, 0);
+    page_nr = (end_addr)/(PAGE_SIZE);
+    printk("page_nr: %d\n", page_nr);
+    pages = (struct page*)_alloc(sizeof(struct page)*page_nr, 1);
+    used_addr = PAGE_ROUND_UP(used_addr);
     free_page_nr = (used_addr)/0x1000 + 1;
+    
     for(k=0; k<free_page_nr; k++) { //this is used by kernel
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 1;
         pages[k].pg_next = 0;
     }
-    for(k=free_page_nr; k<page_nr; k++) {
+    for(k=free_page_nr; k<page_nr; k++) { //free pages 
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 0;
         pages[k].pg_next = 0;
@@ -90,8 +88,7 @@ void init_pgs() {    //init free page list
         pg->pg_next = &pages[k];
         pg = pg->pg_next;
     }
-    
-    printk("used_addr: %d KB\n", used_addr/(1024));
+    printk("used_addr: %d KB\n", used_addr/(0x1000));
 }
 
 
@@ -107,9 +104,8 @@ struct page* alloc_page() {
         cli();  //no interupt now!
         pg = pg->pg_next;
         freepg_list.pg_next = pg->pg_next;
-        pg->pg_next = 0;
+        pg->pg_refcnt = 1;
         sti();
-        printk("return pg->pg_idx:%d\n", pg->pg_idx);
         return pg;
     }
     return 0;
@@ -122,7 +118,7 @@ struct pte* find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
     if( vaddr < end_addr ) {
         PANIC("find_pte() error: invalid virtual address");
     }
-
+    
     pde = &pg_dir[PDEX(vaddr)];
     if(pde->pt_p == 0) { //not present
         if(new == 0){
@@ -134,24 +130,25 @@ struct pte* find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
         }
         pde->pt_p = 1;
         pde->pt_pgsz = 1;
-        pde->pt_flag = (0x001);
-        pde->pt_base = pg->pg_idx;
-        pte = (struct pte*)(pde->pt_base * PAGE);
-        memset(pte, 0, PAGE);
+        pde->pt_flag = 0;
+        pde->pt_base = (pg->pg_idx);
+        pte = (struct pte*)(pde->pt_base * PAGE_SIZE );
+        memset(pte, 0, PAGE_SIZE);
         flush_pgd(pg_dir);
     }
-    pte = (struct pte*)(pde->pt_base * PAGE);
-    printk("in find_pte() : %x\n", &pte);
+    pte = (struct pte*)(pde->pt_base * PAGE_SIZE);
     return &pte[PTEX(vaddr)];
 }
 
+/* set vaddr presented */
 int put_page(struct pde* pg_dir, u32 vaddr, struct page* pg) {
     struct pte* pte = find_pte(pg_dir, vaddr, 1);
     if(pte == 0)
         return 0;
+    kassert(pte);
     pte->pt_base = pg->pg_idx;
     pte->pt_p = 1;
-    pte->pt_flag = (0x001);
+    pte->pt_flag = 0;
     flush_pgd(pg_dir);
     return 1;
 }
@@ -169,8 +166,8 @@ void copy_pgd(struct pde* from, struct pde* targ) {
         tpde->pt_flag = fpde->pt_flag;
         tpde->pt_pgsz = fpde->pt_pgsz;
         if(fpde->pt_p) {
-            fpte = (struct pte*)(fpde->pt_base*PAGE);
-            tpte = (struct pte*)(alloc_page()->pg_idx*PAGE);
+            fpte = (struct pte*)(fpde->pt_base * PAGE_SIZE);
+            tpte = (struct pte*)(alloc_page()->pg_idx * PAGE_SIZE);
             tpte->pt_base = ((u32)tpte>>12);
             for(k=0; k<1024; k++) {
                 tpte[k].pt_base = fpte[k].pt_base;
@@ -186,7 +183,6 @@ void copy_pgd(struct pde* from, struct pde* targ) {
         }
     }
 }
-        
             
 void free_page(struct page* pg) {
     kassert(pg &&
@@ -202,75 +198,60 @@ void free_page(struct page* pg) {
 }
 
 
-/* init memory, end_addr is the max physical addr on machine */
-void mm_init() {
-    puts("mm init ...\n");
-    
-    //we put the end_addr at 0x90002
-    //during booting process, so got it */
-    ini_addr = (u32)(&(__kimg_end__)) + (0x1000);
-    end_addr = (1<<20) + ((*(u16*)0x90002)<<10);
-    printk("end_addr: %x\n", end_addr);
-    used_addr = ini_addr;
-    
-    init_pgd(&(pg_dir0[0])); //init the kernel pg_dir
-
-    //printk("pg_dir0: %x\n", &pg_dir0);
-    init_pgs();
-    
-    irq_install_handler(13, (isq_t)(&page_fault_handler));
-    flush_pgd(&(pg_dir0[0]));
-
-
-#if 0    
-    int* p = (int*)(end_addr-0x1000);
-    printk("addr: %x\n", p);
-    kassert(p);
-    printk("addr: %x --> value: %d\n", p, *p);
-
-
-    int k;
-    for(k=0; k<end_addr + (0x2000); k+=(0x1000)){
-        printk("addr: %x --> ", k);
-        int* p = (int*)k;
-        printk("value: %d\n", *p);
-    }
-#endif
-}
-
-void init_pgd(struct pde* pg_dir) {
+void init_page_dir(struct pde* pg_dir) {
     u32 k;
     memset(pg_dir, 0, sizeof(pg_dir[0])*1024);
-    k_dir_nr = (end_addr)/(PAGE*1024);
+    k_dir_nr = (end_addr)/(PAGE_SIZE*1024);
     for(k=0; k<k_dir_nr; k++) {
         pg_dir[k].pt_base = k<<10;
         pg_dir[k].pt_p = 1;    //present
         pg_dir[k].pt_pgsz = 1; //4MB
         pg_dir[k].pt_flag = 0; //system
     }
+
     for(k=k_dir_nr; k<1024; k++) {
         pg_dir[k].pt_base = 0;
-        pg_dir[k].pt_p = 0;
         pg_dir[k].pt_flag = 1; //user
     }
 }
 
+/* init memory, end_addr is the max physical addr on machine
+   ker_addr is address where kernel code ended ,
+   used_addr will be ker_end_addr added kernel stack etc */
+void mm_init() {
+    puts("mm init ...\n");
+    
+    //we put the end_addr at 0x90002
+    //during booting process, so got it */
+    end_addr = (1<<20) + ((*(u16*)0x90002)<<10);
+    ker_addr = (u32)(&(__kimg_end__)) + (0x1000);
+    ker_addr = PAGE_ROUND_UP(ker_addr);
+    printk("end_addr: %x\n", end_addr);
+    printk("ker_addr: %x\n", ker_addr);
+    printk("ker_size: %dKB\n", ker_addr/PAGE_SIZE);
+    used_addr = ker_addr;
+    
+    init_page_dir(&(pg_dir0[0])); //init the kernel pg_dir
+
+    init_pages();
+    
+    irq_install_handler(13, (isq_t)(&page_fault_handler));
+    flush_pgd(&(pg_dir0[0]));
+}
+
+
 void do_wt_page(void* addr) {
     printk("in do_wt_page\n");
-
     return;
 }
 
 void do_no_page(void* addr) {
-    printk("in do_no_page: %x\n", addr);
+    //printk("vaddr: %x\n", addr);
     struct page* pg = alloc_page();
     if(pg == 0) {
         PANIC("out of memory");
     }
-    printk("pg: %x\n", pg);
-    
 #define PG_ADDR(addr)   ((u32)(addr) & ~0xFFF)
-    
     put_page(cu_pg_dir, (u32)PG_ADDR(addr), pg);
 }
 

@@ -21,11 +21,17 @@ u32 get_sys_ticks(void) {
 
 static void timer_callback(void) {
     ticks++;
-    if (ticks % 18 ==0){
+    if (ticks%18 == 0){
         cli();
         update_time();
         sti();
         //print_time_local();
+    }
+
+    if(ticks%20 == 0){
+        printk("begin switch\n");
+        switch_task();
+        //printk("end switch\n");
     }
 }
 

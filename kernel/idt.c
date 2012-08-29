@@ -32,13 +32,11 @@ Interrupt Gate Descriptor
          - bits 37 to 39  : 0
          - bits 40 to 47  : flags/type 
          - bits 48 to 63  : base offset high
-
 */    
 
 
 /* Defines an IDT entry */
-struct idt_entry
-{
+struct idt_entry {
     unsigned short base_lo;
     unsigned short selector;
     unsigned char  zero;
@@ -46,8 +44,7 @@ struct idt_entry
     unsigned short base_hi;
 } __attribute__((packed));
 
-struct idt_ptr
-{
+struct idt_ptr {
     unsigned short limit;
     unsigned int   base;
 } __attribute__((packed));
@@ -109,10 +106,7 @@ extern void irq13();
 extern void irq14();
 extern void irq15();
 
-
-
-const char* exception_messages[32] =
-{
+const char* exception_messages[32] = {
     "Division By Zero",
     "Debug",
     "Non Maskable Interrupt",
@@ -195,7 +189,6 @@ void idt_init()
 
     /* Add any new ISRs to the IDT here using idt_set_gate */
     /* Points the processor's internal register to the new IDT */
-
     idt_set( 0, (u32)isr0 , 0x08, 0x8E);
     idt_set( 1, (u32)isr1 , 0x08, 0x8E);
     idt_set( 2, (u32)isr2 , 0x08, 0x8E);
@@ -258,9 +251,7 @@ void idt_init()
 
 extern void page_fault_handler(struct registers_t* regs);
 // This gets called from our ASM interrupt handler stub.
-void isr_handler(struct registers_t* regs)
-{
-    
+void isr_handler(struct registers_t* regs) {
 #if 0
     puts("recieved interrupt: ");
     printk_hex(regs->int_no);
@@ -271,13 +262,12 @@ void isr_handler(struct registers_t* regs)
     *  IRQ, and then finally, run it */
     isq_t handler = irq_routines[regs->int_no];
     if (handler) {
-        printk("handler: %x\n", (u32)handler);
         handler(regs);
+        return;
     }
 
     /* Is this a fault whose number is from 0 to 31? */
-    if (regs->int_no < 32)
-    {
+    if (regs->int_no < 32) {
         printk("no handler : %s\n", exception_messages[regs->int_no]);
         for (;;);
     }

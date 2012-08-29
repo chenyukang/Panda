@@ -47,9 +47,10 @@ struct registers_t {
 
 typedef void (*isq_t) (struct registers_t* r);
 typedef void (*isr_t) (struct registers_t* r);
+
 void irq_install_handler(int irq, isq_t handler);
-void idt_set(unsigned char k, unsigned long base,
-             unsigned short selector, unsigned char flags);
+void idt_set(unsigned char k, unsigned long base, unsigned short selector,
+             unsigned char flags);
 
 void timer_init(void);
 void timer_wait(int ticks);

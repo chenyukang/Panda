@@ -12,4 +12,4 @@ mouse: enabled=0
 clock: sync=slowdown
 #vga_update_interval: 150000
 screenmode: name="Panda"
-#gdbstub: enabled=1, port=1234, text_base=0, data_base=0, bss_base=0
+gdbstub: enabled=1, port=1234, text_base=0, data_base=0, bss_base=0
