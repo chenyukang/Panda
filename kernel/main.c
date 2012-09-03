@@ -49,7 +49,7 @@ void kmain(u32 init_stack)
 #endif
 
 
-
+#if 0
     int pid = fork();
     if(pid > 0) {
         //printk("parent \n");
@@ -58,14 +58,14 @@ void kmain(u32 init_stack)
         kassert(0);
         printk("child \n");
     }
+#endif
 
-#if 0
     int init = 0;
     while(1) {
         if(!init) {
             init = 1;
-            //printk("kernel running ...\n");
+            printk("kernel running ...\n");
         }
     }
-#endif
+
 }

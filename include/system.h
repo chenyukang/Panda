@@ -12,7 +12,7 @@
 #include <types.h>
 
 #define abs(x) ((x < 0) ? (-(x)): (x) )
-#define KB  0x1000
+#define KB  1024
 
 //debug option
 //#define NDEBUG 1

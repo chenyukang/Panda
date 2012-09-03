@@ -17,11 +17,12 @@
 #include <asm.h>
 #include <string.h>
 
+#define PROC_NUM 126
 
 extern struct pde pg_dir0;
 struct task init_task;
 struct task task_demo;
-struct task* procs[126];
+struct task* procs[PROC_NUM];
 
 task_t* current_task = 0;
 
@@ -96,7 +97,7 @@ void init_task() {
     current_task->eip = 0;
     current_task->pg_dir = (u32)cu_pg_dir;
     current_task->next = 0;
-    strcpy((char*)current_task->name, "kernel");
+    strcpy((char*)current_task->name, "init");
 
     task_list = current_task;
 }
@@ -188,7 +189,7 @@ int fork() {
 }
 
 void switch_task() {
-#if 1
+#if 0
     printk("from %d(%s) %x ==> Switch to\n", getpid(),
            get_current_name(), current_task);
 #endif

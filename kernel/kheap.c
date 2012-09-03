@@ -91,7 +91,8 @@ static Header* get_more(u32 size) {
 /* notes: align is default return addr align 0x1000,
    this may cost more time for search a free slot,
    and do not call this align=1 requently */
-void* kmalloc_align(u32 nbytes, u32 align) {
+void* kmalloc_align(u32 nbytes, u32 align) 
+{
     Header *p, *prev;
     u32 nunits;
     nunits = (nbytes+sizeof(Header)-1) / sizeof(Header) + 1;

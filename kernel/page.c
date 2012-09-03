@@ -14,10 +14,10 @@
 #include <task.h>
 
 //4kb
-#define  PAGE_SIZE   0x1000
-#define  PG_DIR_NR   1024
-#define  MAX_PAGE_NR (0x8000000/PAGE_SIZE)
-#define  PAGE_ROUND_UP(addr) (((addr + PAGE_SIZE - 1) & (-PAGE_SIZE)))
+#define  PAGE_SIZE             0x1000
+#define  PG_DIR_NR             1024
+#define  MAX_PAGE_NR           (0x8000000/PAGE_SIZE)
+#define  PAGE_ROUND_UP(addr)   (((addr + PAGE_SIZE - 1) & (-PAGE_SIZE)))
 #define  PAGE_ROUND_DWON(addr) ((addr) & (-PAGE_SIZE))
 
 extern char __kimg_end__;
@@ -71,7 +71,7 @@ void init_pages() {    //init free page list
     printk("page_nr: %d\n", page_nr);
     pages = (struct page*)_alloc(sizeof(struct page)*page_nr, 1);
     used_addr = PAGE_ROUND_UP(used_addr);
-    free_page_nr = (used_addr)/0x1000 + 1;
+    free_page_nr = (used_addr)/0x1000;
     
     for(k=0; k<free_page_nr; k++) { //this is used by kernel
         pages[k].pg_idx = k;
@@ -88,7 +88,7 @@ void init_pages() {    //init free page list
         pg->pg_next = &pages[k];
         pg = pg->pg_next;
     }
-    printk("used_addr: %d KB\n", used_addr/(0x1000));
+    printk("free pages: %d\n", page_nr - free_page_nr);
 }
 
 
@@ -111,7 +111,8 @@ struct page* alloc_page() {
     return 0;
 }
 
-struct pte* find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
+struct pte*
+find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
     struct pde* pde;
     struct pte* pte;
     struct page* pg;
@@ -221,16 +222,20 @@ void init_page_dir(struct pde* pg_dir) {
 void mm_init() {
     puts("mm init ...\n");
     
-    //we put the end_addr at 0x90002
-    //during booting process, so got it */
+    // we put the end_addr at 0x90002
+    // during booting process, so got it
+    // 0~ker_addr is for kernel code and data
     end_addr = (1<<20) + ((*(u16*)0x90002)<<10);
-    ker_addr = (u32)(&(__kimg_end__)) + (0x1000);
+    ker_addr = (u32)(&(__kimg_end__));
     ker_addr = PAGE_ROUND_UP(ker_addr);
-    printk("end_addr: %x\n", end_addr);
-    printk("ker_addr: %x\n", ker_addr);
-    printk("ker_size: %dKB\n", ker_addr/PAGE_SIZE);
-    used_addr = ker_addr;
-    
+    // don't use ker_addr ~ 0x100000
+    // free memory begin with 0x100000
+    used_addr = 0x100000;
+    printk("end_addr: %d MB\n", end_addr/(KB*KB));
+    printk("ker_size: %dKB\n", ker_addr/(KB));
+    printk("PAGE_SIZE: %dKB\n", PAGE_SIZE/(KB));
+    printk("used_size: %dKB\n", used_addr/(KB));
+        
     init_page_dir(&(pg_dir0[0])); //init the kernel pg_dir
 
     init_pages();
