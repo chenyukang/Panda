@@ -124,10 +124,11 @@ inline void printk_int(u32 val) {
 }
 
 //be careful with 1<<32
-inline char* int_to_str(char* str, const s32 num,
+static inline char*
+int_to_str(char* str, const s32 num,
                         const s32 radix) {
     char* ptr = str;
-    char* ret ;
+    char* end ;
     int i, j;
     s32 val = num;
 
@@ -135,13 +136,13 @@ inline char* int_to_str(char* str, const s32 num,
         *ptr++ = '-';
     if(num == 0) {
         *ptr++ = '0';
-        ret = ptr;
+        end = ptr;
     } else {
         while (val){
             *ptr++  = digits[abs(val % radix)];
             val /= radix;
         }
-        ret = ptr;
+        end = ptr;
         if(*str == '-')//negative
             str++;
 
@@ -153,10 +154,11 @@ inline char* int_to_str(char* str, const s32 num,
             str[j--] = temp;
         }
     }
-    return ret;
+    return end;
 }
 
-inline char* u32_to_str(char* str, const u32 val) {
+static inline char*
+u32_to_str(char* str, const u32 val) {
     char* ptr = str;
     *ptr++ = '0';
     *ptr++ = 'x';
