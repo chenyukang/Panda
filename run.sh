@@ -1,12 +1,12 @@
 #!/bin/bash
 BOOT="./boot"
 KERNEL="./kernel"
-INCLUDE="./include"
+INCLUDE="./inc"
 NASM="nasm -f elf -g"
 
 # on Mac
 GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector  
--finline-functions -finline-functions-called-once -I./include/ "
+-finline-functions -finline-functions-called-once -I./inc/ "
 LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
 OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
 
