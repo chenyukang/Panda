@@ -6,7 +6,7 @@
  *      @author : Yukang Chen (moorekang@gmail.com)
  *      @date   : 2012-07-09 22:02:26
  *
- *      @brief  : get time from CMOS, mainly according to Linux src
+ *      @brief  : get time from CMOS, mainly according to Linux src 0.11
  *
  *******************************************************************************/
 

@@ -3,12 +3,16 @@ BOOT="./boot"
 KERNEL="./kernel"
 INCLUDE="./include"
 NASM="nasm -f elf -g"
-GCC="gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector  
--finline-functions -finline-small-functions -findirect-inlining 
+
+# on Mac
+GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector  
 -finline-functions -finline-functions-called-once -I./include/ "
+LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
+OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
 
 OBJDIR="./objs"
 TOOL="./tool"
+QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386 "
 
 do_clean() {
     echo "clean up"
@@ -60,15 +64,15 @@ do_compile() {
 do_link() {
     echo "linking ..."
     cd  $OBJDIR;
-    ld boot.O -o boot.bin -T ../$TOOL/boot.ld;
-    ld setup.O -o setup.bin -T ../$TOOL/setup.ld;
+    $LD boot.O -o boot.bin -T ../$TOOL/boot.ld;
+    $LD setup.O -o setup.bin -T ../$TOOL/setup.ld;
     
     #head.O must puted at first
     objs=`ls *.o`
-    cmd="ld head.O $objs -g -o kernel.elf -T ../$TOOL/kernel.ld"
+    cmd="$LD head.O $objs -o kernel.elf -T ../$TOOL/kernel.ld"
     echo $cmd; `$cmd`;
 
-    cmd="objcopy -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin"
+    cmd="$OBJCPY -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin"
     echo $cmd; `$cmd`;
 
     if [ $? -ne 0 ]
@@ -95,7 +99,7 @@ do_all()
     do_clean && do_compile && do_prepare_hd
     if [ -f "a.img" ]
 	then 
-	`qemu -fda a.img -localtime`
+	`$QEMU -fda a.img -localtime`
 	#`bochs -q`
     fi
 }

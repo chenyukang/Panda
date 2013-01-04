@@ -49,10 +49,10 @@ void kmain(u32 init_stack)
 #endif
 
 
-#if 0
+#if 1
     int pid = fork();
     if(pid > 0) {
-        //printk("parent \n");
+        printk("parent \n");
     }
     else {
         kassert(0);
