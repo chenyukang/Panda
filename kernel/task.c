@@ -6,7 +6,7 @@
  *      @author : Yukang Chen (moorekang@gmail.com)
  *      @date   : 2012-06-02 01:20:55
  *
- *      @brief  : task implement 
+ *      @brief  : multi-tasking implement 
  *
  *******************************************************************************/
 
@@ -25,14 +25,12 @@ struct task task_demo;
 struct task* procs[PROC_NUM];
 
 task_t* current_task = 0;
-
 struct task_table task_table;
 
 volatile task_t* task_list;
 volatile task_t* wait_list;
 
 extern u32 read_eip();
-
 extern struct pde* cu_pg_dir;
 
 extern u32   init_esp_start;
@@ -109,17 +107,20 @@ void move_stack(task_t* task, void* new_esp_start) {
     u32 new_esp, new_ebp;
     u32 offset;
     u32 size = 0x1000;
-    struct page* pg = alloc_page();
-    task->stack_base = ((u32)pg)<<10;
+    //struct page* pg = alloc_page();
+    //flush_pgd(task->pg_dir);
+    
+    //task->stack_base = ((u32)pg)<<10; //stack_base is top of this page
 
     asm volatile("mov %%esp, %0" : "=r" (old_esp));
     asm volatile("mov %%ebp, %0" : "=r" (old_ebp));
 
-    offset  = (u32)new_esp_start -  init_esp_start;
+    offset  = (u32)new_esp_start -  init_esp_start; //copy stack
     new_esp = old_esp + offset;
     new_ebp = old_ebp + offset;
-
-    memcpy((void*)new_esp, (void*)old_esp, init_esp_start-old_esp);
+    //size = init_esp_start - old_esp;
+    printk("begin to copy memory:%x %x %x\n", old_esp, old_ebp, init_esp_start);
+    memcpy((void*)new_esp, (void*)old_esp,  init_esp_start-old_esp);
     for(i=(u32)new_esp_start; i>(u32)(new_esp_start-size); i-=4){
         u32 t = *(u32*)i;
         if((old_esp < t) && (t < init_esp_start)) {
@@ -130,7 +131,8 @@ void move_stack(task_t* task, void* new_esp_start) {
     }
     asm volatile("mov %0, %%esp" :: "r" (new_esp));
     asm volatile("mov %0, %%ebp" :: "r" (new_ebp));
-    //printk("end move stack\n");
+    printk("now new_esp: %x\n", new_esp);
+    printk("finsh move_stack\n");
 }
 
 static u32
@@ -154,8 +156,8 @@ int fork() {
     task_t *parent, *new_task, *t;
     u32 eip;
 
-    struct pde* new_pgdir = (struct pde*)alloc_page();
-    copy_pgd(current_task->pg_dir, new_pgdir);
+    //struct pde* new_pgdir = (struct pde*)alloc_page();
+    //copy_pgd(current_task->pg_dir, new_pgdir);
     parent = ( task_t*)current_task;
     new_task = (task_t*)(&task_demo);
 
@@ -163,7 +165,7 @@ int fork() {
     new_task->esp = new_task->ebp = 0;
     new_task->eip = 0;
     new_task->next = 0;
-    new_task->pg_dir = new_pgdir;
+    new_task->pg_dir = current_task->pg_dir;
     strcpy(new_task->name, "proc");
 
     t = (task_t*)task_list;
@@ -179,12 +181,11 @@ int fork() {
         new_task->esp = esp;
         new_task->ebp = ebp;
         new_task->eip = eip;
-        //printk("set new_task: %x\n", eip);
         sti();
         return new_task->pid;
     }
     else {
-        return 0;
+        return 0; //child return
     }
 }
 
@@ -228,7 +229,7 @@ void switch_task() {
     
 #if 1
     printk("real switch (%s): %x \neip:%x ebp:%x esp:%x addr:%x\n",
-           (char*)current_task->name,current_task,
+           (char*)current_task->name, current_task,
            current_task->eip, ebp, esp, current_task->pg_dir);
 #endif
     asm volatile("         \
@@ -242,5 +243,5 @@ void switch_task() {
         jmp *%%ecx           "
                  : : "r"(eip), "r"(esp),
                  "r"(ebp), "r"((u32)cu_pg_dir));
-
+    flush_pgd(cu_pg_dir);
 }

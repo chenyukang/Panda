@@ -55,7 +55,6 @@ void kmain(u32 init_stack)
         printk("parent \n");
     }
     else {
-        kassert(0);
         printk("child \n");
     }
 #endif

@@ -64,5 +64,5 @@ struct page* find_page(u32 nr);
 void free_page(struct page* pg);
 void copy_pgd(struct pde* from, struct pde* targ);
 
-
+void flush_pgd(struct pde* pg_dir);
 #endif

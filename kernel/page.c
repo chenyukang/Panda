@@ -67,6 +67,7 @@ void flush_pgd(struct pde* pg_dir) {
 
 void init_pages() {    //init free page list
     u32 k;
+    printk("end addr--> %x\n", end_addr);
     page_nr = (end_addr)/(PAGE_SIZE);
     printk("page_nr: %d\n", page_nr);
     pages = (struct page*)_alloc(sizeof(struct page)*page_nr, 1);
@@ -83,7 +84,7 @@ void init_pages() {    //init free page list
         pages[k].pg_refcnt = 0;
         pages[k].pg_next = 0;
     }
-    struct page* pg = &freepg_list;
+    struct page* pg = &freepg_list; //usr freepg_list link all free pages
     for(k=free_page_nr; k<page_nr; k++) {
         pg->pg_next = &pages[k];
         pg = pg->pg_next;
@@ -116,9 +117,11 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
     struct pde* pde;
     struct pte* pte;
     struct page* pg;
+#if 0
     if( vaddr < end_addr ) {
         PANIC("find_pte() error: invalid virtual address");
     }
+#endif
     
     pde = &pg_dir[PDEX(vaddr)];
     if(pde->pt_p == 0) { //not present
@@ -242,6 +245,7 @@ void mm_init() {
     
     irq_install_handler(13, (isq_t)(&page_fault_handler));
     flush_pgd(&(pg_dir0[0]));
+    printk("value: %x\n", *((int*)(0x00007000)));
 }
 
 
@@ -251,7 +255,6 @@ void do_wt_page(void* addr) {
 }
 
 void do_no_page(void* addr) {
-    //printk("vaddr: %x\n", addr);
     struct page* pg = alloc_page();
     if(pg == 0) {
         PANIC("out of memory");
