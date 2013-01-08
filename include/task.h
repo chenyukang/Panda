@@ -15,19 +15,6 @@
 #include <page.h>
 #include <mutex.h>
 
-
-struct cpu_state {
-    s32    eip;
-    s32    esp;
-    s32    ebx; // - callee registers
-    s32    ecx;
-    s32    edx;
-    s32    esi;
-    s32    edi;
-    s32    ebp;
-    u32   __sigmask;
-};
-
 struct tss {
     u32      link, esp0;
     u16      ss0, rsv_1;
@@ -87,7 +74,6 @@ struct task {
     u32 stack_base;
     
     enum _status stat;
-    struct cpu_state cpu_s;
     //struct pde* pg_dir;
     //struct _tss_ tss;
     struct task* next;

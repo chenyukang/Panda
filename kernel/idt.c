@@ -145,8 +145,8 @@ const char* exception_messages[32] = {
 };
 
 /* similar with GDT */
-void idt_set(unsigned char k, unsigned long base,
-             unsigned short selector, unsigned char flags)
+void idt_set(u8 k, size_t base,
+             u16 selector, u8 flags)
 {
     /* The interrupt routine's base address */
     idt[k].base_lo = (base & 0xFFFF);
@@ -173,7 +173,6 @@ void idt_init()
     /* Clear out the entire IDT, initializing it to zeros */
     memset(&idt, 0, sizeof(struct idt_entry) * 256);
 
-
     // Remap the irq table.
     outb(0x20, 0x11);
     outb(0xA0, 0x11);
@@ -185,7 +184,6 @@ void idt_init()
     outb(0xA1, 0x01);
     outb(0x21, 0x0);
     outb(0xA1, 0x0);
-
 
     /* Add any new ISRs to the IDT here using idt_set_gate */
     /* Points the processor's internal register to the new IDT */

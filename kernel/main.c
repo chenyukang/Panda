@@ -18,12 +18,14 @@
 #include <time.h>
 
 u32 init_esp_start;
+
 extern char __kimg_end__;
 extern u32 end_addr;
 
+void do_init_job();
 
-void kmain(u32 init_stack)
-{
+void kmain(u32 init_stack) {
+    
     init_esp_start = init_stack;
     init_video();
     puts_color_str("Booting Panda OS ...\n", 0x0B);
@@ -39,9 +41,8 @@ void kmain(u32 init_stack)
     mm_init();
     init_hd();
     init_multi_task();
-    
-    sti();
 
+    sti();
 #if 0
     int* p = (int*)(end_addr + 0x20);
     int v = *p;
@@ -49,16 +50,14 @@ void kmain(u32 init_stack)
 #endif
 
 
-#if 1
+    //spawn((void*)do_init_job);
     int pid = fork();
     if(pid > 0) {
-        printk("parent \n");
+        printk("parent\n");
+    } else {
+        printk("child\n");
     }
-    else {
-        printk("child \n");
-    }
-#endif
-
+    
     int init = 0;
     while(1) {
         if(!init) {
@@ -67,4 +66,10 @@ void kmain(u32 init_stack)
         }
     }
 
+}
+
+void do_init_job() {
+//    while(1) {
+        printk("B\n");
+//    }
 }

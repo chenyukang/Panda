@@ -16,8 +16,8 @@ struct gdt_ptr gp; //also in start.asm
 extern void gdt_flush();
 
 /* Setup a descriptor in the Global Descriptor Table */
-void gdt_set_entry(int num, unsigned long base, unsigned long limit,
-                  u8 access, u8 gran) {
+void gdt_set_entry(int num, unsigned long base,
+                   unsigned long limit, u8 access, u8 gran) {
     gdt[num].base_low = (base & 0xFFFF);
     gdt[num].base_middle = (base >> 16) & 0xFF;
     gdt[num].base_high = (base >> 24) & 0xFF;

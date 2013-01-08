@@ -25,7 +25,7 @@ static void timer_callback(void) {
         cli();
         update_time();
         sti();
-        //print_time_local();
+        print_time_local();
     }
 
     if(ticks%20 == 0){

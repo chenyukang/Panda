@@ -35,14 +35,12 @@ extern void irq15();
 isq_t irq_routines[256]; 
 
 /* This installs a custom IRQ handler for the given IRQ */
-void irq_install_handler(int irq, isq_t handler)
-{
+void irq_install_handler(int irq, isq_t handler) {
     irq_routines[irq] = handler;
 }
 
 /* This clears the handler for a given IRQ */
-void irq_uninstall_handler(int irq)
-{
+void irq_uninstall_handler(int irq) {
     irq_routines[irq] = 0;
 }
 
@@ -54,8 +52,7 @@ void irq_uninstall_handler(int irq)
 *  Interrupt Controller (PICs - also called the 8259's) in
 *  order to make IRQ0 to 15 be remapped to IDT entries 32 to
 *  47 */
-void irq_remap(void)
-{
+void irq_remap(void) {
     outb(0x20, 0x11);
     outb(0xA0, 0x11);
     outb(0x21, 0x20);
@@ -81,7 +78,6 @@ void irq_remap(void)
 void irq_handler(struct registers_t* r)
 {
     /* This is a blank function pointer */
-    //void (*handler)(struct regs *r);
     isq_t handler = 0;
     /* Find out if we have a custom handler to run for this
     *  IRQ, and then finally, run it */
@@ -93,8 +89,7 @@ void irq_handler(struct registers_t* r)
     /* If the IDT entry that was invoked was greater than 40
     *  (meaning IRQ8 - 15), then we need to send an EOI to
     *  the slave controller */
-    if (r->int_no >= 40)
-    {
+    if (r->int_no >= 40) {
         outb(0xA0, 0x20);
     }
 

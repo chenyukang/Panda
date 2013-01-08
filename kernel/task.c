@@ -18,11 +18,15 @@
 #include <string.h>
 
 #define PROC_NUM 126
+#define PAGE 0x1000
 
 extern struct pde pg_dir0;
+struct tss tss;
 struct task init_task;
 struct task task_demo;
 struct task* procs[PROC_NUM];
+
+static u8 kstack0[PAGE] __attribute__((aligned(PAGE)));
 
 task_t* current_task = 0;
 struct task_table task_table;
@@ -31,12 +35,12 @@ volatile task_t* task_list;
 volatile task_t* wait_list;
 
 extern u32 read_eip();
+extern void _do_swtch(struct cpu_state* f, struct cpu_state* t);
 extern struct pde* cu_pg_dir;
 
 extern u32   init_esp_start;
 u32          next_pid_nr = 0;
 
-struct tss ktss;
 
 int getpid(void) {
     kassert(current_task);
@@ -57,8 +61,29 @@ init_task_table() {
     mutex_unlock(task_table.lock);
 }
 
+#if 0
 static void
-init_proc() {
+init_proc0() {
+    struct task* t = current_task = procs[0] = (struct task*)(u32)(kstack0);
+    next_pid_nr = 1;
+    strcpy(t->name, "init");
+    t->pid = 0;
+    t->ppid = 0;
+    t->pg_dir = &pg_dir0;
+    t->stat = WAIT;
+    t->next = 0;
+    printk("pid: %x\n", (u32)(&(t->pid)));
+    printk("ppid: %x\n", (u32)(&(t->ppid)));
+           
+    tss.ss0 = 2<<3;
+    tss.esp0 = (u32)t + PAGE;
+    task_list = current_task;
+}
+#endif
+
+#if 1
+static void
+init_proc0() {
     struct task* t = current_task = procs[0] = &init_task;
     next_pid_nr = 1;
 
@@ -75,13 +100,52 @@ init_proc() {
     //move_stack(t, (void*)0x0040000);
     task_list = current_task;
 }
+#endif
 
 
 void init_multi_task() {
-    init_proc();
+    init_proc0();
     init_task_table();
 }
 
+static u32 find_next_pid() {
+    u32 ret = 0;
+    task_t* t;
+repeat:
+    if(++next_pid_nr < 0) next_pid_nr = 1;
+    for(t=(task_t*)task_list; t->next ; t=t->next){
+        if(t->pid == next_pid_nr) {
+            ++next_pid_nr;
+            goto repeat;
+        }
+    }
+    ret = next_pid_nr++;
+    return ret;
+}
+
+
+struct task* spawn(void* func) {
+    cli();
+    struct task *parent, *new_task;
+    parent = current_task;
+    new_task = &task_demo;
+
+    new_task->pid = find_next_pid();
+    new_task->ppid = parent->pid;
+    new_task->pg_dir = current_task->pg_dir;
+    strcpy(new_task->name, "proc");
+
+    struct task* t = (task_t*)task_list;
+    while(t->next != NULL)
+        t = t->next;
+    t->next = new_task;
+    new_task->cpu_s = parent->cpu_s;
+    new_task->cpu_s.eip = (u32)(func);
+    new_task->cpu_s.esp = (u32)new_task + PAGE;
+    new_task->stat = WAIT;
+    sti();
+    return new_task;
+}
 
 #if 0
 void init_task() {
@@ -135,21 +199,6 @@ void move_stack(task_t* task, void* new_esp_start) {
     printk("finsh move_stack\n");
 }
 
-static u32
-find_next_pid() {
-    u32 ret = 0;
-    task_t* t;
-repeat:
-    if(++next_pid_nr < 0) next_pid_nr = 1;
-    for(t=(task_t*)task_list; t->next ; t=t->next){
-        if(t->pid == next_pid_nr) {
-            ++next_pid_nr;
-            goto repeat;
-        }
-    }
-    ret = next_pid_nr++;
-    return ret;
-}
 
 int fork() {
     cli();
@@ -172,6 +221,7 @@ int fork() {
     while(t->next != NULL)
         t = t->next;
     t->next = new_task;
+    new_task->next = (struct task*)task_list;
 
     eip = read_eip();
     if(current_task == parent) { //this is parent
@@ -189,12 +239,36 @@ int fork() {
     }
 }
 
+#if 0
+void swtch_to(struct task *to){
+    struct task *from;
+    tss.esp0 = (u32)to + PAGE; 
+    from = current_task;
+    current_task = to;
+    flush_pgd(to->pg_dir);
+    printk("switch from: %s to %s\n", from->name, to->name);
+    _do_swtch(&(from->cpu_s), &(to->cpu_s));
+}
+
+
+void switch_task() {
+    if(current_task == 0)
+        return;
+    struct task* next = current_task->next;
+
+    if(next != current_task) {
+        swtch_to(next);
+    }
+    
+}
+#endif
+
+#if 1
 void switch_task() {
 #if 0
     printk("from %d(%s) %x ==> Switch to\n", getpid(),
            get_current_name(), current_task);
 #endif
-
     if(current_task == 0)
         return;
 
@@ -245,3 +319,17 @@ void switch_task() {
                  "r"(ebp), "r"((u32)cu_pg_dir));
     flush_pgd(cu_pg_dir);
 }
+#endif
+
+void task_a ( void )  { 
+    while  ( 1 )  { 
+        printk ( "A" ) ;
+     } 
+}
+ 
+void task_b ( void )  { 
+    while  ( 1 )  { 
+        printk ( "B" ) ;
+     } 
+}
+
