@@ -30,7 +30,7 @@ static void timer_callback(void) {
 
     if(ticks%20 == 0){
         //printk("begin switch\n");
-        switch_task();
+        ///switch_task();
         //printk("end switch\n");
     }
 }

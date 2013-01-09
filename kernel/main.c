@@ -43,6 +43,7 @@ void kmain(u32 init_stack) {
     init_multi_task();
 
     sti();
+    
 #if 0
     int* p = (int*)(end_addr + 0x20);
     int v = *p;

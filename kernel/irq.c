@@ -11,6 +11,7 @@
 #include <asm.h>
 #include <screen.h>
 #include <string.h>
+#include <task.h>
 
 extern void irq0();
 extern void irq1();
@@ -81,6 +82,7 @@ void irq_handler(struct registers_t* r)
     isq_t handler = 0;
     /* Find out if we have a custom handler to run for this
     *  IRQ, and then finally, run it */
+    
     handler = irq_routines[r->int_no];
     if (handler) {
         handler(r);
@@ -96,5 +98,8 @@ void irq_handler(struct registers_t* r)
     /* In either case, we need to send an EOI to the master
     *  interrupt controller too */
     outb(0x20, 0x20);
+    if((r->cs & 3) == 3) {
+        switch_task();
+    }
 }
 

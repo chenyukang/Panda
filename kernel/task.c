@@ -252,18 +252,16 @@ void swtch_to(struct task *to){
     _do_swtch(&(from->cpu_s), &(to->cpu_s));
 }
 
-
 void switch_task() {
     if(current_task == 0)
         return;
     struct task* next = current_task->next;
 
-
     if(next != current_task) {
         swtch_to(next);
     }
-    
 }
+
 #endif
 
 #if 0
@@ -324,15 +322,5 @@ void switch_task() {
 }
 #endif
 
-void task_a ( void )  { 
-    while  ( 1 )  { 
-        printk ( "A" ) ;
-     } 
-}
- 
-void task_b ( void )  { 
-    while  ( 1 )  { 
-        printk ( "B" ) ;
-     } 
-}
+
 

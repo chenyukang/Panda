@@ -19,6 +19,7 @@
 #define  MAX_PAGE_NR           (0x8000000/PAGE_SIZE)
 #define  PAGE_ROUND_UP(addr)   (((addr + PAGE_SIZE - 1) & (-PAGE_SIZE)))
 #define  PAGE_ROUND_DWON(addr) ((addr) & (-PAGE_SIZE))
+#define  PG_ADDR(addr)         ((u32)(addr) & ~0xFFF)
 
 extern char __kimg_end__;
 
@@ -28,25 +29,13 @@ struct pde* cu_pg_dir;
 struct page* pages;
 struct page  freepg_list;
 
-u32 end_addr;
-u32 ker_addr;
-u32 used_addr;
+u32 end_addr, ker_addr, used_addr;
 
-u32 page_nr;
-u32 free_page_nr;
-u32 k_dir_nr; //this is number of page mapped by kernel
+u32 page_nr;      //all page number
+u32 free_page_nr; //free page number
+u32 k_dir_nr;     //this is number of page mapped by kernel
 
 void page_fault_handler(struct registers_t* regs);
-
-//alloc size*4 bytes
-static void* _alloc(u32 size, int align) {
-    if(align != 0) {
-        used_addr = PAGE_ROUND_UP(used_addr);
-    }
-    u32 addr = used_addr;
-    used_addr += size;
-    return (void*)addr;
-}
 
 void flush_pgd(struct pde* pg_dir) {
     cli();
@@ -65,12 +54,22 @@ void flush_pgd(struct pde* pg_dir) {
     sti();
 }
 
-void init_pages() {    //init free page list
+/* ========================== begin pyhsical page =========================== */
+
+static void* _alloc(u32 size ) {
+    used_addr = PAGE_ROUND_UP(used_addr);
+    u32 addr = used_addr;
+    used_addr += size;
+    return (void*)addr;
+}
+
+//init page list, link free pages with a list 
+void init_pages() {
     u32 k;
     printk("end addr--> %x\n", end_addr);
     page_nr = (end_addr)/(PAGE_SIZE);
     printk("page_nr: %d\n", page_nr);
-    pages = (struct page*)_alloc(sizeof(struct page)*page_nr, 1);
+    pages = (struct page*)_alloc(sizeof(struct page) * page_nr);
     used_addr = PAGE_ROUND_UP(used_addr);
     free_page_nr = (used_addr)/0x1000;
     
@@ -89,14 +88,30 @@ void init_pages() {    //init free page list
         pg->pg_next = &pages[k];
         pg = pg->pg_next;
     }
+    //fill this for danglig refs.
+    for(k=free_page_nr; k<page_nr; k++) {
+        memset((void*)(k*PAGE_SIZE), 1, PAGE_SIZE);
+    }
     printk("free pages: %d\n", page_nr - free_page_nr);
 }
-
 
 struct page* find_page(u32 nr) {
     kassert(nr > free_page_nr &&
             nr < 1024);
     return &pages[nr];
+}
+
+void free_page(struct page* pg) {
+    kassert(pg &&
+            pg->pg_refcnt > 0 &&
+            "try free invalid page");
+    cli();
+    pg->pg_refcnt--;
+    if(pg->pg_refcnt == 0) {
+        pg->pg_next = freepg_list.pg_next;
+        freepg_list.pg_next = pg;
+    }
+    sti();
 }
 
 struct page* alloc_page() {
@@ -111,6 +126,7 @@ struct page* alloc_page() {
     }
     return 0;
 }
+/*========================end pyhsical page ========================== */
 
 struct pte*
 find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
@@ -188,19 +204,6 @@ void copy_pgd(struct pde* from, struct pde* targ) {
     }
 }
             
-void free_page(struct page* pg) {
-    kassert(pg &&
-            pg->pg_refcnt > 0 &&
-            "try free invalid page");
-    cli();
-    pg->pg_refcnt--;
-    if(pg->pg_refcnt == 0) {
-        pg->pg_next = freepg_list.pg_next;
-        freepg_list.pg_next = pg;
-    }
-    sti();
-}
-
 
 void init_page_dir(struct pde* pg_dir) {
     u32 k;
@@ -255,12 +258,11 @@ void do_wt_page(void* addr) {
 }
 
 void do_no_page(void* addr) {
-//    printk("now : %x\n", addr);
     struct page* pg = alloc_page();
     if(pg == 0) {
         PANIC("out of memory");
     }
-#define PG_ADDR(addr)   ((u32)(addr) & ~0xFFF)
+
     put_page(cu_pg_dir, (u32)PG_ADDR(addr), pg);
 }
 
@@ -282,7 +284,7 @@ void page_fault_handler(struct registers_t* regs) {
         puts("user-mode ");
     }
     if (regs->err_code & 0x8) {
-        PANIC("touch reserved addr");
+        PANIC("touch reserved address");
     }
     if (regs->err_code & 0x10) {
         PANIC("instruction fetch error");
