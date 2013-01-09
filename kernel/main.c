@@ -50,13 +50,15 @@ void kmain(u32 init_stack) {
 #endif
 
 
-    //spawn((void*)do_init_job);
+    spawn((void*)do_init_job);
+#if 0
     int pid = fork();
     if(pid > 0) {
         printk("parent\n");
     } else {
         printk("child\n");
     }
+#endif
     
     int init = 0;
     while(1) {

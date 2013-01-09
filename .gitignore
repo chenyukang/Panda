@@ -7,6 +7,8 @@
 *.elf
 *.files
 *.txt
+*.h.gch
+*.clang-completion-error
 TAGS
 GPATH
 GRTAGS

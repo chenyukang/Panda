@@ -117,7 +117,7 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
     struct pde* pde;
     struct pte* pte;
     struct page* pg;
-#if 0
+#if 1
     if( vaddr < end_addr ) {
         PANIC("find_pte() error: invalid virtual address");
     }
@@ -255,6 +255,7 @@ void do_wt_page(void* addr) {
 }
 
 void do_no_page(void* addr) {
+//    printk("now : %x\n", addr);
     struct page* pg = alloc_page();
     if(pg == 0) {
         PANIC("out of memory");

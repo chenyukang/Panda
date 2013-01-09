@@ -61,7 +61,7 @@ init_task_table() {
     mutex_unlock(task_table.lock);
 }
 
-#if 0
+#if 1
 static void
 init_proc0() {
     struct task* t = current_task = procs[0] = (struct task*)(u32)(kstack0);
@@ -81,7 +81,7 @@ init_proc0() {
 }
 #endif
 
-#if 1
+#if 0
 static void
 init_proc0() {
     struct task* t = current_task = procs[0] = &init_task;
@@ -199,7 +199,7 @@ void move_stack(task_t* task, void* new_esp_start) {
     printk("finsh move_stack\n");
 }
 
-
+#if 0
 int fork() {
     cli();
     task_t *parent, *new_task, *t;
@@ -238,15 +238,17 @@ int fork() {
         return 0; //child return
     }
 }
+#endif
 
-#if 0
+#if 1
 void swtch_to(struct task *to){
     struct task *from;
     tss.esp0 = (u32)to + PAGE; 
     from = current_task;
     current_task = to;
+    cu_pg_dir = to->pg_dir;
     flush_pgd(to->pg_dir);
-    printk("switch from: %s to %s\n", from->name, to->name);
+    //printk("switch from: %s to %s\n", from->name, to->name);
     _do_swtch(&(from->cpu_s), &(to->cpu_s));
 }
 
@@ -256,6 +258,7 @@ void switch_task() {
         return;
     struct task* next = current_task->next;
 
+
     if(next != current_task) {
         swtch_to(next);
     }
@@ -263,7 +266,7 @@ void switch_task() {
 }
 #endif
 
-#if 1
+#if 0
 void switch_task() {
 #if 0
     printk("from %d(%s) %x ==> Switch to\n", getpid(),
