@@ -98,6 +98,26 @@ static inline void native_halt(void)
     asm volatile("hlt": : :"memory");
 }
 
+static inline void
+outsl(int port, const void *addr, int cnt)
+{
+  asm volatile("cld; rep outsl" :
+               "=S" (addr), "=c" (cnt) :
+               "d" (port), "0" (addr), "1" (cnt) :
+               "cc");
+}
+
+static inline void
+insl(int port, void *addr, int cnt)
+{
+  asm volatile("cld; rep insl" :
+               "=D" (addr), "=c" (cnt) :
+               "d" (port), "0" (addr), "1" (cnt) :
+               "memory", "cc");
+}
+
+
+
 /* Functions below is according Linux kernel source*/
 
 /* Check at compile time that sth is of a particular type

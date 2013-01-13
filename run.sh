@@ -5,8 +5,8 @@ INCLUDE="./inc"
 NASM="nasm -f elf -g"
 
 # on Mac
-GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector  
--finline-functions -finline-functions-called-once -I./inc/ "
+GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+ON_GCC="clang "
 LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
 OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
 
@@ -16,7 +16,7 @@ QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386 "
 
 do_clean() {
     echo "clean up"
-    rm -rf a.img bochsout.txt $OBJDIR/;
+    rm -rf a.img bochsout.txt $OBJDIR/ ./tool/mkfs.exe;
 }
 
 do_compile() {
@@ -57,6 +57,7 @@ do_compile() {
 	    exit;
 	fi
     done
+    
 
     do_link;
 }
@@ -88,15 +89,18 @@ do_link() {
 }
 
 do_prepare_hd() {
+    `$ON_GCC ./tool/mkfs.c -o ./tool/mkfs.exe`
     if [ ! -f "hd.img" ]; then
     echo "making hard disk"
-    bximage hd.img -hd -mode=flat -size=10 -q;
+    #bximage hd.img -hd -mode=flat -size=10 -q;
+    `./tool/mkfs.exe hd.img ./kernel.elf setup.bin`
     fi
 }
 
 do_all()
 {
-    do_clean && do_compile && do_prepare_hd
+    do_clean && do_compile ;
+    do_prepare_hd;
     if [ -f "a.img" ]
 	then 
 	`$QEMU -fda a.img -localtime`

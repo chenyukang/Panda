@@ -14,6 +14,8 @@
 #define HD_H
 
 
+#include "buf.h"
+
 /* Hard Drive */
 #define SECTOR_SIZE		512
 #define SECTOR_BITS		(SECTOR_SIZE * 8)
@@ -45,13 +47,22 @@ struct hd_cmd {
 	u8	command;
 };
 
+struct ide_desc {
+    struct buf* m_first;
+    struct buf* m_last;
+    struct buf* m_io_head;
+    struct buf* m_io_tail;
+    int         m_active;
+};
+        
+
 #define MAKE_DEVICE_REG(drv, lba, lba_high)     \
     (((lba << 6) |                              \
     ((drv << 4) |                               \
      (lba_high & 0xF ) | 0xA0)))
     
 
-void init_hd(void);
+void init_ide(void);
 
 #endif
 

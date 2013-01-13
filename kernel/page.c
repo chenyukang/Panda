@@ -248,7 +248,6 @@ void mm_init() {
     
     irq_install_handler(13, (isq_t)(&page_fault_handler));
     flush_pgd(&(pg_dir0[0]));
-    printk("value: %x\n", *((int*)(0x00007000)));
 }
 
 

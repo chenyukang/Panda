@@ -4,13 +4,13 @@ SECTIONS {
     {
         code = .; _code = .; __code = .;
         *(.text)
-	. = ALIGN(4096);	
+	. = ALIGN(0x1000);	
     }
     .data : 
     {
         data = .; _data = .; __data = .;
         *(.data)
-	. = ALIGN(4096);	
+	. = ALIGN(0x1000);	
     }
 
     .bss :
@@ -18,7 +18,7 @@ SECTIONS {
         sbss = .;
         *(COMMON)
         *(.bss)
-	. = ALIGN(4096);
+	. = ALIGN(0x1000);
         ebss = .;
     }
 

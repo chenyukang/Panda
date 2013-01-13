@@ -72,9 +72,6 @@ init_proc0() {
     t->pg_dir = &pg_dir0;
     t->stat = WAIT;
     t->next = 0;
-    printk("pid: %x\n", (u32)(&(t->pid)));
-    printk("ppid: %x\n", (u32)(&(t->ppid)));
-           
     tss.ss0 = 2<<3;
     tss.esp0 = (u32)t + PAGE;
     task_list = current_task;

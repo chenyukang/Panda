@@ -39,7 +39,7 @@ void kmain(u32 init_stack) {
     timer_init();
     kb_init();
     mm_init();
-    init_hd();
+    init_ide();
     init_multi_task();
 
     sti();
