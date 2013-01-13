@@ -8,6 +8,7 @@
 *.files
 *.txt
 *.h.gch
+*.exe
 *.clang-completion-error
 TAGS
 GPATH
