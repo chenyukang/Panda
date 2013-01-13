@@ -3,16 +3,17 @@
 #define _BUF__
 #include <types.h>
 
-#define NBUF 124
+#define NBUF    124
 #define PBLK    512         /* physical block size */
 #define BLK     1024        /* logical block size */
 
 struct buf {
     u32             b_flag;
-    struct buf     *b_next;
+    struct buf*     b_next;
+    struct buf*     b_prev; 
     short           b_dev;
     u32             b_blkno;
-    char           *b_data;
+    char*           b_data;
     int             b_error;
 };
 
@@ -24,8 +25,5 @@ struct buf {
 #define B_WANTED    0x10
 #define B_DIRTY     0x20
 #define B_ASYNC     0x40
-
-
-extern struct buf   buff[NBUF];
 
 #endif

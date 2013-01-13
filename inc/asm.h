@@ -116,6 +116,18 @@ insl(int port, void *addr, int cnt)
                "memory", "cc");
 }
 
+static inline u32
+xchg(volatile u32 *addr, u32 newval)
+{
+  u32 result;
+  
+  // The + in "+m" denotes a read-modify-write operand.
+  asm volatile("lock; xchgl %0, %1" :
+               "+m" (*addr), "=a" (result) :
+               "1" (newval) :
+               "cc");
+  return result;
+}
 
 
 /* Functions below is according Linux kernel source*/
