@@ -3,16 +3,16 @@ BOOT="./boot"
 KERNEL="./kernel"
 INCLUDE="./inc"
 NASM="nasm -f elf -g"
-
+CFLAGS="-Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
 if [ `uname` = "Linux" ]; then
-	GCC="gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+	GCC="gcc "
         ON_GCC="gcc"
         LD="ld"
 	OBJCPY="objcopy"
         QEMU="qemu"
 else
         # on Mac
-	GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+	GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc "
 	ON_GCC="clang "
 	LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
 	OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
@@ -59,7 +59,7 @@ do_compile() {
     `cd ../`
     for f in $flist;
     do
-	cmd="$GCC -c $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
+	cmd="$GCC $CFLAGS-c $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
 	#echo $cmd; 
 	`$cmd`;
 	if [ $? -ne 0 ]
@@ -100,11 +100,12 @@ do_link() {
 
 do_prepare_hd() {
     `$ON_GCC ./tool/mkfs.c -o ./tool/mkfs.exe`
-    if [ ! -f "hd.img" ]; then
+    #if [ ! -f "hd.img" ]; then
+    rm -rf hd.img;
     echo "making hard disk"
-    bximage hd.img -hd -mode=flat -size=10 -q;
-    #`./tool/mkfs.exe hd.img kernel.elf setup.bin`
-    fi
+    #bximage hd.img -hd -mode=flat -size=10 -q;
+    ./tool/mkfs.exe hd.img README;
+    #fi
 }
 
 do_all()
@@ -113,8 +114,8 @@ do_all()
     do_prepare_hd;
     if [ -f "a.img" ]
 	then 
-	#`$QEMU -fda a.img -localtime`
-	`bochs -q`
+	`$QEMU -fda a.img -hda hd.img -localtime`
+	#`bochs -q`
     fi
 }
 
