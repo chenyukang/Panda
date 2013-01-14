@@ -14,6 +14,7 @@
 
 #include <page.h>
 #include <mutex.h>
+#include <spinlock.h>
 
 
 struct cpu_state {
@@ -111,5 +112,6 @@ char* get_current_name();
 int fork();
 int getpid();
 
-
+void sleep(void* change, struct spinlock* lock);
+void wakeup(void* change);
 #endif

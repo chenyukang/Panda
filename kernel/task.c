@@ -320,4 +320,11 @@ void switch_task() {
 #endif
 
 
+void sleep(void* change, struct spinlock* lock) {
+    
+}
+
+void wakeup(void* change) {
+}
+
 

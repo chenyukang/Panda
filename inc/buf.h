@@ -17,13 +17,18 @@ struct buf {
     int             b_error;
 };
 
+
+#define B_BUSY      0x1
+#define B_VALID     0x2
+#define B_DIRTY     0x4
+
+
 #define B_WRITE     0x0
 #define B_READ      0x1
+
 #define B_DONE      0x2
 #define B_ERROR     0x4
-#define B_BUSY      0x8
 #define B_WANTED    0x10
-#define B_DIRTY     0x20
 #define B_ASYNC     0x40
 
 #endif

@@ -6,7 +6,6 @@
 struct spinlock {
     u32   locked;
     char* name;
-    s32   ncli;
 };
 
 void init_lock(struct spinlock* lk, char* name);

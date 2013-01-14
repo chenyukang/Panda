@@ -63,6 +63,7 @@ struct ide_desc {
     
 
 void init_ide(void);
+void hd_rw(struct buf* bp);
 
 #endif
 
