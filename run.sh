@@ -4,15 +4,25 @@ KERNEL="./kernel"
 INCLUDE="./inc"
 NASM="nasm -f elf -g"
 
-# on Mac
-GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
-ON_GCC="clang "
-LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
-OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
+if [ `uname` = "Linux" ]; then
+	GCC="gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+        ON_GCC="gcc"
+        LD="ld"
+	OBJCPY="objcopy"
+        QEMU="qemu"
+else
+        # on Mac
+	GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc -Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+	ON_GCC="clang "
+	LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
+	OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
+        QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386"
+fi
+
 
 OBJDIR="./objs"
 TOOL="./tool"
-QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386 "
+#QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386 "
 
 do_clean() {
     echo "clean up"
@@ -92,8 +102,8 @@ do_prepare_hd() {
     `$ON_GCC ./tool/mkfs.c -o ./tool/mkfs.exe`
     if [ ! -f "hd.img" ]; then
     echo "making hard disk"
-    #bximage hd.img -hd -mode=flat -size=10 -q;
-    `./tool/mkfs.exe hd.img ./kernel.elf setup.bin`
+    bximage hd.img -hd -mode=flat -size=10 -q;
+    #`./tool/mkfs.exe hd.img kernel.elf setup.bin`
     fi
 }
 
@@ -103,8 +113,8 @@ do_all()
     do_prepare_hd;
     if [ -f "a.img" ]
 	then 
-	`$QEMU -fda a.img -localtime`
-	#`bochs -q`
+	#`$QEMU -fda a.img -localtime`
+	`bochs -q`
     fi
 }
 
