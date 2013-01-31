@@ -10,6 +10,7 @@
 *.h.gch
 *.exe
 *.clang-completion-error
+*.h.gch
 TAGS
 GPATH
 GRTAGS

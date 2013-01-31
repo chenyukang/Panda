@@ -12,4 +12,8 @@ struct blk_cache {
     struct buf head;
 };
 
+void blk_init();
+struct buf* blk_read(u32 dev, u32 sector);
+void blk_write(struct buf* bp);
+void blk_release(struct buf* bp);
 #endif

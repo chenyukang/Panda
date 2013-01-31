@@ -68,8 +68,7 @@ blk_read(u32 dev, u32 sector) {
 }
 
 
-void* 
-blk_write(struct buf* bp) {
+void blk_write(struct buf* bp) {
     kassert(bp);
     if((bp->b_flag & B_BUSY) == 0)
         PANIC("blk_write: error blk");
