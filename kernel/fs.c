@@ -16,7 +16,6 @@ void read_super_blk(u32 dev, struct superblock* sb) {
     blk_release(bp);
 }
 
-
 u32 alloc_block(u32 dev) {
     u32 b, bit, mark;
     struct buf* bp;
