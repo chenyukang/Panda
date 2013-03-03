@@ -1,15 +1,13 @@
-
-#include "spinlock.h"
-#include "blkio.h"
+#include "buf.h"
 #include "task.h"
 #include "string.h"
 #include "hd.h"
 #include "task.h"
 
-struct blk_cache bcache;
+struct buf_cache bcache;
 
-void blk_init() {
-    init_lock(&bcache.lock, "blk_lock");
+void buf_init() {
+    init_lock(&bcache.lock, "buf_lock");
 
     struct buf* bp;
     bcache.head.b_prev = &bcache.head;
@@ -26,13 +24,13 @@ void blk_init() {
 
 
 static struct buf*
-blk_get(u32 dev, u32 sector) {
+buf_get(u32 dev, u32 sector) {
     struct buf* bp;
     acquire_lock(&bcache.lock);
 
 loop:
     for(bp = bcache.head.b_next; bp!=&bcache.head; bp = bp->b_next) {
-        if(bp->b_dev == dev && bp->b_blkno == sector) {
+        if(bp->b_dev == dev && bp->b_sector == sector) {
             if(! (bp->b_flag & B_BUSY) ) {
                 release_lock(&bcache.lock);
                 return bp;
@@ -45,21 +43,21 @@ loop:
     for(bp = bcache.head.b_prev; bp != &bcache.head; bp = bp->b_prev) {
         if((bp->b_flag & B_BUSY) == 0 && (bp->b_flag & B_DIRTY) == 0) {
             bp->b_dev = dev;
-            bp->b_blkno = sector;
+            bp->b_sector = sector;
             bp->b_flag = B_BUSY;
             release_lock(&bcache.lock);
             return bp;
         }
     }
 
-    PANIC("blk_get: no buf for use");
+    PANIC("buf_get: no buf for use");
 }
 
 
 struct buf*
-blk_read(u32 dev, u32 sector) {
+buf_read(u32 dev, u32 sector) {
     struct buf* bp;
-    bp = blk_get(dev, sector);
+    bp = buf_get(dev, sector);
     kassert(bp);
     if(!(bp->b_flag & B_VALID)) {
         hd_rw(bp);
@@ -68,19 +66,21 @@ blk_read(u32 dev, u32 sector) {
 }
 
 
-void blk_write(struct buf* bp) {
+void buf_write(struct buf* bp) {
     kassert(bp);
     if((bp->b_flag & B_BUSY) == 0)
-        PANIC("blk_write: error blk");
+        PANIC("buf_write: error buf");
     bp->b_flag |= B_DIRTY;
     hd_rw(bp);
 }
 
 
-
-void blk_release(struct buf* bp) {
+/*buf_release, release leads to some confusion,
+  release means to put this buf at the header of this cache,
+  this is visited most recently */
+void buf_release(struct buf* bp) {
     if((bp->b_flag & B_BUSY) == 0)
-        PANIC("blk_release: error blk");
+        PANIC("buf_release: error buf");
     acquire_lock(&bcache.lock);
 
     bp->b_next->b_prev = bp->b_prev;

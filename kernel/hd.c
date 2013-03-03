@@ -50,8 +50,6 @@ static int waitfor_ready(int check_error) {
     return 0;
 }
 
-
-
 void do_hd_cmd(struct hd_cmd* cmd) {
     waitfor_ready(0);
     outb(0x3F6, 0); //interrupt
@@ -79,7 +77,7 @@ void ide_start(struct buf* pb) {
     if(pb->b_flag & B_READ)
         cmd.command = CMD_READ;
     else cmd.command = CMD_WRITE;
-    lba = pb->b_blkno * BLK / PBLK;
+    lba = pb->b_sector * BLK / PBLK;
     cmd.feature = 0;
     cmd.lba_low = lba & 0xFF;
     cmd.lba_mid = (lba >> 8) & 0xFF ;
@@ -156,12 +154,11 @@ static void print_identify_info(u16* hdinfo) {
 	       (cmd_set_supported & 0x0400) ? "Yes" : "No");
 
 	int sectors = ((int)hdinfo[61] << 16) + hdinfo[60];
-	printk("sectors: %d HD size: %d MB\n", sectors, sectors * 512 / 1000000);
+	printk("SECTORS: %d HD size: %d MB\n", sectors, sectors * 512 / 1000000);
 }
 #endif
 
 
-#if 1
 void init_hd() {
     void* bios = (void*)0x90080;
     /* get the number of divers, from the BIOS data area */
@@ -172,10 +169,10 @@ void init_hd() {
     hd_inf[0].lzone = *(u16*)(12+bios);
     hd_inf[0].sect  = *(u8*)(14+bios);
 
-#if 1
     u32 hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
-    printk("hd_size: %d\n", hd_size/1024);
-    
+    printk("hd_size: %d KB\n", hd_size/1024);
+
+#if 0
     printk("heads:%d\ncyl:%d\nwpcom:%d\nctl:%d\nlzone:%d\nsect:%d\n",
            hd_inf[0].head, hd_inf[0].cyl, hd_inf[0].wpcom,
            hd_inf[0].ctl, hd_inf[0].lzone, hd_inf[0].sect);
@@ -188,7 +185,6 @@ void init_hd() {
     do_hd_cmd(&cmd);
     waitfor_ready(0);
 }
-#endif
 
 void init_ide() {
     init_hd();

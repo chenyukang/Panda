@@ -14,24 +14,51 @@
 #define BLK_H
 
 
-#include <types.h>
+#include "types.h"
+#include "buf.h"
 
-#define NR_REQUEST 32
-#define DEVICE_NAME "hard_disk"
-#define MAJOR_NR 3
+#define ROOTINO 1  // root i-number
+#define BSIZE 512  // block size
 
-struct request {
-    int dev;           //the dev number, -1 is for free status
-    int cmd_type;      //write or read
-    int error;         //erros happened
-    size_t sector;     //sector for start
-    size_t nr_sectors; //the number of w/r sectors
-    char*  buffer;     //data buffer
-    struct request* next;
+// File system super block
+struct superblock {
+  u32 size;         // Size of file system image (blocks)
+  u32 nblocks;      // Number of data blocks
+  u32 ninodes;      // Number of inodes.
+  u32 nlog;         // Number of log blocks
 };
 
-extern struct request requests[NR_REQUEST];
-struct request* current_req;
+#define NDIRECT 12
+#define NINDIRECT (BSIZE / sizeof(u32))
+#define MAXFILE (NDIRECT + NINDIRECT)
+
+// On-disk inode structure
+struct dinode {
+  short type;           // File type
+  short major;          // Major device number (T_DEV only)
+  short minor;          // Minor device number (T_DEV only)
+  short nlink;          // Number of links to inode in file system
+  u32 size;            // Size of file (bytes)
+  u32 addrs[NDIRECT+1];   // Data block addresses
+};
+
+// Inodes per block.
+#define IPB           (BSIZE / sizeof(struct dinode))
+
+// Block containing inode i
+#define IBLOCK(i)     ((i) / IPB + 2)
+
+// Bitmap bits per block
+#define BPB           (BSIZE*8)
+
+// Block containing bit for block b
+#define BBLOCK(b, ninodes) (b/BPB + (ninodes)/IPB + 3)
+
+void readsb(u32 dev, struct superblock* sb);
+void blk_zero(u32 dev, u32 bn);
+void blk_free(u32 dev, u32 bn);
+u32  blk_alloc(u32 dev);
+
 
 #endif
 

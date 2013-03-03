@@ -7,7 +7,11 @@
 
 #define stat xv6_stat  // avoid clash with host struct stat
 
+#define USE_SYS 1
+
 #include "../inc/fs.h"
+#include "../inc/buf.h"
+#include "../inc/blk.h"
 #include "../inc/stat.h"
 
 #define u32 unsigned int

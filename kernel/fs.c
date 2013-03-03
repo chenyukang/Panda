@@ -1,7 +1,8 @@
 #include <fs.h>
-#include <blkio.h>
+#include <blk.h>
 #include <string.h>
 
+#if 0
 static void 
 zero_blk(int dev, int sector) {
     struct buf* bp = blk_read(dev, sector);
@@ -51,6 +52,4 @@ void free_block(u32 dev, u32 blkno) {
     bp->b_data[bit/8] &= ~mask;
     blk_release(bp);
 }
-
-
-
+#endif

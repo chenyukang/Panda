@@ -1,7 +1,10 @@
+#ifndef _BUF_H__
+#define _BUF_H__
 
-#ifndef _BUF__
-#define _BUF__
-#include <types.h>
+#define NBUF 124
+
+#include "types.h"
+#include "spinlock.h"
 
 #define NBUF    124
 #define PBLK    512         /* physical block size */
@@ -11,8 +14,8 @@ struct buf {
     u32             b_flag;
     struct buf*     b_next;
     struct buf*     b_prev; 
-    short           b_dev;
-    u32             b_blkno;
+    s16             b_dev;
+    u32             b_sector;
     char*           b_data;
     int             b_error;
 };
@@ -30,5 +33,16 @@ struct buf {
 #define B_ERROR     0x4
 #define B_WANTED    0x10
 #define B_ASYNC     0x40
+
+struct buf_cache {
+    struct spinlock lock;
+    struct buf buf[NBUF];
+    struct buf head;
+};
+
+void buf_init();
+struct buf* buf_read(u32 dev, u32 sector);
+void buf_write(struct buf* bp);
+void buf_release(struct buf* bp);
 
 #endif
