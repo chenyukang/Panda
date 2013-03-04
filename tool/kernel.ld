@@ -3,23 +3,22 @@ SECTIONS {
     .text 0x0 : 
     {
         code = .; _code = .; __code = .;
-        *(.text)
-	. = ALIGN(0x1000);	
+        *(.text);
+        . = ALIGN(0x1000);	
     }
     .data : 
     {
         data = .; _data = .; __data = .;
-        *(.data)
-	. = ALIGN(0x1000);	
+        *(.rodata);
+        *(.data);
+        . = ALIGN(0x1000);	
     }
 
     .bss :
     {
-        sbss = .;
-        *(COMMON)
-        *(.bss)
-	. = ALIGN(0x1000);
-        ebss = .;
+        __bss__ = .;
+        *(.bss);
+        . = ALIGN(0x1000);
     }
 
     __kimg_end__ = .;

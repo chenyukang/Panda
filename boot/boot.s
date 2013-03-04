@@ -33,8 +33,8 @@ start:
 
 	;; ok, let finish boot and jump to setup
 	;; jmp setupseg:setupoffset
-	jmp 0x9000:0x0100
-	
+    jmp 0x9000:0x0100
+
 print_str:
 	mov ah, 0x0E
 .next:
@@ -53,7 +53,7 @@ msg	db "Loading Panda OS"	;
 ;;; some constants
 bootseg 	equ 0x0000	;boot begin address
 setupseg 	equ 0x9000    	;setup address
-setupoffset 	equ 0x0100	;
+setupoffset equ 0x0100	;
 setupsize 	equ 512	;
 bootdriver 	db  0		;
 ; Magic number for sector

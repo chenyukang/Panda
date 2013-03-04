@@ -187,8 +187,9 @@ void init_hd() {
 }
 
 void init_ide() {
+    printk("init_ide ...\n");
     init_hd();
     irq_install_handler(14, (isq_t)(&hd_interupt_handler));
-    waitfor_ready(0);
+    //waitfor_ready(0);
     ide_queue = 0;
 }

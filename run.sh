@@ -6,40 +6,40 @@ NASM="nasm -f elf -g"
 CFLAGS="-Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
 if [ `uname` = "Linux" ]; then
 	GCC="gcc "
-        ON_GCC="gcc"
-        LD="ld"
+    ON_GCC="gcc"
+    LD="ld"
 	OBJCPY="objcopy"
-        QEMU="qemu"
+    #QEMU="/usr/local/bin/qemu-system-i386 "
+    QEMU="qemu "
 else
-        # on Mac
+    # on Mac
 	GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc "
 	ON_GCC="clang "
 	LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
 	OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
-        QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386"
+    QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386"
 fi
 
 
 OBJDIR="./objs"
 TOOL="./tool"
-#QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386 "
 
 do_clean() {
     echo "clean up"
-    rm -rf a.img bochsout.txt $OBJDIR/ ./tool/mkfs.exe;
+    rm -rf a.img hd.img bochsout.txt $OBJDIR/ ./tool/mkfs.exe;
 }
 
 do_compile() {
     if [ ! -d "$OBJDIR" ]; then
-	mkdir $OBJDIR;
+	    mkdir $OBJDIR;
     fi
-       
+
     echo "building boot"
     flist=`cd $BOOT/; ls *.s;`
     for f in $flist;
-    do 
-	cmd="$NASM $BOOT/$f -o $OBJDIR/${f/.s/.O}"
-	echo $cmd; `$cmd`
+    do
+	    cmd="$NASM $BOOT/$f -o $OBJDIR/${f/.s/.O}"
+	    echo $cmd; `$cmd`
     done
 
     echo "building kernel"
@@ -47,27 +47,26 @@ do_compile() {
     `cd ../`
     for f in $flist;
     do
-	cmd="$NASM $KERNEL/$f -o $OBJDIR/${f/.s/.o}"
-	echo $cmd ; `$cmd`
-	if [ $? -ne 0 ]
+	    cmd="$NASM $KERNEL/$f -o $OBJDIR/${f/.s/.o}"
+	    echo $cmd ; `$cmd`
+	    if [ $? -ne 0 ]
 	    then 
-	    exit;
-	fi
+	        exit;
+	    fi
     done
 
     flist=`cd $KERNEL/; ls *.c;`
     `cd ../`
     for f in $flist;
     do
-	cmd="$GCC $CFLAGS-c $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
-	#echo $cmd; 
-	`$cmd`;
-	if [ $? -ne 0 ]
-	    then 
-	    exit;
-	fi
+	    cmd="$GCC $CFLAGS-c $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
+    	#echo $cmd;
+	    `$cmd`;
+	    if [ $? -ne 0 ]
+	    then
+	        exit;
+	    fi
     done
-    
 
     do_link;
 }
@@ -77,7 +76,7 @@ do_link() {
     cd  $OBJDIR;
     $LD boot.O -o boot.bin -T ../$TOOL/boot.ld;
     $LD setup.O -o setup.bin -T ../$TOOL/setup.ld;
-    
+
     #head.O must puted at first
     objs=`ls *.o`
     cmd="$LD head.O $objs -o kernel.elf -T ../$TOOL/kernel.ld"
@@ -88,13 +87,13 @@ do_link() {
 
     if [ $? -ne 0 ]
 	then
-	echo "link error!"
-	exit
+	    echo "link error!"
+	    exit
     else
-	echo "making a.img"
-	cmd="cat boot.bin setup.bin kernel.bin > ../a.img"
-	echo $cmd; cat boot.bin setup.bin kernel.bin > ../a.img;
-	cd ../;
+	    echo "making a.img"
+	    cmd="cat boot.bin setup.bin kernel.bin > ../a.img"
+	    echo $cmd; cat boot.bin setup.bin kernel.bin > ../a.img;
+	    cd ../;
     fi
 }
 
@@ -113,9 +112,10 @@ do_all()
     do_clean && do_compile ;
     do_prepare_hd;
     if [ -f "a.img" ]
-	then 
-	#`$QEMU -fda a.img -hda hd.img -localtime`
-	`bochs -q`
+	then
+        #$QEMU -no-kqemu -fda a.img -hda hd.img -m 128 -localtime -d exec,cpu,pcall;
+    #    $QEMU -no-kqemu -fda a.img -hda hd.img -localtime -m 64;
+	bochs -q;
     fi
 }
 
@@ -143,14 +143,14 @@ do_wc_line() {
 
 while [ $# -gt 0 ]
 do
-  case $1 in
-    -all|-a) do_all; exit 0;;
-    -clean|-x) do_clean; exit 0;;
-    -compile|-c) do_clean; do_compile; exit 0;;
-    -commit |-u) shift; log=$1; do_commit; exit 0;;
-    -line |-l) do_wc_line; exit 0;
-  esac
-  shift
+    case $1 in
+        -all|-a) do_all; exit 0;;
+        -clean|-x) do_clean; exit 0;;
+        -compile|-c) do_clean; do_compile; exit 0;;
+        -commit |-u) shift; log=$1; do_commit; exit 0;;
+        -line |-l) do_wc_line; exit 0;
+    esac
+    shift
 done
 
 

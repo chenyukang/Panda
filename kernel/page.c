@@ -69,10 +69,11 @@ void init_pages() {
     printk("end addr--> %x\n", end_addr);
     page_nr = (end_addr)/(PAGE_SIZE);
     printk("page_nr: %d\n", page_nr);
+    
     pages = (struct page*)_alloc(sizeof(struct page) * page_nr);
     used_addr = PAGE_ROUND_UP(used_addr);
     free_page_nr = (used_addr)/0x1000;
-    
+
     for(k=0; k<free_page_nr; k++) { //this is used by kernel
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 1;
@@ -88,10 +89,11 @@ void init_pages() {
         pg->pg_next = &pages[k];
         pg = pg->pg_next;
     }
+    
     //fill this for danglig refs.
-    for(k=free_page_nr; k<page_nr; k++) {
-        memset((void*)(k*PAGE_SIZE), 1, PAGE_SIZE);
-    }
+    //for(k=free_page_nr; k<page_nr; k++) {
+        //memset((void*)(k*PAGE_SIZE), 1, PAGE_SIZE);
+    //   }
     printk("free pages: %d\n", page_nr - free_page_nr);
 }
 
@@ -227,7 +229,7 @@ void init_page_dir(struct pde* pg_dir) {
    used_addr will be ker_end_addr added kernel stack etc */
 void mm_init() {
     puts("mm init ...\n");
-    
+
     // we put the end_addr at 0x90002
     // during booting process, so got it
     // 0~ker_addr is for kernel code and data
@@ -241,11 +243,11 @@ void mm_init() {
     printk("ker_size: %dKB\n", ker_addr/(KB));
     printk("PAGE_SIZE: %dKB\n", PAGE_SIZE/(KB));
     printk("used_size: %dKB\n", used_addr/(KB));
-        
+
     init_page_dir(&(pg_dir0[0])); //init the kernel pg_dir
 
     init_pages();
-    
+
     irq_install_handler(13, (isq_t)(&page_fault_handler));
     flush_pgd(&(pg_dir0[0]));
 }

@@ -64,7 +64,7 @@ void time_init(void) {
     BCD_TO_BIN(time.tm_mon);
     BCD_TO_BIN(time.tm_year);
     BCD_TO_BIN(time.tm_centry);
-    
+
     time.tm_year = time.tm_centry*100 + time.tm_year;
     kern_setup_time = kernel_mktime(&time);
     kern_time = time;
@@ -75,7 +75,7 @@ void print_time_local(void) {
     printk("%d-%d-%d %d:%d:%d\n",
            kern_time.tm_year, kern_time.tm_mon, kern_time.tm_day,
            kern_time.tm_hour, kern_time.tm_min, kern_time.tm_sec);
-}    
+}
 
 /* add one second */
 void update_time() {
@@ -95,8 +95,7 @@ void update_time() {
         t->tm_min = 0;
         t->tm_sec = 0;
     }
-    
+
     //update a day
 }
 
-    

@@ -1,7 +1,7 @@
 
 extern kmain
 [BITS 32]
-	mov esp, stack_top
+    mov esp, stack_top
 
 	mov ax, 0x10
 	mov ds, ax
@@ -9,18 +9,18 @@ extern kmain
 	mov [0xb8000], cl
 	mov cl, 0x04
 	mov [0xb8001], cl
-	
-	;; check A20 enable
-	xor eax, eax
+
+    ;; check A20 enable
+    xor eax, eax
 err:	inc eax
 	mov [0x000000], eax
 	cmp [0x100000], eax
 	je err
-	
+
 	;; Finally, we goto OS's c world
-	push esp
+    push esp
 	call kmain
-	jmp $
+    ;; 	jmp $
 ;------------------------------------------------------------------------
 
 
@@ -50,7 +50,6 @@ move_text_mode:
 	mov al, 0x03
 	int 0x10
 	
-; 导出函数
 
 global _do_swtch
 _do_swtch:
@@ -221,7 +220,7 @@ irq_common_stub:
     iret
 
 extern page_fault_handler
-	
+
 isr_pagefault_stub:
     pusha
     push ds

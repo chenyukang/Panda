@@ -18,7 +18,7 @@ setup:
 read_info:
 	mov ax, 0x9000
 	mov ds, ax
-	
+
 	;; Now get memory size and save at 0x90002
 	;; This may just report up to 64M.
 	;; It only reports contiguous (usable) RAM.
@@ -28,14 +28,14 @@ read_info:
 
 	;; just get hd0 info data
 	;; save the disk info at 0x90080
-	mov ax, 0x0000
-	mov ds, ax
-	lds si, [4 * 0x41]
-	mov ax, 0x9000
-	mov es, ax
-	mov di, 0x80
-	mov cx, 0x10
-	rep movsb
+	;; mov ax, 0x0000
+	;; mov ds, ax
+	;; lds si, [4 * 0x41]
+	;; mov ax, 0x9000
+	;; mov es, ax
+	;; mov di, 0x80
+	;; mov cx, 0x10
+	;; rep movsb
 
 	mov ax, setupseg
 	mov ds, ax
@@ -70,7 +70,7 @@ read_info:
 	;;
 	cli
 	lgdt [gdt_addr]
-	
+
 	;; A20
 	call empty_8042
 	mov al, 0xd1
@@ -84,7 +84,7 @@ read_info:
 	or  eax, 1
 	mov cr0, eax
 
-        ;; jump into head, which puted at 0x00000
+    ;; jump into head, which puted at 0x00000
 	jmp dword 0x8:0x0
 
 
@@ -111,9 +111,9 @@ setupoffset	equ 	0x0100
 setupsize 	equ 	512
 
 
-systemseg 	equ	0x0000
+systemseg 	    equ	    0x0000
 systemoffset	equ 	0x0000
-systemsize 	equ 	1024*32 ; this will bigger than kernel.bin
+systemsize 	    equ 	1024*32 ; this will bigger than kernel.bin
 
 setup_msg db "Setup Panda OS"	;
 	db 13, 10, 0  		;

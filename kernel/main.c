@@ -25,15 +25,15 @@ extern u32 end_addr;
 void do_init_job();
 
 void kmain(u32 init_stack) {
-    
+
     init_esp_start = init_stack;
     init_video();
     puts_color_str("Booting Panda OS ...\n", 0x0B);
+
     puts_color_str("Welcome ...\n", 0x0A);
 
     cli();
-    
-    time_init();    
+    time_init();
     gdt_init();
     idt_init();
     timer_init();
@@ -41,17 +41,15 @@ void kmain(u32 init_stack) {
     mm_init();
     init_ide();
     init_multi_task();
-
     sti();
-    
+
 #if 0
     int* p = (int*)(end_addr + 0x20);
     int v = *p;
     printk("addr: %x %d\n", p, v);
 #endif
 
-
-    spawn((void*)do_init_job);
+//    spawn((void*)do_init_job);
 #if 0
     int pid = fork();
     if(pid > 0) {
@@ -60,7 +58,7 @@ void kmain(u32 init_stack) {
         printk("child\n");
     }
 #endif
-    
+
     int init = 0;
     while(1) {
         if(!init) {
@@ -68,11 +66,10 @@ void kmain(u32 init_stack) {
             printk("kernel running ...\n");
         }
     }
-
 }
 
 void do_init_job() {
 //    while(1) {
-        printk("B\n");
+        printk("job: B\n");
 //    }
 }
