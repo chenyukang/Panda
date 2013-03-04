@@ -5,8 +5,8 @@ vgaromimage: file=/usr/share/vgabios/vgabios.bin
 #vgaromimage: file=/usr/local/Cellar/bochs/2.6/share/bochs/VGABIOS-elpin-2.40
 vga: extension=vbe
 floppya: 1_44=a.img, status=inserted
-#ata0-master: type=disk, path="hd.img", mode=flat, cylinders=20, heads=16, spt=63
-ata0-slave: type=disk, mode=flat, path="fs.img", cylinders=1024, heads=1, spt=1
+ata0-slave: type=disk, mode=flat, path="hd.img", cylinders=1024, heads=1, spt=1
+#ata0-slave: type=disk, mode=flat, path="fs.img", cylinders=1024, heads=1, spt=1
 boot: floppy
 log: bochsout.txt
 mouse: enabled=0

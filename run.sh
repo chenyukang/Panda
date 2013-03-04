@@ -114,8 +114,8 @@ do_all()
     do_prepare_hd;
     if [ -f "a.img" ]
 	then 
-	`$QEMU -fda a.img -hda hd.img -localtime`
-	#`bochs -q`
+	#`$QEMU -fda a.img -hda hd.img -localtime`
+	`bochs -q`
     fi
 }
 
