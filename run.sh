@@ -114,8 +114,8 @@ do_all()
     if [ -f "a.img" ]
 	then
         #$QEMU -no-kqemu -fda a.img -hda hd.img -m 128 -localtime -d exec,cpu,pcall;
-    #    $QEMU -no-kqemu -fda a.img -hda hd.img -localtime -m 64;
-	bochs -q;
+        $QEMU -fda a.img -hda hd.img -localtime -m 128;
+	#bochs -q;
     fi
 }
 

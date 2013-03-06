@@ -2,6 +2,10 @@
 #include <inode.h>
 #include <string.h>
 #include <blk.h>
+#include <buf.h>
+
+
+#define min(a, b) ((a) < (b) ? (a) : (b))
 
 struct inode icache[NINODE];
 
@@ -19,8 +23,6 @@ void stati(struct inode* ip, struct stat* st) {
     st->nlink = ip->nlink;
     st->size = ip->size;
 }
-
-
 
 struct inode* ialloc(u32 dev, s16 type) {
     int inum;
@@ -113,7 +115,6 @@ void i_unlock_drop(struct inode* ip) {
 }
 
 
-#if 0
 static u32
 bmap(struct inode* ip, u32 bn) {
     u32 addr;
@@ -144,13 +145,53 @@ bmap(struct inode* ip, u32 bn) {
     }
     
 }
-#endif
 
 int readi(struct inode* ip, char* addr, u32 off, u32 n) {
-    return 0;
+    u32 total, done;
+    struct buf* bp;
+    
+    if(ip->type == T_DEV) {
+        return -1;
+    }
+    if(off > ip->size || off + n < off) {
+        return -1;
+    }
+    if(off + n > ip->size)
+        n = ip->size - off;
+    for(total=0; total<n; total+=done, off+=done, addr+=done) {
+        bp = buf_read(ip->dev, bmap(ip, off/BSIZE));
+        done = min(n-total, BSIZE - off%BSIZE);
+        memmove(addr, bp->b_data + off%BSIZE, done);
+        buf_release(bp);
+    }
+    return n;
 }
 
 int writei(struct inode* ip, char* addr, u32 off, u32 n) {
-    return 0;
+    u32 total, done;
+    struct buf* bp;
+
+    if(ip->type == T_DEV) {
+        return -1;
+    }
+
+    if(off > ip->size || off + n < off) 
+        return -1;
+
+    /* if size is larger than the biggest file size*/
+    if(off + n > MAXFILE * BSIZE)
+        return -1;
+
+    for(total=0; total<n; total+=done, off+=done, addr+=done) {
+        bp = buf_read(ip->dev, bmap(ip, off/BSIZE));
+        done = min(n-total, BSIZE - off/BSIZE);
+        memmove(bp->b_data + off%BSIZE, addr, done);
+        buf_release(bp);
+    }
+    if(n>0 && off > ip->size) {
+        ip->size = off;
+        iupdate(ip);
+    }
+    return n;
 }
 

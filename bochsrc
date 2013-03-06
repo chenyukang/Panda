@@ -1,8 +1,8 @@
 megs: 128
-romimage: file=/usr/share/bochs/BIOS-bochs-latest
-#romimage: file=/usr/local/Cellar/bochs/2.6/share/bochs/BIOS-bochs-latest
-vgaromimage: file=/usr/share/vgabios/vgabios.bin
-#vgaromimage: file=/usr/local/Cellar/bochs/2.6/share/bochs/VGABIOS-elpin-2.40
+#romimage: file=/usr/share/bochs/BIOS-bochs-latest
+romimage: file=/usr/local/Cellar/bochs/2.6/share/bochs/BIOS-bochs-latest
+vgaromimage: file=/usr/local/Cellar/bochs/2.6/share/bochs/VGABIOS-elpin-2.40
+#vgaromimage: file=/usr/share/vgabios/vgabios.bin
 vga: extension=vbe
 floppya: 1_44=a.img, status=inserted
 ata0-slave: type=disk, mode=flat, path="hd.img", cylinders=1024, heads=1, spt=1
