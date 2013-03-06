@@ -96,12 +96,16 @@ void iunlock(struct inode* ip) {
     ip->flags &= ~I_BUSY;
 }
 
+void itrunc(struct inode* ip) {
+}
+
+
 void idrop(struct inode* ip) {
     if(ip->ref_cnt == 1 && (ip->flags & I_VALID) && ip->nlink == 0) {
         if(ip->flags & I_BUSY)
             PANIC("idrop busy");
         ip->flags |= I_BUSY;
-//        itrunc(ip);
+        itrunc(ip);
         ip->type = 0;
         iupdate(ip);
         ip->flags = 0;

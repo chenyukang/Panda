@@ -10,8 +10,8 @@
 #include <bitmap.h>
 #include <asm.h>
 
-extern u32* frames;   //in page.c
-extern u32  nr_frames;
+u32* frames;   //in page.c
+u32  nr_frames;
 
 inline static void INIT(u32 addr, u32* frame,
                         u32* index, u32* offset) {
