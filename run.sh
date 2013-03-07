@@ -4,6 +4,7 @@ KERNEL="./kernel"
 INCLUDE="./inc"
 NASM="nasm -f elf -g"
 CFLAGS="-Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+BOCHS="bochs"
 if [ `uname` = "Linux" ]; then
 	GCC="gcc "
     ON_GCC="gcc"
@@ -11,6 +12,7 @@ if [ `uname` = "Linux" ]; then
 	OBJCPY="objcopy"
     #QEMU="/usr/local/bin/qemu-system-i386 "
     QEMU="qemu "
+    BOCHS_CONF="./.bochs_linux"
 else
     # on Mac
 	GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc "
@@ -18,6 +20,7 @@ else
 	LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
 	OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
     QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386"
+    BOCHS_CONF="./.bochs_mac"
 fi
 
 
@@ -50,8 +53,7 @@ do_compile() {
 	    cmd="$NASM $KERNEL/$f -o $OBJDIR/${f/.s/.o}"
 	    echo $cmd ; `$cmd`
 	    if [ $? -ne 0 ]
-	    then 
-	        exit;
+	    then exit;
 	    fi
     done
 
@@ -63,8 +65,7 @@ do_compile() {
     	#echo $cmd;
 	    `$cmd`;
 	    if [ $? -ne 0 ]
-	    then
-	        exit;
+	    then exit;
 	    fi
     done
 
@@ -113,9 +114,13 @@ do_all()
     do_prepare_hd;
     if [ -f "a.img" ]
 	then
-        #$QEMU -no-kqemu -fda a.img -hda hd.img -m 128 -localtime -d exec,cpu,pcall;
-        $QEMU -fda a.img -hda hd.img -localtime -m 128;
-	#bochs -q;
+        echo $sim
+        if [ $sim == "-qemu" ] 
+        then $QEMU -no-kqemu -fda a.img -hda hd.img -m 128 -localtime -d exec,cpu,pcall;
+        #$QEMU -fda a.img -hda hd.img -localtime -m 128;
+        else
+     	    $BOCHS -f $BOCHS_CONF -q;
+        fi
     fi
 }
 
@@ -148,7 +153,9 @@ do
         -clean|-x) do_clean; exit 0;;
         -compile|-c) do_clean; do_compile; exit 0;;
         -commit |-u) shift; log=$1; do_commit; exit 0;;
-        -line |-l) do_wc_line; exit 0;
+        -line |-l) do_wc_line; exit 0;;
+        -qemu|-q) sim=$1; do_all; exit 0;;
+        -bochs|-b) sim=$1; do_all; exit 0;
     esac
     shift
 done
