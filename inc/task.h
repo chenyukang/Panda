@@ -16,6 +16,7 @@
 #include <mutex.h>
 #include <spinlock.h>
 
+#define NOFILE 124
 
 struct cpu_state {
     s32    eip;
@@ -92,6 +93,7 @@ struct task {
     //struct pde* pg_dir;
     //struct _tss_ tss;
     struct task* next;
+    void*  ofile[NOFILE];
     char name[24];  /* process name*/
 };
 

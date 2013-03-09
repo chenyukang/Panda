@@ -276,7 +276,7 @@ s32 dir_link(struct inode* dp, char* name, u32 inum) {
             
 static char*
 _skip(char* path, char* name) {
-    char* s;
+    const char* s;
     int len;
 
     while( *path == '/') path++;

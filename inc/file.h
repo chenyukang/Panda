@@ -5,7 +5,7 @@
 #include <inode.h>
 
 struct file {
-    enum { FD_NONE, FD_PIPE, FD_INODE } f_type;
+    enum { FD_NONE, FD_PIPE, FD_INODE } type;
     int ref;
     char readable;
     char writeable;
@@ -13,6 +13,13 @@ struct file {
     u32 offset;
 };
 
+
+struct file* file_alloc(void);
+struct file* file_dup(struct file* f);
+void file_close(struct file* f);
+int file_stat(struct file* f, struct stat* st) ;
+int file_read(struct file* f, char* addr, int n) ;
+int file_write(struct file* f, char* addr, int n) ;
 
 #define I_BUSY  0x1
 #define I_VALID 0x2

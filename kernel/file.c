@@ -18,7 +18,7 @@ struct file* file_alloc(void) {
     struct file* f;
     for(f = file_buf; f < file_buf + NFILE; f++) {
         if(f->ref == 0) {
-            kassert(f->f_type == FD_NONE);
+            kassert(f->type == FD_NONE);
             f->ref = 1;
             return f;
         }
@@ -41,15 +41,15 @@ void file_close(struct file* f) {
     }
     struct file back = *f;
     f->ref = 0;
-    f->f_type = FD_NONE;
+    f->type = FD_NONE;
 
-    if(back.f_type == FD_INODE) {
+    if(back.type == FD_INODE) {
         iput(back.ip);
     }
 }
 
 int file_stat(struct file* f, struct stat* st) {
-    if(f->f_type == FD_INODE) {
+    if(f->type == FD_INODE) {
         stati(f->ip, st);
         return 0;
     }
@@ -60,7 +60,7 @@ int file_read(struct file* f, char* addr, int n) {
     int r;
     if(f->readable == 0)
         return -1;
-    if(f->f_type == FD_INODE) {
+    if(f->type == FD_INODE) {
         r = readi(f->ip, addr, f->offset, n);
         if(r > 0) {
             f->offset += r;
@@ -74,7 +74,7 @@ int file_write(struct file* f, char* addr, int n) {
     int r;
     if(f->writeable == 0)
         return -1;
-    if(f->f_type == FD_INODE) {
+    if(f->type == FD_INODE) {
         r = writei(f->ip, addr, f->offset, n);
         if( r == n ) {
             f->offset += r;
