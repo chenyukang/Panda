@@ -37,6 +37,17 @@ void* memcpy(void *dest, const void *src, size_t cnt) {
     return dest;
 }
 
+s32 memcmp(const void* v1, const void* v2, u32 n) {
+    const unsigned char *s1, *s2;
+    s1 = v1, s2 = v2;
+    while( n-- > 0 ) {
+        if( *s1 != *s2) {
+            return *s1 - *s2;
+        }
+        s1++, s2++;
+    }
+    return 0;
+}
 
 void* memset(void* addr, unsigned char v, size_t cnt) {
     char* t = (char*)addr;
@@ -70,6 +81,17 @@ unsigned short *memsetw(unsigned short *dest,
     unsigned short *temp = (unsigned short *)dest;
     for( ; count != 0; count--) *temp++ = val;
     return dest;
+}
+
+s32 strncmp(const char* v1, const char* v2, u32 n) {
+    const char* p = v1;
+    const char* q = v2;
+    while(n>0 && *p && *p == *q) {
+        n--, p++, q++;
+    }
+    if( n == 0)
+        return 0;
+    return (u8)*p - (u8)*q;
 }
 
 size_t strlen(const char *str) {

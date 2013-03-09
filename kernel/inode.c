@@ -97,6 +97,30 @@ void iunlock(struct inode* ip) {
 }
 
 void itrunc(struct inode* ip) {
+    int i;
+    struct buf* bp;
+
+    for(i=0; i<NDIRECT; i++) {
+        if(ip->addrs[i]) {
+            blk_free(ip->dev, ip->addrs[i]);
+            ip->addrs[i] = 0;
+        }
+    }
+
+    //have extra contents
+    if(ip->addrs[NDIRECT] ) {
+        bp = buf_read(ip->dev, ip->addrs[NDIRECT]);
+        u32* addr = (u32*)bp->b_data;
+        for(i=0; i<NINDIRECT; i++) {
+            if(addr[i])
+                blk_free(ip->dev, addr[i]);
+        }
+        buf_release(bp);
+        blk_free(ip->dev, addr[NDIRECT]);
+        ip->addrs[NDIRECT] = 0;
+    }
+    ip->size = 0;
+    iupdate(ip);
 }
 
 
@@ -130,7 +154,7 @@ bmap(struct inode* ip, u32 bn) {
             ip->addrs[bn] = addr = blk_alloc(ip->dev);
         return addr;
     }
-
+    
     bn -= NDIRECT;
     if(bn < NINDIRECT) {
         //load indirect block, allocating if necessary.
@@ -199,3 +223,113 @@ int writei(struct inode* ip, char* addr, u32 off, u32 n) {
     return n;
 }
 
+
+int namecmp(const char* s, const char* t) {
+    return strncmp(s, t, DIRSIZ); //DIRSIZE is the max length of name
+}
+
+
+struct inode*
+dir_lookup(struct inode* dp, char* name, u32* poff) {
+    u32 off;
+    struct dirent dire;
+
+    if(dp->type != T_DIR)
+        PANIC("dir_lookup: error type of inode ");
+    for(off=0; off<dp->size; off+=sizeof(dire)) {
+        if(readi(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
+            PANIC("dir_lookup: error readi");
+        if(dire.inum == 0) continue;
+        if(namecmp(name, dire.name) == 0) {
+            if(poff)
+                *poff = off;
+            return iget(dp->dev, dire.inum);
+        }
+    }
+    return 0;
+}
+
+s32 dir_link(struct inode* dp, char* name, u32 inum) {
+    u32 off;
+    struct dirent* dire;
+    struct inode*  ip;
+
+    if((ip = dir_lookup(dp, name, 0)) != 0) {
+        idrop(ip);
+        return -1;
+    }
+
+    //look for an empty dirent
+    for(off=0; off<dp->size; off+=sizeof(dire)) {
+        if(readi(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
+            PANIC("dir_link: error readi");
+        if(dire->inum == 0)
+            break;
+    }
+    strncmp(dire->name, name, DIRSIZ);
+    dire->inum = inum;
+    if(writei(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
+        PANIC("dir_link: error writei");
+    return 0;
+}
+
+            
+static char*
+_skip(char* path, char* name) {
+    char* s;
+    int len;
+
+    while( *path == '/') path++;
+    if( *path == 0) return 0;
+
+    s = path;
+    while( *path != '/' && *path != 0 )
+        path++;
+    len = path - s;
+    len = len > DIRSIZ ? DIRSIZ : len;
+    memmove(name, s, len);
+    name[len-1] = 0;
+    while(*path == '/')
+        path++;
+    return path;
+}
+
+static struct inode*
+inode_namex(char* path, char* name, u32 parent) {
+    struct inode* ip;
+    struct inode* next;
+
+    if(*path == '/')
+        ip = iget(ROOTDEV, ROOTINO);
+    else ip = 0;
+
+    while((path = _skip(path, name)) != 0) {
+        if(ip->type != T_DIR) {
+            return 0;
+        }
+        if(parent && *path == '\0') {
+            return ip;
+        }
+        if((next = dir_lookup(ip, name, 0)) == 0) {
+            return 0;
+        }
+        ip = next;
+    }
+    if(parent) {
+        return 0;
+    }
+    return ip;
+}
+
+        
+struct inode* inode_name(char* path) {
+    char name[DIRSIZ];
+    memset(name, 0, sizeof(name));
+    return inode_namex(path, name, 0);
+}
+
+struct inode* inode_name_parent(char* path, char* name) {
+    return inode_namex(path, name, 1);
+}
+
+        

@@ -239,9 +239,9 @@ void mm_init() {
     // don't use ker_addr ~ 0x100000
     // free memory begin with 0x100000
     used_addr = 0x100000;
-    printk("end_addr: %d MB\n", end_addr/(KB*KB));
-    printk("ker_size: %dKB\n", ker_addr/(KB));
-    printk("PAGE_SIZE: %dKB\n", PAGE_SIZE/(KB));
+    printk("mem_size : %d MB\n", end_addr/(KB*KB));
+    printk("ker_size : %dKB\n", ker_addr/(KB));
+    printk("page_size: %dKB\n", PAGE_SIZE/(KB));
     printk("used_size: %dKB\n", used_addr/(KB));
 
     init_page_dir(&(pg_dir0[0])); //init the kernel pg_dir

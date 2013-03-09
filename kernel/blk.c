@@ -44,7 +44,7 @@ void blk_free(u32 dev, u32 bn) {
 }
 
 u32  blk_alloc(u32 dev) {
-        u32 b, bit, mark;
+    u32 b, bit, mark;
     struct buf* bp;
     struct superblock sb;
     readsb(dev, &sb);

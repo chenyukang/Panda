@@ -17,6 +17,7 @@
 #include "types.h"
 #include "buf.h"
 
+#define ROOTDEV       1  // device number of file system root disk
 #define ROOTINO 1  // root i-number
 #define BSIZE 512  // block size
 
@@ -58,6 +59,14 @@ void readsb(u32 dev, struct superblock* sb);
 void blk_zero(u32 dev, u32 bn);
 void blk_free(u32 dev, u32 bn);
 u32  blk_alloc(u32 dev);
+
+// Directory is a file containing a sequence of dirent structures.
+#define DIRSIZ 14
+
+struct dirent {
+  u16  inum;
+  char name[DIRSIZ];
+};
 
 
 #endif
