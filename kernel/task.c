@@ -72,6 +72,7 @@ init_proc0() {
     t->pg_dir = &pg_dir0;
     t->stat = WAIT;
     t->next = 0;
+    t->cwd  = inode_name("/");
     tss.ss0 = 2<<3;
     tss.esp0 = (u32)t + PAGE;
     task_list = current_task;

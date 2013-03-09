@@ -116,7 +116,8 @@ do_all()
         if [ $1 == "qemu" ] 
         then 
 	    #$QEMU -no-kqemu -fda a.img -hda hd.img -m 128 -localtime -d exec,cpu,pcall;
-            $QEMU -fda a.img -hda hd.img -localtime -m 128;
+            $QEMU -fda a.img -hda fs.img -localtime -m 128;
+	    #$QEMU -hdb hd.img a.img -localtime -m 128;
         else
      	    $BOCHS -f $BOCHS_CONF -q;
         fi

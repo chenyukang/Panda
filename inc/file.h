@@ -14,6 +14,8 @@ struct file {
 };
 
 
+void file_init(void);
+
 struct file* file_alloc(void);
 struct file* file_dup(struct file* f);
 void file_close(struct file* f);

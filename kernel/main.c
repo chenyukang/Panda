@@ -16,6 +16,9 @@
 #include <test.h>
 #include <task.h>
 #include <time.h>
+#include <file.h>
+#include <sysfile.h>
+
 
 u32 init_esp_start;
 
@@ -39,6 +42,9 @@ void kmain(u32 init_stack) {
     timer_init();
     kb_init();
     mm_init();
+    buf_init();
+    file_init();
+    init_inodes();
     init_ide();
     init_multi_task();
     sti();
@@ -59,6 +65,7 @@ void kmain(u32 init_stack) {
     }
 #endif
 
+    test_file();
     int init = 0;
     while(1) {
         if(!init) {

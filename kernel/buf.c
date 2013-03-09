@@ -25,19 +25,25 @@ void buf_init() {
 
 static struct buf*
 buf_get(u32 dev, u32 sector) {
+    printk("in buf_get\n");
     struct buf* bp;
     acquire_lock(&bcache.lock);
+    printk("now try to get\n");
 
 loop:
-    for(bp = bcache.head.b_next; bp!=&bcache.head; bp = bp->b_next) {
+    for(bp = bcache.head.b_next; bp != &bcache.head; bp = bp->b_next) {
+#if 0
+        printk("step %d :%x %d %d  -> bp: %d %d\n",step++, (u32)bp, dev, sector,
+               bp->b_dev, bp->b_sector);
+#endif
         if(bp->b_dev == dev && bp->b_sector == sector) {
             if(! (bp->b_flag & B_BUSY) ) {
                 release_lock(&bcache.lock);
                 return bp;
             }
+            sleep(bp, &bcache.lock);
+            goto loop;
         }
-        sleep(bp, &bcache.lock);
-        goto loop;
     }
 
     for(bp = bcache.head.b_prev; bp != &bcache.head; bp = bp->b_prev) {
@@ -46,6 +52,7 @@ loop:
             bp->b_sector = sector;
             bp->b_flag = B_BUSY;
             release_lock(&bcache.lock);
+            printk("buf_get return\n");
             return bp;
         }
     }

@@ -31,6 +31,7 @@ struct hd_i_struct {
     unsigned int wpcom,lzone,ctl;
 };
 
+//static int havedisk1;
 static struct buf* ide_queue;
 
 struct hd_i_struct hd_inf[] = {{0,0,0,0,0,0},
@@ -45,7 +46,7 @@ static int waitfor_ready(int check_error) {
             break;
         }
     }
-    if(check_error & (( r & (IDE_DF|IDE_ERROR)) != 0))
+    if(check_error & (( r & (IDE_DF | IDE_ERROR)) != 0))
         return -1;
     return 0;
 }
@@ -69,24 +70,27 @@ void set_ready(struct buf* pb) {
 }
 
 void ide_start(struct buf* pb) {
-    u32         lba;
+    u32 lba;
+    
     if(pb == 0) {
         PANIC("ide_start for null buf");
     }
     struct hd_cmd cmd;
     if(pb->b_flag & B_READ)
         cmd.command = CMD_READ;
-    else cmd.command = CMD_WRITE;
+    else
+        cmd.command = CMD_WRITE;
     lba = pb->b_sector * BLK / PBLK;
     cmd.feature = 0;
     cmd.lba_low = lba & 0xFF;
     cmd.lba_mid = (lba >> 8) & 0xFF ;
     cmd.lba_high = (lba >> 16) & 0xFF;
     cmd.count = BLK/PBLK;
-    cmd.device = 0xE0 | ((lba >> 24) &0x0F); //alway for drive 0
+    cmd.device = 0xE0 | ((lba >> 24) & 0x0F); //alway for drive 0
     do_hd_cmd(&cmd);
     if(pb->b_flag & B_WRITE)
         outsl(0x1F0, pb->b_data, BLK/4);
+    printk("finish ide_start\n");
 }
 
 void hd_interupt_handler(void) {
@@ -105,19 +109,22 @@ void hd_interupt_handler(void) {
 }
 
 void hd_rw(struct buf* bp) {
+    printk("hd_rw\n");
     if(!(bp->b_flag & B_BUSY))
         PANIC("hd_rw: buf is not busy");
-    if(bp->b_dev != 0)
-        PANIC("hd_rw: error device number");
+    //if(bp->b_dev != 0)
+    //PANIC("hd_rw: error device number");
     bp->b_next = 0;
     struct buf* p = ide_queue;
     if( p == 0 ) {
-        ide_queue = p;
+        ide_queue = bp;
     } else {
         while(p->b_next != 0)  p = p->b_next;
         p->b_next = bp;
     }
+    printk("queue: %x bp: %x\n", (u32)ide_queue, (u32)bp);
     if(ide_queue == bp) {
+        printk("now haha begin ide_start\n");
         ide_start(bp);
     }
 }
@@ -160,6 +167,7 @@ static void print_identify_info(u16* hdinfo) {
 
 
 void init_hd() {
+
     void* bios = (void*)0x90080;
     /* get the number of divers, from the BIOS data area */
     hd_inf[0].cyl   = *(u16*)bios;
@@ -184,12 +192,26 @@ void init_hd() {
     cmd.device = MAKE_DEVICE_REG(0, 0, 0);
     do_hd_cmd(&cmd);
     waitfor_ready(0);
+
+#if 0
+    // Check if disk 1 is present
+    outb(0x1f6, 0xe0 | (1<<4));
+    for(i=0; i<1000; i++){
+        if(inb(0x1f7) != 0){
+            havedisk1 = 1;
+            printk("have disk1\n");
+            break;
+        }
+    }
+    // Switch back to disk 0.
+    //outb(0x1f6, 0xe0 | (0<<4));
+#endif
 }
 
 void init_ide() {
     printk("init_ide ...\n");
     init_hd();
     irq_install_handler(14, (isq_t)(&hd_interupt_handler));
-    //waitfor_ready(0);
+    waitfor_ready(0);
     ide_queue = 0;
 }

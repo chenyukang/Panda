@@ -44,7 +44,7 @@ void file_close(struct file* f) {
     f->type = FD_NONE;
 
     if(back.type == FD_INODE) {
-        iput(back.ip);
+        idrop(back.ip);
     }
 }
 

@@ -3,6 +3,7 @@
 #include <sysfile.h>
 #include <inode.h>
 #include <file.h>
+#include <string.h>
 
 extern task_t* current_task;
 
@@ -16,6 +17,18 @@ fd_alloc(struct file* f) {
         }
     }
     return -1;
+}
+
+int test_file() {
+    printk("test_file \n");
+    int fd = _open("README");
+    if(fd > 0) {
+        printk("open file: README\n");
+    }
+    else {
+        printk("failed to open file: README\n");
+    }
+    return 0;
 }
 
 int _open(char* name) {

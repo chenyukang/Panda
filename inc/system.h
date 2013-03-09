@@ -32,9 +32,11 @@
 #endif
 
 /* this panic just get into dead loop */
-#define  PANIC(Expression)                      \
-    printk("FATAL ERROR:%s\n", Expression);     \
-    while(1) ;                                  \
+#define  PANIC(Expression)                         \
+    {                                              \
+        printk("FATAL ERROR:%s\n", Expression);    \
+        while(1) ;                                 \
+    }                                              \
 
 
 /* This defines what the stack looks like after an ISR was running */

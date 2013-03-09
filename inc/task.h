@@ -15,6 +15,7 @@
 #include <page.h>
 #include <mutex.h>
 #include <spinlock.h>
+#include <inode.h>
 
 #define NOFILE 124
 
@@ -94,6 +95,7 @@ struct task {
     //struct _tss_ tss;
     struct task* next;
     void*  ofile[NOFILE];
+    struct inode *cwd;           // Current directory
     char name[24];  /* process name*/
 };
 
