@@ -11,6 +11,7 @@
 *.exe
 *.clang-completion-error
 *.h.gch
+.DS_Store
 TAGS
 GPATH
 GRTAGS
