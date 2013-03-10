@@ -273,7 +273,7 @@ void isr_handler(struct registers_t* regs) {
 
 void test_idt()
 {
-    asm volatile ("int $0xF");
+    asm volatile ("int $0xD");
     asm volatile ("int $0x04");
     asm volatile ("int $0x06");
 }

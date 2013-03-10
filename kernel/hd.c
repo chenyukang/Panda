@@ -11,6 +11,7 @@
  *******************************************************************************/
 
 #include <asm.h>
+#include <task.h>
 #include <system.h>
 #include <string.h>
 #include <hd.h>
@@ -31,8 +32,9 @@ struct hd_i_struct {
     unsigned int wpcom,lzone,ctl;
 };
 
-//static int havedisk1;
+static int havedisk1;
 static struct buf* ide_queue;
+static struct spinlock hdlock;
 
 struct hd_i_struct hd_inf[] = {{0,0,0,0,0,0},
                                {0,0,0,0,0,0}};
@@ -51,69 +53,61 @@ static int waitfor_ready(int check_error) {
     return 0;
 }
 
-void do_hd_cmd(struct hd_cmd* cmd) {
-    waitfor_ready(0);
-    outb(0x3F6, 0); //interrupt
-    /* Activate the Interrupt Enable (nIEN) bit */
-	outb(0x1F1,  cmd->feature);
-	outb(0x1F2,  cmd->count);
-	outb(0x1F3,  cmd->lba_low);
-	outb(0x1F4,  cmd->lba_mid);
-	outb(0x1F5,  cmd->lba_high);
-	outb(0x1F6,  cmd->device);
-	/* Write the command code to the Command Register */
-	outb(0x1F7,  cmd->command);
-}
-
-
 void set_ready(struct buf* pb) {
 }
 
-void ide_start(struct buf* pb) {
-    u32 lba;
-    
-    if(pb == 0) {
-        PANIC("ide_start for null buf");
-    }
-    struct hd_cmd cmd;
-    if(pb->b_flag & B_READ)
-        cmd.command = CMD_READ;
-    else
-        cmd.command = CMD_WRITE;
-    lba = pb->b_sector * BLK / PBLK;
-    cmd.feature = 0;
-    cmd.lba_low = lba & 0xFF;
-    cmd.lba_mid = (lba >> 8) & 0xFF ;
-    cmd.lba_high = (lba >> 16) & 0xFF;
-    cmd.count = BLK/PBLK;
-    cmd.device = 0xE0 | ((lba >> 24) & 0x0F); //alway for drive 0
-    do_hd_cmd(&cmd);
-    if(pb->b_flag & B_WRITE)
-        outsl(0x1F0, pb->b_data, BLK/4);
-    printk("finish ide_start\n");
+// Start the request for b.  Caller must hold idelock.
+static void
+ide_start(struct buf *b)
+{
+  if(b == 0)
+    PANIC("idestart");
+
+  waitfor_ready(0);
+  outb(0x3f6, 0);  // generate interrupt
+  outb(0x1f2, 1);  // number of sectors
+  outb(0x1f3, b->b_sector & 0xff);
+  outb(0x1f4, (b->b_sector >> 8) & 0xff);
+  outb(0x1f5, (b->b_sector >> 16) & 0xff);
+  outb(0x1f6, 0xe0 | ((b->b_dev&1)<<4) | ((b->b_sector>>24)&0x0f));
+  if(b->b_flag & B_DIRTY){
+      outb(0x1f7, CMD_WRITE);
+      outsl(0x1f0, b->b_data, 512/4);
+  } else {
+      outb(0x1f7, CMD_READ);
+  }
 }
 
 void hd_interupt_handler(void) {
+    acquire_lock(&hdlock);
     waitfor_ready(1);
-    struct buf* b = ide_queue;
-    if(b == 0) {
+    struct buf* bp = ide_queue;
+    if(bp == 0) {
+        release_lock(&hdlock);
         return;
     }
-    ide_queue = b->b_next;
-    if( b->b_flag & B_READ )
-        insl(0x1F0, b->b_data, BLK/4);
-    set_ready(b);
+    ide_queue = bp->b_next;
+
+    if(!(bp->b_flag & B_DIRTY) && waitfor_ready(1) >= 0)
+        insl(0x1F0, bp->b_data, 512/4);
+
+    bp->b_flag |= B_VALID;
+    bp->b_flag &= ~B_DIRTY;
+    
     if(ide_queue) {
         ide_start(ide_queue);
     }
+
+    release_lock(&hdlock);
 }
 
 void hd_rw(struct buf* bp) {
-    printk("hd_rw\n");
     if(!(bp->b_flag & B_BUSY))
         PANIC("hd_rw: buf is not busy");
-    //if(bp->b_dev != 0)
-    //PANIC("hd_rw: error device number");
+    if(bp->b_dev != 0 && havedisk1 == 0)
+        PANIC("hd_rw: error device number");
+    
+    acquire_lock(&hdlock);
     bp->b_next = 0;
     struct buf* p = ide_queue;
     if( p == 0 ) {
@@ -122,52 +116,19 @@ void hd_rw(struct buf* bp) {
         while(p->b_next != 0)  p = p->b_next;
         p->b_next = bp;
     }
-    printk("queue: %x bp: %x\n", (u32)ide_queue, (u32)bp);
     if(ide_queue == bp) {
-        printk("now haha begin ide_start\n");
         ide_start(bp);
     }
+    
+    while((bp->b_flag & (B_VALID|B_DIRTY)) != B_VALID) {
+        sleep(bp, &hdlock);
+    }
+    release_lock(&hdlock);
 }
-
-#if 0
-static void print_identify_info(u16* hdinfo) {
-	int i;
-    unsigned k;
-	char s[64];
-
-	struct iden_info_ascii {
-		int idx;
-		int len;
-		char * desc;
-	} iinfo[] = {{10, 20, "HD SN"}, /* Serial number in ASCII */
-                 {27, 40, "HD Model"} /* Model number in ASCII */ };
-
-	for (k = 0; k < sizeof(iinfo)/sizeof(iinfo[0]); k++) {
-		char * p = (char*)&hdinfo[iinfo[k].idx];
-		for (i = 0; i < iinfo[k].len/2; i++) {
-			s[i*2+1] = *p++;
-			s[i*2] = *p++;
-		}
-		s[i*2] = 0;
-		printk("%s: %s\n", iinfo[k].desc, s);
-	}
-
-	int capabilities = hdinfo[49];
-	printk("LBA supported: %s\n",
-	       (capabilities & 0x0200) ? "Yes" : "No");
-
-	int cmd_set_supported = hdinfo[83];
-	printk("LBA48 supported: %s\n",
-	       (cmd_set_supported & 0x0400) ? "Yes" : "No");
-
-	int sectors = ((int)hdinfo[61] << 16) + hdinfo[60];
-	printk("SECTORS: %d HD size: %d MB\n", sectors, sectors * 512 / 1000000);
-}
-#endif
-
 
 void init_hd() {
 
+    init_lock(&hdlock, "disklock");
     void* bios = (void*)0x90080;
     /* get the number of divers, from the BIOS data area */
     hd_inf[0].cyl   = *(u16*)bios;
@@ -180,20 +141,11 @@ void init_hd() {
     u32 hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
     printk("hd_size: %d KB\n", hd_size/1024);
 
-#if 0
-    printk("heads:%d\ncyl:%d\nwpcom:%d\nctl:%d\nlzone:%d\nsect:%d\n",
-           hd_inf[0].head, hd_inf[0].cyl, hd_inf[0].wpcom,
-           hd_inf[0].ctl, hd_inf[0].lzone, hd_inf[0].sect);
-#endif
-    
     irq_install_handler(14, (isq_t)(&hd_interupt_handler));
-
-    struct hd_cmd cmd;
-    cmd.device = MAKE_DEVICE_REG(0, 0, 0);
-    do_hd_cmd(&cmd);
     waitfor_ready(0);
 
-#if 0
+#if 1
+    int i;
     // Check if disk 1 is present
     outb(0x1f6, 0xe0 | (1<<4));
     for(i=0; i<1000; i++){
@@ -204,14 +156,13 @@ void init_hd() {
         }
     }
     // Switch back to disk 0.
-    //outb(0x1f6, 0xe0 | (0<<4));
+    outb(0x1f6, 0xe0 | (0<<4));
 #endif
 }
 
 void init_ide() {
     printk("init_ide ...\n");
     init_hd();
-    irq_install_handler(14, (isq_t)(&hd_interupt_handler));
     waitfor_ready(0);
     ide_queue = 0;
 }

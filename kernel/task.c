@@ -80,6 +80,7 @@ init_proc0() {
 #endif
 
 void init_multi_task() {
+    memset(procs, 0, sizeof(procs));
     init_proc0();
     init_task_table();
 }
@@ -134,21 +135,37 @@ void swtch_to(struct task *to){
     _do_swtch(&(from->cpu_s), &(to->cpu_s));
 }
 
-void switch_task() {
+void sched() {
     if(current_task == 0)
         return;
     struct task* next = current_task->next;
-
+    
+    while(!(next->stat == CREATED ||
+            next->stat == RUNNING))
+        next = next->next;
+    
     if(next != current_task) {
         swtch_to(next);
     }
 }
 
 void sleep(void* change, struct spinlock* lock) {
-    
+    if(current_task == 0) {
+        PANIC("sleep: no task");
+    }
+    if(lock == 0) {
+        PANIC("sleep: no lock");
+    }
+    current_task->chan = change;
+    current_task->stat = WAIT;
+    sched();
 }
 
 void wakeup(void* change) {
+    kassert(change);
+    struct task* t;
+    t = current_task;
 }
+
 
 

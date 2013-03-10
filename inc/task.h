@@ -59,7 +59,7 @@ struct proc_stack {
     u32 esp0, ss0;
 };
 
-enum _status {
+enum task_status {
     CREATED = 0,
     WAIT,
     RUNNING,
@@ -89,14 +89,15 @@ struct task {
     u32 eip;        /* instruction pointer */
     u32 stack_base;
     
-    enum _status stat;
+    enum task_status stat;
     struct cpu_state cpu_s;
     //struct pde* pg_dir;
     //struct _tss_ tss;
     struct task* next;
     void*  ofile[NOFILE];
     struct inode *cwd;           // Current directory
-    char name[24];  /* process name*/
+    void *chan;
+    char name[64];  /* process name*/
 };
 
 typedef struct task task_t;
@@ -107,11 +108,10 @@ struct task_table {
 };
 
 void init_multi_task();
-void switch_task();
+void sched();
 struct task* spawn(void* func);
 
 char* get_current_name();
-
 
 int fork();
 int getpid();

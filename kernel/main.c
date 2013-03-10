@@ -55,7 +55,7 @@ void kmain(u32 init_stack) {
     printk("addr: %x %d\n", p, v);
 #endif
 
-//    spawn((void*)do_init_job);
+    spawn((void*)do_init_job);
 #if 0
     int pid = fork();
     if(pid > 0) {
@@ -65,7 +65,9 @@ void kmain(u32 init_stack) {
     }
 #endif
 
+#if 0
     test_file();
+#endif
     int init = 0;
     while(1) {
         if(!init) {

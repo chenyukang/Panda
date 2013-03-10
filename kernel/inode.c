@@ -136,7 +136,6 @@ void ilock(struct inode* ip) {
     }
     if(!(ip->flags & I_VALID)) {
         bp = buf_read(ip->dev, IBLOCK(ip->inum));
-        printk("in ilock\n");
         dip = (struct dinode*)bp->b_data + ip->inum%IPB;
         printk("got type: %d\n", dip->type);
         ip->type = dip->type;
@@ -304,7 +303,6 @@ s32 dir_link(struct inode* dp, char* name, u32 inum) {
             
 static char*
 _skip(char* path, char* name) {
-    printk("now in _skip: %s\n", path);
     const char* s;
     int len;
 
@@ -316,12 +314,10 @@ _skip(char* path, char* name) {
         path++;
     len = path - s;
     len = len > DIRSIZ ? DIRSIZ : len;
-    printk("len: %d\n", len);
     memmove(name, s, len);
     name[len-1] = 0;
     while(*path == '/')
         path++;
-    printk("return _skip\n");
     return path;
 }
 
@@ -330,7 +326,7 @@ inode_namex(char* path, char* name, u32 parent) {
     struct inode* ip;
     struct inode* next;
 
-    printk("entering inode_namex: %s\n", path);
+    //printk("entering inode_namex: %s\n", path);
     if(*path == '/')
         ip = iget(ROOTDEV, ROOTINO);
     else
@@ -339,10 +335,8 @@ inode_namex(char* path, char* name, u32 parent) {
     kassert(ip);
     while((path = _skip(path, name)) != 0) {
         ilock(ip);
-        printk("now path: %d %d\n", ip->type, T_DIR);
         if(ip->type != T_DIR) {
             i_unlock_drop(ip);
-            printk("after dir\n");
             return 0;
         }
         if(parent && *path == '\0') {
@@ -350,7 +344,6 @@ inode_namex(char* path, char* name, u32 parent) {
             return ip;
         }
         if((next = dir_lookup(ip, name, 0)) == 0) {
-            printk("after dir_lookup\n");
             i_unlock_drop(ip);
             return 0;
         }
@@ -361,7 +354,7 @@ inode_namex(char* path, char* name, u32 parent) {
         idrop(ip);
         return 0;
     }
-    printk("return inode_name\n");
+    //printk("return inode_name\n");
     return ip;
 }
 
@@ -369,7 +362,6 @@ inode_namex(char* path, char* name, u32 parent) {
 struct inode* inode_name(char* path) {
     char name[DIRSIZ];
     memset(name, 0, sizeof(name));
-    printk("in inode_name: %s\n", path);
     return inode_namex(path, name, 0);
 }
 

@@ -99,7 +99,7 @@ void irq_handler(struct registers_t* r)
     *  interrupt controller too */
     outb(0x20, 0x20);
     if((r->cs & 3) == 3) {
-        switch_task();
+        sched();
     }
 }
 

@@ -41,7 +41,6 @@
                             "1:":"=a" (_v):"d" (port)); \
           _v;                                           \
       })
-
                        
 typedef long time_t;
 

@@ -20,9 +20,6 @@
 
 u16 inw (u16 _port);
 
-u8 inb (u16 _port);
-inline void outb (u16 _port, u8 _data);
-
 inline void write_nmi(u8 nmi);
 inline void enable_nmi(void);
 inline void disable_nmi(void);
@@ -98,6 +95,18 @@ static inline void native_halt(void)
     asm volatile("hlt": : :"memory");
 }
 
+static inline void outb(u16 port, u8 data)
+{
+  asm volatile("out %0,%1" : : "a" (data), "d" (port));
+}
+
+static inline u8 inb(u16 port) {
+  u8 data;
+
+  asm volatile("in %1,%0" : "=a" (data) : "d" (port));
+  return data;
+}
+
 static inline void
 outsl(int port, const void *addr, int cnt)
 {
@@ -156,14 +165,6 @@ xchg(volatile u32 *addr, u32 newval)
 
 void	port_read(u16 port, void* buf, int n);
 void	port_write(u16 port, void* buf, int n);
-
-#if 0
-#define port_read(port, buf, nr)                                        \
-    __asm__("cld;rep;insw"::"d"(port), "D"(buf), "c"(nr):"cx", "di")
-
-#define port_write(port, buf, nr) \
-    __asm__("cld;rep;outsw"::"d"(port), "S"(buf), "c"(nr):"cx", "si")
-#endif
 
 #endif
 
