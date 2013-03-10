@@ -10,13 +10,11 @@ start:
   pushl $argv
   pushl $init
   pushl $0  // where caller pc would be
-  movl $SYS_exec, %eax
+  movl $SYS_exec, %eax  // exec(argv, argc), where argv="/init"
   int $T_SYSCALL
 
-# for(;;) exit();
+#for(;;) 
 exit:
-  movl $SYS_exit, %eax
-  int $T_SYSCALL
   jmp exit
 
 # char init[] = "/init\0";
