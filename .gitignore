@@ -12,6 +12,7 @@
 *.clang-completion-error
 *.h.gch
 .DS_Store
+objs/
 TAGS
 GPATH
 GRTAGS

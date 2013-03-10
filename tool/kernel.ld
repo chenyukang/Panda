@@ -1,3 +1,4 @@
+
 ENTRY(kmain)
 SECTIONS {
     .text 0x0 : 

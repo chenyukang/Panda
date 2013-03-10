@@ -19,6 +19,7 @@ else
     ON_GCC="clang "
     LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
     OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
+    OBJDUMP="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objdump"
     QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386"
     BOCHS_CONF="./.bochs_mac"
 fi
@@ -43,7 +44,7 @@ do_compile() {
 	cmd="$NASM $BOOT/$f -o $OBJDIR/${f/.s/.O}"
 	echo $cmd; `$cmd`
     done
-
+    
     echo "building kernel"
     flist=`cd $KERNEL/; ls *.s;`
     `cd ../`
@@ -56,11 +57,16 @@ do_compile() {
 	fi
     done
 
+    $GCC $CFLAGS -nostdinc -I. -c $KERNEL/initcode.S -o $OBJDIR/initcode.o;
+    $LD  $LDFLAGS -N -e start -Ttext 0 -o $OBJDIR/initcode.out $OBJDIR/initcode.o;
+    $OBJCPY -S -O binary $OBJDIR/initcode.out $OBJDIR/initcode;
+    rm -rf $OBJDIR/initcode.o;
+
     flist=`cd $KERNEL/; ls *.c;`
     `cd ../`
     for f in $flist;
     do
-	cmd="$GCC $CFLAGS-c $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
+	cmd="$GCC $CFLAGS -c $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
             #echo $cmd;
 	`$cmd`;
 	if [ $? -ne 0 ]
@@ -79,11 +85,14 @@ do_link() {
 
     #head.O must puted at first
     objs=`ls *.o`
-    cmd="$LD head.O $objs -o kernel.elf -T ../$TOOL/kernel.ld"
-    echo $cmd; `$cmd`;
+    #cmd="$LD head.O $objs -b binary initcode -o kernel.bin -T ../$TOOL/kernel.ld"
+    cmd="$LD -m elf_i386 -T ../$TOOL/kernel.ld -o kernel.bin head.O $objs -b binary initcode"
+    #echo $cmd; 
+    `$cmd`;
 
-    cmd="$OBJCPY -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin"
-    echo $cmd; `$cmd`;
+    $OBJDUMP -t kernel.bin | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
+    #cmd="$OBJCPY -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin"
+    #echo $cmd; `$cmd`;
 
     if [ $? -ne 0 ]
     then

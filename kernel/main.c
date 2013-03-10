@@ -57,6 +57,12 @@ void kmain(u32 init_stack) {
     
     int init = 0;
     printk("proc name: %s\n", current_task->name);
+
+    extern char _binary_initcode_start[], _binary_initcode_size[];
+
+    printk("init_start: %x init_size: %x\n",
+           _binary_initcode_start, _binary_initcode_size);
+           
     while(1) {
         if(!init) {
             printk("kernel running ...\n");
