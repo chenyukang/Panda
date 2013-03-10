@@ -66,7 +66,6 @@ static void* _alloc(u32 size ) {
 //init page list, link free pages with a list 
 void init_pages() {
     u32 k;
-    printk("end addr--> %x\n", end_addr);
     page_nr = (end_addr)/(PAGE_SIZE);
     printk("page_nr: %d\n", page_nr);
     

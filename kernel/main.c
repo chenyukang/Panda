@@ -24,8 +24,10 @@ u32 init_esp_start;
 
 extern char __kimg_end__;
 extern u32 end_addr;
+extern task_t* current_task;
 
 void do_init_job();
+void do_init_Aojb();
 
 void kmain(u32 init_stack) {
 
@@ -47,38 +49,36 @@ void kmain(u32 init_stack) {
     init_inodes();
     init_ide();
     init_multi_task();
+    printk("proc name: %s\n", current_task->name);
     sti();
 
-#if 0
-    int* p = (int*)(end_addr + 0x20);
-    int v = *p;
-    printk("addr: %x %d\n", p, v);
-#endif
-
     spawn((void*)do_init_job);
-#if 0
-    int pid = fork();
-    if(pid > 0) {
-        printk("parent\n");
-    } else {
-        printk("child\n");
-    }
-#endif
-
-#if 0
-    test_file();
-#endif
+    spawn((void*)do_init_Aojb);
+    
     int init = 0;
+    printk("proc name: %s\n", current_task->name);
     while(1) {
         if(!init) {
-            init = 1;
             printk("kernel running ...\n");
+            init = 1;
         }
+        sti();
+        sched();
     }
 }
 
+static int bstep = 0;
 void do_init_job() {
-//    while(1) {
-        printk("job: B\n");
-//    }
+    printk("job B: %d\n", bstep++);
+    while(1) {
+        //printk("job B: %d\n", bstep++);
+    }
+}
+
+static int astep = 0;
+void do_init_Aojb() {
+    printk("job A: %d\n", astep++);
+    while(1) {
+        //printk("job A: %d\n", astep++);
+    }
 }

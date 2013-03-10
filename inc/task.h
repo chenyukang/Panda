@@ -13,7 +13,6 @@
 #define TASK_H
 
 #include <page.h>
-#include <mutex.h>
 #include <spinlock.h>
 #include <inode.h>
 
@@ -60,9 +59,11 @@ struct proc_stack {
 };
 
 enum task_status {
-    CREATED = 0,
+    UNUSED = 0,
+    CREATED,
     WAIT,
     RUNNING,
+    RUNNABLE,
     ZOMBIE,
     EXITING
 };
@@ -79,10 +80,10 @@ struct task {
     void* kstack_base;
     
     struct proc_heap heap;
-    
     u32 pid;        /* process id */
     u32 ppid;       /* parent id */
     s32 priority;   /* process priority */
+    u32 r_time;
 
     s32 exit_code;  /* exit code process exit */
     u32 esp, ebp;   /* stack and base pointers */
@@ -102,11 +103,6 @@ struct task {
 
 typedef struct task task_t;
 
-struct task_table {
-    struct mutex lock;
-    struct task* head;
-};
-
 void init_multi_task();
 void sched();
 struct task* spawn(void* func);
@@ -118,4 +114,5 @@ int getpid();
 
 void sleep(void* change, struct spinlock* lock);
 void wakeup(void* change);
+
 #endif

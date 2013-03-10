@@ -93,11 +93,12 @@ void hd_interupt_handler(void) {
 
     bp->b_flag |= B_VALID;
     bp->b_flag &= ~B_DIRTY;
+    wakeup(bp);
     
     if(ide_queue) {
         ide_start(ide_queue);
     }
-
+    
     release_lock(&hdlock);
 }
 
