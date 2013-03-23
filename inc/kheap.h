@@ -11,6 +11,7 @@
 
 #include <system.h>
 
+#if 0
 typedef void* type_t;
 typedef long Align ;
 
@@ -32,6 +33,7 @@ void kheap_init(void* start_addr, void* end_addr);
 void kfree(void* ap);
 void* kmalloc(u32 nbytes);
 void* kmalloc_align(u32 nbytes, u32 align);
+#endif
 
 #endif
 

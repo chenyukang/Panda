@@ -62,6 +62,7 @@ int test_detect_cpu() {
     return 1;
 }
 
+#if 0
 int test_kmalloc() {
     int k;
     for(k=0; k<10; k++) {
@@ -81,3 +82,4 @@ int test_kmalloc() {
     return 1;
 }
 
+#endif

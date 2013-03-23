@@ -14,12 +14,6 @@
 #include <task.h>
 
 //4kb
-#define  PAGE_SIZE             0x1000
-#define  PG_DIR_NR             1024
-#define  MAX_PAGE_NR           (0x8000000/PAGE_SIZE)
-#define  PAGE_ROUND_UP(addr)   (((addr + PAGE_SIZE - 1) & (-PAGE_SIZE)))
-#define  PAGE_ROUND_DWON(addr) ((addr) & (-PAGE_SIZE))
-#define  PG_ADDR(addr)         ((u32)(addr) & ~0xFFF)
 
 extern char __kimg_end__;
 
@@ -90,9 +84,9 @@ void init_pages() {
     }
     
     //fill this for danglig refs.
-    //for(k=free_page_nr; k<page_nr; k++) {
-        //memset((void*)(k*PAGE_SIZE), 1, PAGE_SIZE);
-    //   }
+    for(k=free_page_nr; k<page_nr; k++) {
+        memset((void*)(k*PAGE_SIZE), 1, PAGE_SIZE);
+    }
     printk("free pages: %d\n", page_nr - free_page_nr);
 }
 
@@ -127,7 +121,29 @@ struct page* alloc_page() {
     }
     return 0;
 }
+
+
+/* alloc_mem alloc PAGE_SIZE memory for use */
+u32 alloc_mem() {
+    struct page* pg = alloc_page();
+    return pg->pg_idx * PAGE_SIZE;
+}
+
+void free_mem(u32 addr) {
+    struct page* pg = find_page((addr >> 12));
+    free_page(pg);
+}
+
+
 /*========================end pyhsical page ========================== */
+
+
+struct pde* alloc_pde() {
+    struct page* p = alloc_page();
+    if(p == 0)
+        return 0;
+    return (struct pde*)(p->pg_idx * PAGE_SIZE);
+}
 
 struct pte*
 find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
@@ -141,17 +157,14 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
 #endif
     
     pde = &pg_dir[PDEX(vaddr)];
-    if(pde->pt_p == 0) { //not present
-        if(new == 0){
+    if((pde->pt_flags & PTE_P) == 0) { //not present
+        if(new == 0)
             return 0;
-        }
+
         pg = alloc_page();
-        if(pg == 0) {
+        if(pg == 0) 
             return 0;
-        }
-        pde->pt_p = 1;
-        pde->pt_pgsz = 1;
-        pde->pt_flag = 0;
+        pde->pt_flags = PTE_P | PTE_U | PTE_W;
         pde->pt_base = (pg->pg_idx);
         pte = (struct pte*)(pde->pt_base * PAGE_SIZE );
         memset(pte, 0, PAGE_SIZE);
@@ -168,8 +181,7 @@ int put_page(struct pde* pg_dir, u32 vaddr, struct page* pg) {
         return 0;
     kassert(pte);
     pte->pt_base = pg->pg_idx;
-    pte->pt_p = 1;
-    pte->pt_flag = 0;
+    pte->pt_flags |= PTE_P;
     flush_pgd(pg_dir);
     return 1;
 }
@@ -183,20 +195,18 @@ void copy_pgd(struct pde* from, struct pde* targ) {
     for(idx=k_dir_nr; idx<1024; idx++) {
         fpde = &(from[idx]);
         tpde = &(targ[idx]);
-        tpde->pt_p  = fpde->pt_p;
-        tpde->pt_flag = fpde->pt_flag;
-        tpde->pt_pgsz = fpde->pt_pgsz;
-        if(fpde->pt_p) {
+        tpde->pt_flags = fpde->pt_flags;
+        if(fpde->pt_flags & PTE_P) {
             fpte = (struct pte*)(fpde->pt_base * PAGE_SIZE);
             tpte = (struct pte*)(alloc_page()->pg_idx * PAGE_SIZE);
             tpte->pt_base = ((u32)tpte>>12);
             for(k=0; k<1024; k++) {
                 tpte[k].pt_base = fpte[k].pt_base;
-                tpte[k].pt_flag = fpte[k].pt_flag;
-                if(fpte[k].pt_p) {
+                tpte[k].pt_flags = fpte[k].pt_flags;
+                if(fpte[k].pt_flags & PTE_P) {
                     //turn off PTE_W 
-                    fpte[k].pt_flag &= (0x110);
-                    tpte[k].pt_flag &= (0x110);
+                    fpte[k].pt_flags &= ~PTE_W;
+                    tpte[k].pt_flags &= ~PTE_W;
                     page = find_page(fpte->pt_base);
                     page->pg_refcnt++;
                 }
@@ -211,15 +221,13 @@ void init_page_dir(struct pde* pg_dir) {
     memset(pg_dir, 0, sizeof(pg_dir[0])*1024);
     k_dir_nr = (end_addr)/(PAGE_SIZE*1024);
     for(k=0; k<k_dir_nr; k++) {
-        pg_dir[k].pt_base = k<<10;
-        pg_dir[k].pt_p = 1;    //present
-        pg_dir[k].pt_pgsz = 1; //4MB
-        pg_dir[k].pt_flag = 0; //system
+        pg_dir[k].pt_base  = k<<10;
+        pg_dir[k].pt_flags = PTE_P | PTE_W | PTE_PS;
     }
 
     for(k=k_dir_nr; k<1024; k++) {
-        pg_dir[k].pt_base = 0;
-        pg_dir[k].pt_flag = 1; //user
+        pg_dir[k].pt_base  = 0;
+        pg_dir[k].pt_flags = PTE_U;
     }
 }
 

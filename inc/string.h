@@ -12,6 +12,7 @@
 #include <system.h>
 
 void strcpy(char* dest, char* src);
+void strncpy(char* dest, char* src, size_t cnt);
 s32  strncmp(const char* v1, const char* v2, u32 n);
 
 void puts(const char* text);

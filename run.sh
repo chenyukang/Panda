@@ -86,13 +86,13 @@ do_link() {
     #head.O must puted at first
     objs=`ls *.o`
     #cmd="$LD head.O $objs -b binary initcode -o kernel.bin -T ../$TOOL/kernel.ld"
-    cmd="$LD -m elf_i386 -T ../$TOOL/kernel.ld -o kernel.bin head.O $objs -b binary initcode"
+    cmd="$LD -m elf_i386 -T ../$TOOL/kernel.ld -o kernel.elf head.O $objs "
     #echo $cmd; 
     `$cmd`;
 
-    $OBJDUMP -t kernel.bin | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
-    #cmd="$OBJCPY -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin"
-    #echo $cmd; `$cmd`;
+    #$OBJDUMP -t kernel.bin | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
+    cmd="$OBJCPY -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin"
+    echo $cmd; `$cmd`;
 
     if [ $? -ne 0 ]
     then

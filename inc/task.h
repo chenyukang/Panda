@@ -15,6 +15,7 @@
 #include <page.h>
 #include <spinlock.h>
 #include <inode.h>
+#include <vm.h>
 
 #define NOFILE 124
 
@@ -99,6 +100,7 @@ struct task {
     struct inode *cwd;           // Current directory
     void *chan;
     char name[64];  /* process name*/
+    struct vm           p_vm;
 };
 
 typedef struct task task_t;

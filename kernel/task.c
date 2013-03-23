@@ -26,14 +26,14 @@ struct {
 } proc_table;
 
 struct tss tss;
-struct task init_task;
 struct task* procs[PROC_NUM];
 
 extern struct pde pg_dir0;
 extern struct pde* cu_pg_dir;
 extern u32         init_esp_start;
 
-task_t* current_task = 0;
+//static struct task* init_task = 0;
+struct task* current_task = 0;
 
 extern u32 read_eip();
 extern void _do_swtch(struct cpu_state* fr, struct cpu_state* to);
@@ -200,3 +200,16 @@ void wakeup(void* change) {
 }
 
 
+#if 0
+void init_userproc() {
+    struct task* p;
+    extern char _binary_initcode_start[];
+    extern char _binary_initcode_size[];
+    init_task = p = alloc_proc();
+    p->pg_dir = (struct pde*)alloc_pde();
+    copy_pgd(current_task->pd_dir, p->pg_dir);
+    memset(p->tf, 0 , sizeof(*p->tf));
+    p->cwd = nameid("/");
+    p->stat = RUNNABLE;
+}
+#endif

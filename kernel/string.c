@@ -27,6 +27,14 @@ void strcpy(char* dest, char* src) {
     }
 }
 
+
+void strncpy(char* dest, char* src, size_t cnt) {
+    while(cnt && (*dest++ = *src++))
+        cnt--;
+    if(cnt > 0)
+        *dest++ = '\0';
+}
+
 /* ignore overlap */
 void* memcpy(void *dest, const void *src, size_t cnt) {
     const unsigned char *sp = (const unsigned char *)src;

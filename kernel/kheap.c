@@ -10,6 +10,7 @@
 #include <page.h>
 #include <string.h>
 
+#if 0
 #define MINI_NALLOC 1024
 
 static u32 kheap_start_addr;
@@ -126,3 +127,4 @@ void* kmalloc(u32 nbytes) {
     return kmalloc_align(nbytes, 0);
 }
 
+#endif

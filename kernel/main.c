@@ -58,10 +58,10 @@ void kmain(u32 init_stack) {
     int init = 0;
     printk("proc name: %s\n", current_task->name);
 
-    extern char _binary_initcode_start[], _binary_initcode_size[];
+//    extern char _binary_initcode_start[], _binary_initcode_size[];
 
-    printk("init_start: %x init_size: %x\n",
-           _binary_initcode_start, _binary_initcode_size);
+//    printk("init_start: %x init_size: %x\n",
+//           _binary_initcode_start, _binary_initcode_size);
            
     while(1) {
         if(!init) {
@@ -72,6 +72,7 @@ void kmain(u32 init_stack) {
         sched();
     }
 }
+
 
 static int bstep = 0;
 void do_init_job() {
