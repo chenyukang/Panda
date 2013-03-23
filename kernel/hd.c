@@ -69,7 +69,7 @@ ide_start(struct buf *b)
   outb(0x1f3, b->b_sector & 0xff);
   outb(0x1f4, (b->b_sector >> 8) & 0xff);
   outb(0x1f5, (b->b_sector >> 16) & 0xff);
-  outb(0x1f6, 0xe0 | ((b->b_dev&1)<<4) | ((b->b_sector>>24)&0x0f));
+  outb(0x1f6, 0xe0 | ((b->b_dev&1)<<4) | ((b->b_sector>>24) & 0x0f));
   if(b->b_flag & B_DIRTY){
       outb(0x1f7, CMD_WRITE);
       outsl(0x1f0, b->b_data, 512/4);
@@ -79,17 +79,22 @@ ide_start(struct buf *b)
 }
 
 void hd_interupt_handler(void) {
-    acquire_lock(&hdlock);
+    printk("in hd_interupt_handler\n");
+    //acquire_lock(&hdlock);
     waitfor_ready(1);
+    printk("now first\n");
     struct buf* bp = ide_queue;
     if(bp == 0) {
-        release_lock(&hdlock);
+        printk("returning\n");
+        //release_lock(&hdlock);
         return;
     }
     ide_queue = bp->b_next;
 
-    if(!(bp->b_flag & B_DIRTY) && waitfor_ready(1) >= 0)
+    if(!(bp->b_flag & B_DIRTY) && waitfor_ready(1) >= 0){
+        printk("in haha\n");
         insl(0x1F0, bp->b_data, 512/4);
+    }
 
     bp->b_flag |= B_VALID;
     bp->b_flag &= ~B_DIRTY;
@@ -99,7 +104,7 @@ void hd_interupt_handler(void) {
         ide_start(ide_queue);
     }
     
-    release_lock(&hdlock);
+    //release_lock(&hdlock);
 }
 
 void hd_rw(struct buf* bp) {
@@ -121,7 +126,7 @@ void hd_rw(struct buf* bp) {
         ide_start(bp);
     }
     
-    while((bp->b_flag & (B_VALID|B_DIRTY)) != B_VALID) {
+    while((bp->b_flag & (B_VALID | B_DIRTY)) != B_VALID) {
         sleep(bp, &hdlock);
     }
     release_lock(&hdlock);
@@ -131,6 +136,7 @@ void init_hd() {
 
     init_lock(&hdlock, "disklock");
     void* bios = (void*)0x90080;
+    
     /* get the number of divers, from the BIOS data area */
     hd_inf[0].cyl   = *(u16*)bios;
     hd_inf[0].head  = *(u8*)(2+bios);
@@ -142,7 +148,7 @@ void init_hd() {
     u32 hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
     printk("hd_size: %d KB\n", hd_size/1024);
 
-    irq_install_handler(14, (isq_t)(&hd_interupt_handler));
+    irq_install_handler(32+14, (isq_t)(&hd_interupt_handler));
     waitfor_ready(0);
 
 #if 1

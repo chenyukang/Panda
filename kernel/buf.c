@@ -52,7 +52,6 @@ loop:
             bp->b_sector = sector;
             bp->b_flag = B_BUSY;
             release_lock(&bcache.lock);
-            printk("buf_get return\n");
             return bp;
         }
     }

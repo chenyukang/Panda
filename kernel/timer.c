@@ -29,9 +29,9 @@ static void timer_callback(void) {
     }
 
     if(ticks%20 == 0){
-        printk("begin switch\n");
+        //printk("begin switch\n");
         sched();
-        printk("end switch\n");
+        //printk("end switch\n");
     }
 }
 

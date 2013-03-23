@@ -84,8 +84,8 @@ int do_exec(char* path, char** argv) {
     u32 esp, argc;
     
     ip = inode_name(path);
+    printk("now ip: %x\n", (unsigned)ip);
     if(ip == 0) {
-        idrop(ip);
         return -1;
     }
 

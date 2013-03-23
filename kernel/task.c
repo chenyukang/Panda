@@ -131,7 +131,7 @@ struct task* spawn(void* func) {
     return new_task;
 }
 
-static int step = 0;
+//static int step = 0;
 void swtch_to(struct task *to){
     struct task *from;
     tss.esp0 = (u32)to + PAGE; 
@@ -142,12 +142,12 @@ void swtch_to(struct task *to){
     current_task = to;
     cu_pg_dir = to->pg_dir;
     flush_pgd(to->pg_dir);
-    printk("switch %d from: %s to %s\n", step++, from->name, to->name);
+    //printk("switch %d from: %s to %s\n", step++, from->name, to->name);
     _do_swtch(&(from->cpu_s), &(to->cpu_s));
 }
 
 void sched() {
-    printk("sched\n");
+    //  printk("sched\n");
     int i, min;
     struct task* next = 0;
     struct task* t;
@@ -177,10 +177,11 @@ void sleep(void* change, struct spinlock* lock) {
 
     if(lock == 0)
         PANIC("sleep: no lock");
-
+    cli();
     acquire_lock(&proc_table.lock);
     current_task->chan = change;
     current_task->stat = WAIT;
+    sti();
     sched();
     release_lock(&proc_table.lock);
 }
@@ -190,13 +191,13 @@ void wakeup(void* change) {
     u32 i;
     if(change == 0) PANIC("wakeup: change error");
     
-    acquire_lock(&proc_table.lock);
+    //acquire_lock(&proc_table.lock);
     for(i=0; i<PROC_NUM; i++) {
         p = &proc_table.procs[i];
         if(p->stat == WAIT && p->chan == change)
             p->stat = RUNNABLE;
     }
-    release_lock(&proc_table.lock);
+    //release_lock(&proc_table.lock);
 }
 
 

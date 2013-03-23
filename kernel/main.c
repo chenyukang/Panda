@@ -18,7 +18,7 @@
 #include <time.h>
 #include <file.h>
 #include <sysfile.h>
-
+#include <exec.h>
 
 u32 init_esp_start;
 
@@ -28,6 +28,8 @@ extern task_t* current_task;
 
 void do_init_job();
 void do_init_Aojb();
+
+void init_user();
 
 void kmain(u32 init_stack) {
 
@@ -52,16 +54,12 @@ void kmain(u32 init_stack) {
     printk("proc name: %s\n", current_task->name);
     sti();
 
-    spawn((void*)do_init_job);
-    spawn((void*)do_init_Aojb);
-    
+    //spawn((void*)do_init_job);
+    //spawn((void*)do_init_Aojb);
+
+    spawn(init_user);
+
     int init = 0;
-    printk("proc name: %s\n", current_task->name);
-
-//    extern char _binary_initcode_start[], _binary_initcode_size[];
-
-//    printk("init_start: %x init_size: %x\n",
-//           _binary_initcode_start, _binary_initcode_size);
            
     while(1) {
         if(!init) {
@@ -74,12 +72,17 @@ void kmain(u32 init_stack) {
 }
 
 
+void init_user() {
+    do_exec("/init", NULL);
+    for(; ; );
+}
+
 static int bstep = 0;
 void do_init_job() {
     printk("job B: %d\n", bstep++);
-    while(1) {
+    //while(1) {
         //printk("job B: %d\n", bstep++);
-    }
+   //}
 }
 
 static int astep = 0;
