@@ -26,11 +26,13 @@ extern char __kimg_end__;
 extern u32 end_addr;
 extern task_t* current_task;
 
-void do_init_job();
-void do_init_Aojb();
+void do_init_Ajob();
+void do_init_Bjob();
+void do_init_Cjob();
 
 void init_user();
 
+int init = 0;
 void kmain(u32 init_stack) {
 
     init_esp_start = init_stack;
@@ -52,14 +54,15 @@ void kmain(u32 init_stack) {
     init_ide();
     init_multi_task();
     printk("proc name: %s\n", current_task->name);
+
+
+    spawn((void*)do_init_Ajob);
+    //spawn((void*)do_init_Ajob);
+    //spawn((void*)do_init_Cjob);
     sti();
+    //spawn(init_user);
 
-    //spawn((void*)do_init_job);
-    //spawn((void*)do_init_Aojb);
-
-    spawn(init_user);
-
-    int init = 0;
+    init = 0;
            
     while(1) {
         if(!init) {
@@ -77,18 +80,29 @@ void init_user() {
     for(; ; );
 }
 
-static int bstep = 0;
-void do_init_job() {
-    printk("job B: %d\n", bstep++);
-    //while(1) {
-        //printk("job B: %d\n", bstep++);
-   //}
-}
-
 static int astep = 0;
-void do_init_Aojb() {
+void do_init_Ajob() {
     printk("job A: %d\n", astep++);
     while(1) {
         //printk("job A: %d\n", astep++);
+        astep++;
+    }
+}
+
+static int bstep = 0;
+void do_init_Bjob() {
+    printk("job B: %d\n", bstep++);
+    while(1) {
+        //printk("job B: %d\n", bstep++);
+        bstep++;
+   }
+}
+
+static int cstep = 0;
+void do_init_Cjob() {
+    printk("job C: %d\n", cstep++);
+    while(1) {
+        cstep++;
+        //printk("job C: %d\n", cstep++);
     }
 }

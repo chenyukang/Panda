@@ -16,28 +16,28 @@
 #include <page.h>
 #include <asm.h>
 #include <string.h>
+#include <gdt.h>
 
 #define PROC_NUM 126
 #define PAGE 0x1000
+
 
 struct {
     struct spinlock lock;
     struct task procs[PROC_NUM];
 } proc_table;
 
-struct tss tss;
+struct tss_desc tss;
 struct task* procs[PROC_NUM];
 
 extern struct pde pg_dir0;
 extern struct pde* cu_pg_dir;
 extern u32         init_esp_start;
 
-//static struct task* init_task = 0;
 struct task* current_task = 0;
 
 extern u32 read_eip();
-extern void _do_swtch(struct cpu_state* fr, struct cpu_state* to);
-
+extern void _do_swtch(struct jmp_buf* from, struct jmp_buf* to);
 
 int getpid(void) {
     kassert(current_task);
@@ -75,13 +75,6 @@ repeat:
     return id;
 }
 
-static void loopfunc() {
-    printk("init\n");
-    while(1) {
-        //printk("init\n");
-    }
-}
-
 static void init_proc0() {
     struct task* t = current_task = alloc_proc();
     t->pid = next_pid();
@@ -91,11 +84,9 @@ static void init_proc0() {
     t->next = 0;
     t->r_time = 0;
     t->cwd = inode_name("/");
-    t->cpu_s.eip = (u32)(loopfunc);
-    t->cpu_s.esp = (u32)t + PAGE;
-    strcpy(t->name, "init");
-    tss.ss0 = 2<<3;
+    tss.ss0  = KERN_DS;
     tss.esp0 = (u32)t + PAGE;
+    strcpy(t->name, "init");
 }
 
 static void init_proctable() {
@@ -114,26 +105,29 @@ struct task* spawn(void* func) {
     cli();
     struct task *parent, *new_task;
     parent = current_task;
+    //parent = &(proc_table.procs[0]);
     new_task = alloc_proc();
     new_task->pid = next_pid();
     new_task->ppid = parent->pid;
     new_task->pg_dir = current_task->pg_dir;
-    new_task->cpu_s = parent->cpu_s;
-    new_task->cpu_s.eip = (u32)(func);
-    new_task->cpu_s.esp = (u32)new_task + PAGE;
+    new_task->p_context = parent->p_context;
+    new_task->p_context.eip = (u32)func;
+    new_task->p_context.esp = (u32)new_task+PAGE;
     new_task->stat = RUNNABLE;
     new_task->r_time = 0;
     if(new_task->pid == 2)
         strcpy(new_task->name, "proc2");
-    else
+    else if(new_task->pid == 3)
         strcpy(new_task->name, "proc3");
+    else strcpy(new_task->name, "proc4");
     sti();
     return new_task;
 }
 
-//static int step = 0;
+static int step = 0;
 void swtch_to(struct task *to){
     struct task *from;
+    tss.ss0  = KERN_DS;
     tss.esp0 = (u32)to + PAGE; 
     from = current_task;
     from->stat = RUNNABLE;
@@ -142,12 +136,12 @@ void swtch_to(struct task *to){
     current_task = to;
     cu_pg_dir = to->pg_dir;
     flush_pgd(to->pg_dir);
-    //printk("switch %d from: %s to %s\n", step++, from->name, to->name);
-    _do_swtch(&(from->cpu_s), &(to->cpu_s));
+    printk("switch %d from: %s to %s\n", step++, from->name, to->name);
+    _do_swtch(&(from->p_context), &(to->p_context));
+    //_do_swtch(&(from->cpu_s), &(to->cpu_s));
 }
 
 void sched() {
-    //  printk("sched\n");
     int i, min;
     struct task* next = 0;
     struct task* t;
@@ -157,8 +151,7 @@ void sched() {
     min = -1;
     for(i=PROC_NUM-1; i>=0; i--) {
         t = &proc_table.procs[i];
-        if(t->stat != RUNNABLE || t == current_task ||
-           t->ppid == current_task->ppid)
+        if(t->stat != RUNNABLE || t == current_task ) 
             continue;
         else {
             if(min == -1 || t->r_time <= min) {

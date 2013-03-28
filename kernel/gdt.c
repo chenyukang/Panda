@@ -9,15 +9,47 @@
 #include <system.h>
 #include <string.h>
 #include <gdt.h>
+#include <asm.h>
+
+extern struct tss_desc tss;
 
 struct gdt_entry gdt[NR_GDTENTRY];
 struct gdt_ptr gp; //also in start.asm
 
 extern void gdt_flush();
 
+void set_seg(struct gdt_entry* seg, u32 base, u32 limit, u32 dpl, u32 type){
+    seg->limit_lo = ((limit) >> 12) & 0xffff;
+    seg->base_lo  = (base) & 0xffff;
+    seg->base_mi  = ((base) >> 16) & 0xff;
+    seg->type     = type;
+    seg->s        = 1;
+    seg->dpl      = dpl;
+    seg->present  = 1; 
+    seg->limit_hi = (u32) (limit) >> 28;
+    seg->avl      = 0;
+    seg->r        = 0;
+    seg->db       = 1;
+    seg->g        = 1;
+    seg->base_hi  = (base) >> 24;
+}
+
+void set_ldt(struct gdt_entry* seg, u32 base){
+    set_seg(seg, base, 0, 0, STS_LDT);
+    seg->limit_lo = 0x3;
+    seg->s = 0;
+}
+
+void set_tss(struct gdt_entry* seg, u32 base){
+    set_seg(seg, base, 0, 0, STS_TA);
+    seg->limit_lo = 0x68;
+    seg->s = 0;
+}
+
+#if 0
 /* Setup a descriptor in the Global Descriptor Table */
-void gdt_set_entry(int num, unsigned long base,
-                   unsigned long limit, u8 access, u8 gran) {
+void gdt_set_entry(u32 num, u32 base,
+                   u32 limit, u8 access, u8 gran) {
     gdt[num].base_low = (base & 0xFFFF);
     gdt[num].base_middle = (base >> 16) & 0xFF;
     gdt[num].base_high = (base >> 24) & 0xFF;
@@ -26,20 +58,21 @@ void gdt_set_entry(int num, unsigned long base,
     gdt[num].granularity |= (gran & 0xF0);
     gdt[num].access = access;
 }
+#endif
 
 void gdt_init(void) {
     puts("gdt_init ...\n");
     memset(gdt, 0, sizeof(gdt));
     gp.limit = (sizeof(struct gdt_entry) * NR_GDTENTRY) - 1;
-    gp.base = (unsigned int)&gdt;
+    gp.base = (u32)&gdt;
 
-    gdt_set_entry(0, 0, 0, 0, 0);    //Null gdt, this is just needed for some simulator 
-    gdt_set_entry(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); //code
-    gdt_set_entry(2, 0, 0xFFFFFFFF, 0x92, 0xCF); //data
-
-    gdt_set_entry(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); //user code
-    gdt_set_entry(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); //user data
-
-    /* flush GDT */
-    gdt_flush();  //asm volatile( "lgdt %0" :: "m"(gp));
+    set_seg(&gdt[1], 0, 0xffffffff, 0, STA_X | STA_R);
+    set_seg(&gdt[2], 0, 0xffffffff, 0, STA_W);
+    set_seg(&gdt[3], 0, 0xffffffff, 3, STA_X | STA_R);
+    set_seg(&gdt[4], 0, 0xffffffff, 3, STA_W);
+    set_tss(&gdt[5], (u32)&tss);
+    // load gdt
+    gdt_flush();
+    // load tss
+    ltr(5<<3);
 }

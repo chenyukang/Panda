@@ -19,19 +19,7 @@
 
 #define NOFILE 124
 
-struct cpu_state {
-    s32    eip;
-    s32    esp;
-    s32    ebx; // - callee registers
-    s32    ecx;
-    s32    edx;
-    s32    esi;
-    s32    edi;
-    s32    ebp;
-    u32   __sigmask;
-};
-
-struct tss {
+struct tss_desc {
     u32      link, esp0;
     u16      ss0, rsv_1;
     u32      esp1;
@@ -49,6 +37,20 @@ struct tss {
     u16      ldt,rsv_10;
     u16      trap, iomb;
 } __attribute__((packed));
+
+
+struct jmp_buf {
+    s32    eip;
+    s32    esp;
+    s32    ebx; // - callee registers
+    s32    ecx;
+    s32    edx;
+    s32    esi;
+    s32    edi;
+    s32    ebp;
+    u32   __sigmask;
+};
+
 
 struct proc_stack {
     u32 ds, es, fs, gs;
@@ -69,18 +71,21 @@ enum task_status {
     EXITING
 };
 
-struct proc_heap{
-    void* heap_base;
-    void* heap_top;
-};
-    
+struct trap {
+    int        gs, fs, es, ds;                             /* pushed the segs last */
+    int        edi, esi, ebp, _esp, ebx, edx, ecx, eax;    /* pushed by 'pusha', note the esp here is ignored. */
+    int        int_no, err_code;                           /* our 'push byte #' and ecodes do this */
+    int        eip, cs, eflags, esp, ss;                   /* pushed by the processor automatically */ 
+} __attribute__((packed));
+
+
 struct task {
     struct proc_stack* kstack;
     struct pde* pg_dir;
+    struct task* next;
     u32 privilege;
     void* kstack_base;
     
-    struct proc_heap heap;
     u32 pid;        /* process id */
     u32 ppid;       /* parent id */
     s32 priority;   /* process priority */
@@ -91,22 +96,21 @@ struct task {
     u32 eip;        /* instruction pointer */
     u32 stack_base;
     
-    enum task_status stat;
-    struct cpu_state cpu_s;
-    //struct pde* pg_dir;
-    //struct _tss_ tss;
-    struct task* next;
-    void*  ofile[NOFILE];
-    struct inode *cwd;           // Current directory
-    void *chan;
-    char name[64];  /* process name*/
+    enum task_status    stat;
+    struct inode*       cwd;           /* Current directory */
+    void*               ofile[NOFILE];
+    void*               chan;
+    char                name[64];              /* process name*/
     struct vm           p_vm;
+    struct jmp_buf      p_context;
+    struct trap*        p_trap;
 };
 
 typedef struct task task_t;
 
 void init_multi_task();
 void sched();
+
 struct task* spawn(void* func);
 
 char* get_current_name();

@@ -35,10 +35,16 @@ inline void disable_nmi(void);
 
 #define sti() __asm__ ("sti"::)
 #define cli() __asm__ ("cli"::)
+
+
+/* load TSS into tr */
+static inline void ltr(u32 n) {
+    asm volatile("ltr %%ax"::"a"(n));
+}
+
 /* ffs: if ret == 0 : no one bit found
    return index is begin with 1 */
-static inline int first_onebit(int x)
-{
+static inline int first_onebit(int x) {
     if (!x) {
         return 0;
     }
@@ -49,8 +55,7 @@ static inline int first_onebit(int x)
     }
 }
 
-static inline u32 native_irq_save(void)
-{
+static inline u32 native_irq_save(void) {
     u32 flags;
 
     /*
@@ -67,36 +72,30 @@ static inline u32 native_irq_save(void)
     return flags;
 }
 
-static inline void native_irq_restore(u32 flags)
-{
+static inline void native_irq_restore(u32 flags) {
     asm volatile("push %0 ; popf"
                  : /* no output */
                  :"g" (flags)
                  :"memory", "cc");
 }
 
-static inline void native_irq_disable(void)
-{
+static inline void native_irq_disable(void) {
     asm volatile("cli": : :"memory");
 }
 
-static inline void native_irq_enable(void)
-{
+static inline void native_irq_enable(void) {
     asm volatile("sti": : :"memory");
 }
 
-static inline void native_safe_halt(void)
-{
+static inline void native_safe_halt(void) {
     asm volatile("sti; hlt": : :"memory");
 }
 
-static inline void native_halt(void)
-{
+static inline void native_halt(void) {
     asm volatile("hlt": : :"memory");
 }
 
-static inline void outb(u16 port, u8 data)
-{
+static inline void outb(u16 port, u8 data) {
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
 
@@ -108,8 +107,7 @@ static inline u8 inb(u16 port) {
 }
 
 static inline void
-outsl(int port, const void *addr, int cnt)
-{
+outsl(int port, const void *addr, int cnt) {
   asm volatile("cld; rep outsl" :
                "=S" (addr), "=c" (cnt) :
                "d" (port), "0" (addr), "1" (cnt) :
@@ -117,8 +115,7 @@ outsl(int port, const void *addr, int cnt)
 }
 
 static inline void
-insl(int port, void *addr, int cnt)
-{
+insl(int port, void *addr, int cnt) {
   asm volatile("cld; rep insl" :
                "=D" (addr), "=c" (cnt) :
                "d" (port), "0" (addr), "1" (cnt) :
@@ -126,8 +123,7 @@ insl(int port, void *addr, int cnt)
 }
 
 static inline u32
-xchg(volatile u32 *addr, u32 newval)
-{
+xchg(volatile u32 *addr, u32 newval) {
   u32 result;
   
   // The + in "+m" denotes a read-modify-write operand.

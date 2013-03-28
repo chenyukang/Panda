@@ -19,19 +19,21 @@ u32 get_sys_ticks(void) {
     return ticks;
 }
 
+extern int init;
+
 static void timer_callback(void) {
     ticks++;
     if (ticks%18 == 0){
         cli();
         update_time();
         sti();
-        //print_time_local();
+        print_time_local();
     }
 
     if(ticks%20 == 0){
-        //printk("begin switch\n");
-        sched();
-        //printk("end switch\n");
+        if(init == 1) {
+            sched();
+        }
     }
 }
 
