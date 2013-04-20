@@ -65,101 +65,102 @@ xint(u32 x)
 int
 main(int argc, char *argv[])
 {
-  int i, cc, fd;
-  u32 rootino, inum, off;
-  struct dirent de;
-  char buf[512];
-  struct dinode din;
+    int i, cc, fd;
+    u32 rootino, inum, off;
+    struct dirent de;
+    char buf[512];
+    struct dinode din;
 
 
-  static_assert(sizeof(int) == 4, "Integers must be 4 bytes!");
+    static_assert(sizeof(int) == 4, "Integers must be 4 bytes!");
 
-  if(argc < 2){
-    fprintf(stderr, "Usage: mkfs fs.img files...\n");
-    exit(1);
-  }
-
-  assert((512 % sizeof(struct dinode)) == 0);
-  assert((512 % sizeof(struct dirent)) == 0);
-
-  fsfd = open(argv[1], O_RDWR|O_CREAT|O_TRUNC, 0666);
-  if(fsfd < 0){
-    perror(argv[1]);
-    exit(1);
-  }
-
-  sb.size = xint(size);
-  sb.nblocks = xint(nblocks); // so whole disk is size sectors
-  sb.ninodes = xint(ninodes);
-  sb.nlog = xint(nlog);
-
-  bitblocks = size/(512*8) + 1;
-  usedblocks = ninodes / IPB + 3 + bitblocks;
-  freeblock = usedblocks;
-
-  printf("used %d (bit %d ninode %zu) free %u log %u total %d\n", usedblocks,
-         bitblocks, ninodes/IPB + 1, freeblock, nlog, nblocks+usedblocks+nlog);
-
-  assert(nblocks + usedblocks + nlog == size);
-
-  for(i = 0; i < nblocks + usedblocks + nlog; i++)
-    wsect(i, zeroes);
-
-  memset(buf, 0, sizeof(buf));
-  memmove(buf, &sb, sizeof(sb));
-  wsect(1, buf);
-
-  rootino = ialloc(T_DIR);
-  assert(rootino == ROOTINO);
-
-  bzero(&de, sizeof(de));
-  de.inum = xshort(rootino);
-  strcpy(de.name, ".");
-  iappend(rootino, &de, sizeof(de));
-
-  bzero(&de, sizeof(de));
-  de.inum = xshort(rootino);
-  strcpy(de.name, "..");
-  iappend(rootino, &de, sizeof(de));
-
-  for(i = 2; i < argc; i++){
-    assert(index(argv[i], '/') == 0);
-
-    if((fd = open(argv[i], 0)) < 0){
-      perror(argv[i]);
-      exit(1);
+    if(argc < 2){
+        fprintf(stderr, "Usage: mkfs fs.img files...\n");
+        exit(1);
     }
-    
-    // Skip leading _ in name when writing to file system.
-    // The binaries are named _rm, _cat, etc. to keep the
-    // build operating system from trying to execute them
-    // in place of system binaries like rm and cat.
-    if(argv[i][0] == '_')
-      ++argv[i];
 
-    inum = ialloc(T_FILE);
+    assert((512 % sizeof(struct dinode)) == 0);
+    assert((512 % sizeof(struct dirent)) == 0);
+
+    fsfd = open(argv[1], O_RDWR|O_CREAT|O_TRUNC, 0666);
+    if(fsfd < 0){
+        perror(argv[1]);
+        exit(1);
+    }
+
+    sb.size = xint(size);
+    sb.nblocks = xint(nblocks); // so whole disk is size sectors
+    sb.ninodes = xint(ninodes);
+    sb.nlog = xint(nlog);
+
+    bitblocks = size/(512*8) + 1;
+    usedblocks = ninodes / IPB + 3 + bitblocks;
+    freeblock = usedblocks;
+
+    printf("used %d (bit %d ninode %zu) free %u log %u total %d\n", usedblocks,
+           bitblocks, ninodes/IPB + 1, freeblock, nlog, nblocks+usedblocks+nlog);
+
+    assert(nblocks + usedblocks + nlog == size);
+
+    for(i = 0; i < nblocks + usedblocks + nlog; i++)
+        wsect(i, zeroes);
+
+    memset(buf, 0, sizeof(buf));
+    memmove(buf, &sb, sizeof(sb));
+    wsect(1, buf);
+
+    rootino = ialloc(T_DIR);
+    assert(rootino == ROOTINO);
 
     bzero(&de, sizeof(de));
-    de.inum = xshort(inum);
-    strncpy(de.name, argv[i], DIRSIZ);
+    de.inum = xshort(rootino);
+    strcpy(de.name, ".");
     iappend(rootino, &de, sizeof(de));
 
-    while((cc = read(fd, buf, sizeof(buf))) > 0)
-      iappend(inum, buf, cc);
+    bzero(&de, sizeof(de));
+    de.inum = xshort(rootino);
+    strcpy(de.name, "..");
+    iappend(rootino, &de, sizeof(de));
 
-    close(fd);
-  }
+    for(i = 2; i < argc; i++){
+        printf("argv[%d]: %s\n", i, argv[i]);
+        assert(index(argv[i], '/') == 0);
 
-  // fix size of root inode dir
-  rinode(rootino, &din);
-  off = xint(din.size);
-  off = ((off/BSIZE) + 1) * BSIZE;
-  din.size = xint(off);
-  winode(rootino, &din);
+        if((fd = open(argv[i], 0)) < 0){
+            perror(argv[i]);
+            exit(1);
+        }
+    
+        // Skip leading _ in name when writing to file system.
+        // The binaries are named _rm, _cat, etc. to keep the
+        // build operating system from trying to execute them
+        // in place of system binaries like rm and cat.
+        if(argv[i][0] == '_')
+            ++argv[i];
 
-  balloc(usedblocks);
+        inum = ialloc(T_FILE);
 
-  exit(0);
+        bzero(&de, sizeof(de));
+        de.inum = xshort(inum);
+        strncpy(de.name, argv[i], DIRSIZ);
+        iappend(rootino, &de, sizeof(de));
+
+        while((cc = read(fd, buf, sizeof(buf))) > 0)
+            iappend(inum, buf, cc);
+
+        close(fd);
+    }
+
+    // fix size of root inode dir
+    rinode(rootino, &din);
+    off = xint(din.size);
+    off = ((off/BSIZE) + 1) * BSIZE;
+    din.size = xint(off);
+    winode(rootino, &din);
+
+    balloc(usedblocks);
+
+    exit(0);
 }
 
 void

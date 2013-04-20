@@ -5,6 +5,7 @@ INCLUDE="./inc"
 NASM="nasm -f elf -g"
 CFLAGS="-Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
 BOCHS="bochs"
+
 if [ `uname` = "Linux" ]; then
     GCC="gcc "
     ON_GCC="gcc"
@@ -57,10 +58,12 @@ do_compile() {
 	fi
     done
 
-    $GCC $CFLAGS -nostdinc -I. -c $KERNEL/initcode.S -o $OBJDIR/initcode.o;
-    $LD  $LDFLAGS -N -e start -Ttext 0 -o $OBJDIR/initcode.out $OBJDIR/initcode.o;
-    $OBJCPY -S -O binary $OBJDIR/initcode.out $OBJDIR/initcode;
-    rm -rf $OBJDIR/initcode.o;
+    # $GCC $CFLAGS -nostdinc -I. -c $KERNEL/initcode.S -o $OBJDIR/initcode.o;
+    # $LD  $LDFLAGS -N -e start -Ttext 0 -o $OBJDIR/initcode.out $OBJDIR/initcode.o;
+    # $OBJCPY -S -O binary $OBJDIR/initcode.out $OBJDIR/initcode;
+    # rm -rf $OBJDIR/initcode.o;
+    
+    $GCC $CFLAGS -nostdinc -I.  $KERNEL/init.c -o $OBJDIR/init;
 
     flist=`cd $KERNEL/; ls *.c;`
     `cd ../`
@@ -112,12 +115,13 @@ do_prepare_hd() {
     rm -rf hd.img;
     echo "making hard disk"
     #bximage hd.img -hd -mode=flat -size=10 -q;
-    ./tool/mkfs.exe hd.img README;
+    cp $OBJDIR/init ./;
+    ./tool/mkfs.exe hd.img init;
+    rm -rf init;
     #fi
 }
 
-do_all()
-{
+do_all() {
     do_clean && do_compile ;
     do_prepare_hd;
     if [ -f "a.img" ]
@@ -142,8 +146,7 @@ do_commit() {
     git push;
 }
 
-show_help()
-{
+show_help() {
     echo "-clean|x   : do clean"
     echo "-compile|c : do compile"
     echo "-all|a     : do above two, and run simulation"

@@ -105,11 +105,13 @@ struct task* spawn(void* func) {
     cli();
     struct task *parent, *new_task;
     parent = current_task;
-    //parent = &(proc_table.procs[0]);
     new_task = alloc_proc();
     new_task->pid = next_pid();
     new_task->ppid = parent->pid;
-    new_task->pg_dir = current_task->pg_dir;
+    new_task->pg_dir = (struct pde*)(alloc_pde());
+    init_page_dir(new_task->pg_dir);
+    copy_pgd(current_task->pg_dir, new_task->pg_dir);
+    //new_task->pg_dir = current_task->pg_dir;
     new_task->p_context = parent->p_context;
     new_task->p_context.eip = (u32)func;
     new_task->p_context.esp = (u32)new_task+PAGE;
@@ -135,7 +137,7 @@ void swtch_to(struct task *to){
     to->r_time++;
     current_task = to;
     cu_pg_dir = to->pg_dir;
-    flush_pgd(to->pg_dir);
+    flush_pgd(cu_pg_dir);
     printk("switch %d from: %s to %s\n", step++, from->name, to->name);
     _do_swtch(&(from->p_context), &(to->p_context));
     //_do_swtch(&(from->cpu_s), &(to->cpu_s));
@@ -174,9 +176,9 @@ void sleep(void* change, struct spinlock* lock) {
     acquire_lock(&proc_table.lock);
     current_task->chan = change;
     current_task->stat = WAIT;
+    release_lock(&proc_table.lock);
     sti();
     sched();
-    release_lock(&proc_table.lock);
 }
 
 void wakeup(void* change) {
@@ -185,11 +187,13 @@ void wakeup(void* change) {
     if(change == 0) PANIC("wakeup: change error");
     
     //acquire_lock(&proc_table.lock);
+    cli();
     for(i=0; i<PROC_NUM; i++) {
         p = &proc_table.procs[i];
         if(p->stat == WAIT && p->chan == change)
             p->stat = RUNNABLE;
     }
+    sti();
     //release_lock(&proc_table.lock);
 }
 

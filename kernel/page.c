@@ -150,6 +150,7 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
     struct pde* pde;
     struct pte* pte;
     struct page* pg;
+    
 #if 1
     if( vaddr < end_addr ) {
         PANIC("find_pte() error: invalid virtual address");

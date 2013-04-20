@@ -138,6 +138,7 @@ void ilock(struct inode* ip) {
         bp = buf_read(ip->dev, IBLOCK(ip->inum));
         dip = (struct dinode*)bp->b_data + ip->inum%IPB;
         printk("got type: %d\n", dip->type);
+        kassert(0);
         ip->type = dip->type;
         ip->major = dip->major;
         ip->minor = dip->minor;
@@ -261,6 +262,7 @@ dir_lookup(struct inode* dp, char* name, u32* poff) {
     u32 off;
     struct dirent dire;
     printk("in dir_lookup: %s\n", name);
+    kassert(0);
     if(dp->type != T_DIR)
         PANIC("dir_lookup: error type of inode ");
     for(off=0; off<dp->size; off+=sizeof(dire)) {
@@ -332,20 +334,24 @@ inode_namex(char* path, char* name, u32 parent) {
         ip = iget(ROOTDEV, ROOTINO);
     else
         ip = idup(current_task->cwd);
-    
+
     kassert(ip);
     while((path = _skip(path, name)) != 0) {
         printk("skip: %s\n", name);
         ilock(ip);
+        kassert(0);
         if(ip->type != T_DIR) {
+            kassert(0);
             i_unlock_drop(ip);
             return 0;
         }
         if(parent && *path == '\0') {
+            kassert(0);
             i_unlock_drop(ip);
             return ip;
         }
         printk("now before dir_lookup: %s\n", name);
+        kassert(0);
         if((next = dir_lookup(ip, name, 0)) == 0) {
             i_unlock_drop(ip);
             return 0;

@@ -65,6 +65,7 @@ struct page* alloc_page();
 struct page* find_page(u32 nr);
 struct pde* alloc_pde();
 
+void init_page_dir(struct pde* pg_dir);
 void free_page(struct page* pg);
 void copy_pgd(struct pde* from, struct pde* targ);
 

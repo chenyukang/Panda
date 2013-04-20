@@ -55,15 +55,10 @@ void kmain(u32 init_stack) {
     init_multi_task();
     printk("proc name: %s\n", current_task->name);
 
-
-    spawn((void*)do_init_Ajob);
-    //spawn((void*)do_init_Ajob);
-    //spawn((void*)do_init_Cjob);
     sti();
-    //spawn(init_user);
+    spawn(init_user);
 
     init = 0;
-           
     while(1) {
         if(!init) {
             printk("kernel running ...\n");
