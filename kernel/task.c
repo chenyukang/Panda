@@ -30,11 +30,10 @@ struct {
 struct tss_desc tss;
 struct task* procs[PROC_NUM];
 
-extern struct pde pg_dir0;
+struct task*       current_task = 0;
+extern struct pde  pg_dir0;
 extern struct pde* cu_pg_dir;
 extern u32         init_esp_start;
-
-struct task* current_task = 0;
 
 extern u32 read_eip();
 extern void _do_swtch(struct jmp_buf* from, struct jmp_buf* to);
@@ -162,23 +161,24 @@ void sched() {
             }
         }
     }
-    kassert(next);
-    swtch_to(next);
+    //kassert(next);
+    if(next) 
+        swtch_to(next);
 }
 
 void sleep(void* change, struct spinlock* lock) {
     if(current_task == 0)
         PANIC("sleep: no task");
-
     if(lock == 0)
         PANIC("sleep: no lock");
+    
     cli();
     acquire_lock(&proc_table.lock);
     current_task->chan = change;
     current_task->stat = WAIT;
     release_lock(&proc_table.lock);
     sti();
-    sched();
+    //sched();
 }
 
 void wakeup(void* change) {

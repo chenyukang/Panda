@@ -15,6 +15,7 @@ void buf_init() {
     /* now link all buffers with link list */
     for(bp = bcache.buf; bp < bcache.buf+NBUF; bp++) {
         bp->b_next = bcache.head.b_next;
+        //printk("now: %d %x\n", (u32)bp, (u32)bp->b_next);
         bp->b_prev = &bcache.head;
         bp->b_dev  = -1;
         bcache.head.b_next->b_prev = bp;
@@ -25,10 +26,10 @@ void buf_init() {
 
 static struct buf*
 buf_get(u32 dev, u32 sector) {
-    printk("in buf_get\n");
+    printk("dev: %d sector: %d\n", dev, sector);
+    u32 step = 0;
     struct buf* bp;
     acquire_lock(&bcache.lock);
-    printk("now try to get\n");
 
 loop:
     for(bp = bcache.head.b_next; bp != &bcache.head; bp = bp->b_next) {
@@ -36,6 +37,9 @@ loop:
         printk("step %d :%x %d %d  -> bp: %d %d\n",step++, (u32)bp, dev, sector,
                bp->b_dev, bp->b_sector);
 #endif
+        if(step == 126) {
+            kassert(0);
+        }
         if(bp->b_dev == dev && bp->b_sector == sector) {
             if(! (bp->b_flag & B_BUSY) ) {
                 release_lock(&bcache.lock);
@@ -45,7 +49,7 @@ loop:
             goto loop;
         }
     }
-
+    
     for(bp = bcache.head.b_prev; bp != &bcache.head; bp = bp->b_prev) {
         if((bp->b_flag & B_BUSY) == 0 && (bp->b_flag & B_DIRTY) == 0) {
             bp->b_dev = dev;

@@ -13,7 +13,8 @@
 struct buf {
     u32             b_flag;
     struct buf*     b_next;
-    struct buf*     b_prev; 
+    struct buf*     b_prev;
+    struct buf*     b_qnext;
     s16             b_dev;
     u32             b_sector;
     char*           b_data;

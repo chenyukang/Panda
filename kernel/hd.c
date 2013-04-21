@@ -89,10 +89,9 @@ void hd_interupt_handler(void) {
         //release_lock(&hdlock);
         return;
     }
-    ide_queue = bp->b_next;
+    ide_queue = bp->b_qnext;
 
     if(!(bp->b_flag & B_DIRTY) && waitfor_ready(1) >= 0){
-        printk("in haha\n");
         insl(0x1F0, bp->b_data, 512/4);
     }
 
@@ -114,13 +113,13 @@ void hd_rw(struct buf* bp) {
         PANIC("hd_rw: error device number");
     
     acquire_lock(&hdlock);
-    bp->b_next = 0;
+    bp->b_qnext = 0;
     struct buf* p = ide_queue;
     if( p == 0 ) {
         ide_queue = bp;
     } else {
-        while(p->b_next != 0)  p = p->b_next;
-        p->b_next = bp;
+        while(p->b_qnext != 0)  p = p->b_qnext;
+        p->b_qnext = bp;
     }
     if(ide_queue == bp) {
         ide_start(bp);
