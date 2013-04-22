@@ -82,14 +82,12 @@ int do_exec(char* path, char** argv) {
     struct vm* vm;
     char** res;
     u32 esp, argc;
-    
+
     ip = inode_name(path);
-    printk("now ip: %x\n", (unsigned)ip);
     if(ip == 0) {
-        kassert(0);
         return -1;
     }
-
+    
     buf = buf_read(ip->dev, 0);
     head = (struct header*)buf->b_data;
     if(head->a_magic != NMAGIC ) {

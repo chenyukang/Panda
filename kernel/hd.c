@@ -58,10 +58,9 @@ void set_ready(struct buf* pb) {
 
 // Start the request for b.  Caller must hold idelock.
 static void
-ide_start(struct buf *b)
-{
+ide_start(struct buf *b) {
   if(b == 0)
-    PANIC("idestart");
+    PANIC("ide_start");
 
   waitfor_ready(0);
   outb(0x3f6, 0);  // generate interrupt
@@ -82,27 +81,26 @@ void hd_interupt_handler(void) {
     printk("in hd_interupt_handler\n");
     //acquire_lock(&hdlock);
     waitfor_ready(1);
-    printk("now first\n");
     struct buf* bp = ide_queue;
     if(bp == 0) {
         printk("returning\n");
         //release_lock(&hdlock);
         return;
     }
+    
     ide_queue = bp->b_qnext;
-
     if(!(bp->b_flag & B_DIRTY) && waitfor_ready(1) >= 0){
         insl(0x1F0, bp->b_data, 512/4);
+        printk("waiting...\n");
     }
 
     bp->b_flag |= B_VALID;
     bp->b_flag &= ~B_DIRTY;
     wakeup(bp);
-    
+
     if(ide_queue) {
         ide_start(ide_queue);
     }
-    
     //release_lock(&hdlock);
 }
 
@@ -112,13 +110,13 @@ void hd_rw(struct buf* bp) {
     if(bp->b_dev != 0 && havedisk1 == 0)
         PANIC("hd_rw: error device number");
     
-    acquire_lock(&hdlock);
+    //acquire_lock(&hdlock);
     bp->b_qnext = 0;
     struct buf* p = ide_queue;
     if( p == 0 ) {
         ide_queue = bp;
     } else {
-        while(p->b_qnext != 0)  p = p->b_qnext;
+        while(p->b_qnext != 0)  p = p->b_qnext;  //put at the end
         p->b_qnext = bp;
     }
     if(ide_queue == bp) {
@@ -128,7 +126,7 @@ void hd_rw(struct buf* bp) {
     while((bp->b_flag & (B_VALID | B_DIRTY)) != B_VALID) {
         sleep(bp, &hdlock);
     }
-    release_lock(&hdlock);
+    //release_lock(&hdlock);
 }
 
 void init_hd() {
@@ -164,6 +162,7 @@ void init_hd() {
     // Switch back to disk 0.
     outb(0x1f6, 0xe0 | (0<<4));
 #endif
+    
 }
 
 void init_ide() {

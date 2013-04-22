@@ -71,7 +71,7 @@ void kmain(u32 init_stack) {
 
 
 void init_user() {
-    //do_exec("/init", NULL);
+    do_exec("/init", NULL);
     for(; ; );
 }
 

@@ -49,8 +49,8 @@ char* get_current_name() {
 }
 
 struct task* alloc_proc() {
-    acquire_lock(&proc_table.lock);
     u32 i;
+    acquire_lock(&proc_table.lock);
     for(i=0; i<PROC_NUM; i++) {
         if(proc_table.procs[i].stat == UNUSED) {
             release_lock(&proc_table.lock);
@@ -128,7 +128,6 @@ struct task* spawn(void* func) {
 static int step = 0;
 void swtch_to(struct task *to){
     struct task *from;
-    tss.ss0  = KERN_DS;
     tss.esp0 = (u32)to + PAGE; 
     from = current_task;
     from->stat = RUNNABLE;
@@ -161,12 +160,12 @@ void sched() {
             }
         }
     }
-    //kassert(next);
     if(next) 
         swtch_to(next);
 }
 
 void sleep(void* change, struct spinlock* lock) {
+    printk("sleep...\n");
     if(current_task == 0)
         PANIC("sleep: no task");
     if(lock == 0)
@@ -178,15 +177,15 @@ void sleep(void* change, struct spinlock* lock) {
     current_task->stat = WAIT;
     release_lock(&proc_table.lock);
     sti();
-    //sched();
+    sched();
 }
 
 void wakeup(void* change) {
     struct task* p;
     u32 i;
-    if(change == 0) PANIC("wakeup: change error");
+    if(change == 0)
+        PANIC("wakeup: change error");
     
-    //acquire_lock(&proc_table.lock);
     cli();
     for(i=0; i<PROC_NUM; i++) {
         p = &proc_table.procs[i];
@@ -194,7 +193,6 @@ void wakeup(void* change) {
             p->stat = RUNNABLE;
     }
     sti();
-    //release_lock(&proc_table.lock);
 }
 
 

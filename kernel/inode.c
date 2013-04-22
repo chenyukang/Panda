@@ -261,6 +261,7 @@ dir_lookup(struct inode* dp, char* name, u32* poff) {
     u32 off;
     struct dirent dire;
     printk("in dir_lookup: %s\n", name);
+    kassert(0);
     if(dp->type != T_DIR)
         PANIC("dir_lookup: error type of inode ");
     for(off=0; off<dp->size; off+=sizeof(dire)) {
