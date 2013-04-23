@@ -48,11 +48,11 @@ char* get_current_name() {
 
 struct task* alloc_proc() {
     u32 i;
-    //acquire_lock(&proc_table.lock);
+    acquire_lock(&proc_table.lock);
 #if 0
     for(i=0; i<PROC_NUM; i++) {
         if(proc_table.procs[i].stat == UNUSED) {
-            //release_lock(&proc_table.lock);
+            release_lock(&proc_table.lock);
             return &proc_table.procs[i];
         }
     }
@@ -60,11 +60,11 @@ struct task* alloc_proc() {
     for(i=0; i<PROC_NUM; i++) {
         if(proc_table.procs[i] == 0) {
             proc_table.procs[i] = (struct task*)alloc_mem();
-            //release_lock(&proc_table.lock);
+            release_lock(&proc_table.lock);
             return proc_table.procs[i];
         }
     }
-    //release_lock(&proc_table.lock);
+    release_lock(&proc_table.lock);
     return 0;
 }
 

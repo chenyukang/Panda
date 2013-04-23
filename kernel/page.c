@@ -80,7 +80,7 @@ void init_pages() {
     }
     
     //fill this for danglig refs.
-#if 0
+#if 1
     for(k=free_page_nr; k<page_nr; k++) {
         memset((void*)(k*PAGE_SIZE), 1, PAGE_SIZE);
     }
@@ -149,12 +149,10 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
     struct pte* pte;
     struct page* pg;
     
-#if 1
     if( vaddr < end_addr ) {
         PANIC("find_pte() error: invalid virtual address");
     }
-#endif
-    
+
     pde = &pg_dir[PDEX(vaddr)];
     if((pde->pt_flags & PTE_P) == 0) { //not present
         if(new == 0)
