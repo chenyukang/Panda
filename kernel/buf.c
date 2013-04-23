@@ -44,7 +44,9 @@ loop:
                 //release_lock(&bcache.lock);
                 return bp;
             }
+            cli();
             sleep(bp, &bcache.lock);
+            sti();
             goto loop;
         }
     }
@@ -97,7 +99,7 @@ void buf_release(struct buf* bp) {
         PANIC("buf_release: error buf");
     
     //acquire_lock(&bcache.lock);
-    cli();
+
     bp->b_next->b_prev = bp->b_prev;
     bp->b_prev->b_next = bp->b_next;
     bp->b_next = bcache.head.b_next;
@@ -105,7 +107,7 @@ void buf_release(struct buf* bp) {
     bcache.head.b_next->b_prev = bp;
     bcache.head.b_next = bp;
     bp->b_flag &= ~B_BUSY;
-
+    cli();
     wakeup(bp);
     sti();
     

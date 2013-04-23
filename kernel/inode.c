@@ -93,8 +93,6 @@ iget(u32 dev, u32 inum) {
 }
 
 void iunlock(struct inode* ip) {
-    printk("flag: %d\n", ip->flags);
-    printk("ref_cnt: %d\n", ip->ref_cnt);
     if(ip == 0 ||  ip->ref_cnt < 1)
         PANIC("iunlock: invalid inode");
     ip->flags &= ~I_BUSY;
@@ -137,7 +135,6 @@ void ilock(struct inode* ip) {
     if(!(ip->flags & I_VALID)) {
         bp = buf_read(ip->dev, IBLOCK(ip->inum));
         dip = (struct dinode*)bp->b_data + ip->inum%IPB;
-        //printk("got type: %d\n", dip->type);
         ip->type = dip->type;
         ip->major = dip->major;
         ip->minor = dip->minor;
@@ -261,14 +258,12 @@ dir_lookup(struct inode* dp, char* name, u32* poff) {
     u32 off;
     struct dirent dire;
     //printk("in dir_lookup: %s\n", name);
-    kassert(0);
     if(dp->type != T_DIR)
         PANIC("dir_lookup: error type of inode ");
     for(off=0; off<dp->size; off+=sizeof(dire)) {
         if(readi(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
             PANIC("dir_lookup: error readi");
         if(dire.inum == 0) continue;
-        //printk("now dire.name: %s\n", dire.name);
         if(namecmp(name, dire.name) == 0) {
             if(poff)
                 *poff = off;
@@ -328,7 +323,6 @@ inode_namex(char* path, char* name, u32 parent) {
     struct inode* ip;
     struct inode* next;
 
-    printk("entering inode_namex: %s\n", path);
     if(*path == '/')
         ip = iget(ROOTDEV, ROOTINO);
     else
@@ -336,7 +330,6 @@ inode_namex(char* path, char* name, u32 parent) {
 
     kassert(ip);
     while((path = _skip(path, name)) != 0) {
-        printk("skip: %s\n", name);
         ilock(ip);
         if(ip->type != T_DIR) {
             i_unlock_drop(ip);
@@ -346,7 +339,6 @@ inode_namex(char* path, char* name, u32 parent) {
             i_unlock_drop(ip);
             return ip;
         }
-        //printk("now before dir_lookup: %s\n", name);
         if((next = dir_lookup(ip, name, 0)) == 0) {
             i_unlock_drop(ip);
             return 0;
@@ -358,7 +350,6 @@ inode_namex(char* path, char* name, u32 parent) {
         idrop(ip);
         return 0;
     }
-    printk("return inode_name\n");
     return ip;
 }
 

@@ -80,7 +80,7 @@ ide_start(struct buf *b) {
 void hd_interupt_handler(void) {
     //printk("in hd_interupt_handler:%d\n", hdlock.locked);
 
-    //acquire_lock(&hdlock);
+    acquire_lock(&hdlock);
     waitfor_ready(1);
     struct buf* bp = ide_queue;
     if(bp == 0) {
@@ -91,19 +91,16 @@ void hd_interupt_handler(void) {
     ide_queue = bp->b_qnext;
     if(!(bp->b_flag & B_DIRTY) && waitfor_ready(1) >= 0){
         insl(0x1F0, bp->b_data, 512/4);
-        printk("waiting ... \n");
     }
 
     bp->b_flag |= B_VALID;
     bp->b_flag &= ~B_DIRTY;
-    cli();
     wakeup(bp);
-    sti();
 
     if(ide_queue) {
         ide_start(ide_queue);
     }
-    //release_lock(&hdlock);
+    release_lock(&hdlock);
 }
 
 void hd_rw(struct buf* bp) {
@@ -113,7 +110,6 @@ void hd_rw(struct buf* bp) {
     if(bp->b_dev != 0 && havedisk1 == 0)
         PANIC("hd_rw: error device number");
     
-    //acquire_lock(&hdlock);
     bp->b_qnext = 0;
     struct buf* p = ide_queue;
     if( p == 0 ) {
@@ -128,7 +124,6 @@ void hd_rw(struct buf* bp) {
     while((bp->b_flag & (B_VALID | B_DIRTY)) != B_VALID) {
         sleep(bp, &hdlock);
     }
-//    release_lock(&hdlock);
 }
 
 void init_hd() {

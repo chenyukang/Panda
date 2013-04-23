@@ -90,6 +90,7 @@ int do_exec(char* path, char** argv) {
     }
     buf = buf_read(ip->dev, 0);
     head = (struct header*)buf->b_data;
+    printk("head: %x\n", head);
     if(head->a_magic != NMAGIC ) {
         goto error;
     }
@@ -115,7 +116,6 @@ int do_exec(char* path, char** argv) {
 error:
     buf_release(buf);
     idrop(ip);
-    kassert(0);
     return -1;
 }
 

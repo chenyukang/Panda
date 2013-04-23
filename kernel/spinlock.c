@@ -17,10 +17,9 @@ int holding(struct spinlock* lk) {
 /* as we just support one cpu, so this idle wait is uncessary,
    anyway keep it */
 void acquire_lock(struct spinlock* lk) {
-    printk("got lock: %s\n", lk->name);
     if(holding(lk)){
-        printk("acquire_lock: %s\n", lk->name);
-        PANIC("acquire_lock");
+        printk("acquire_lock error: %s\n", lk->name);
+        kassert(0);
     }
     cli();
     while(xchg(&lk->locked, 1) != 0)
@@ -29,9 +28,9 @@ void acquire_lock(struct spinlock* lk) {
 
 
 void release_lock(struct spinlock* lk) {
-    printk("release lock: %s\n", lk->name);
     if(!holding(lk)){
-        PANIC("try release un-acquired lock");
+        printk("release_lock error: %s\n", lk->name);
+        kassert(0);
     }
     xchg(&lk->locked, 0);
     sti();

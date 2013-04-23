@@ -134,7 +134,10 @@ struct task* spawn(void* func) {
     return new_task;
 }
 
-//static int step = 0;
+#define DEBUG_PROC 1
+#ifdef DEBUG_PROC
+static int step = 0;
+#endif
 void swtch_to(struct task *to){
     struct task *from = current_task;
     tss.esp0 = (u32)to + PAGE_SIZE; 
@@ -143,7 +146,9 @@ void swtch_to(struct task *to){
     to->r_time++;
     current_task = to;
     flush_pgd(to->pg_dir);
-//    printk("switch %d from: %s to %s\n", step++, from->name, to->name);
+#ifdef DEBUG_PROC
+    printk("switch %d from: %s to %s\n", step++, from->name, to->name);
+#endif
     _do_swtch(&(from->p_context), &(to->p_context));
 }
 
@@ -179,13 +184,13 @@ void sleep(void* change, struct spinlock* lock) {
     if(lock == 0)
         PANIC("sleep: no lock");
 
-    //acquire_lock(&proc_table.lock);
     cli();
     current_task->chan = change;
     current_task->stat = WAIT;
     sti();
-    //release_lock(&proc_table.lock);
+    
     sched();
+
 }
 
 void wakeup(void* change) {
@@ -194,7 +199,6 @@ void wakeup(void* change) {
 
     if(change == 0)
         PANIC("wakeup: change error");
-    
     for(i=0; i<PROC_NUM; i++) {
         p = proc_table.procs[i];
         if(p == 0) continue;

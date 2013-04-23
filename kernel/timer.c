@@ -27,10 +27,10 @@ static void timer_callback(void) {
         cli();
         update_time();
         sti();
-        print_time_local();
+        //print_time_local();
     }
 
-    if(ticks%32 == 0){
+    if(ticks%10 == 0){
         sched();
     }
 }

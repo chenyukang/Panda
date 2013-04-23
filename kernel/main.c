@@ -63,6 +63,7 @@ void kmain(u32 init_stack) {
             printk("kernel running ...\n");
             init = 1;
         }
+        sti();
         sched();
     }
 }
@@ -71,7 +72,7 @@ void kmain(u32 init_stack) {
 void init_user() {
     do_exec("/init", NULL);
     while(1) {
-        sched();
+        ;
     }
 }
 
