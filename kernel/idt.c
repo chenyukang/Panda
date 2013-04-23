@@ -9,6 +9,7 @@
 #include <system.h>
 #include <screen.h>
 #include <string.h>
+#include <task.h>
 #include <asm.h>
 
 /*
@@ -52,6 +53,8 @@ struct idt_ptr {
 /* The IDT table , used for interrupt */
 struct idt_entry idt[256];
 struct idt_ptr   idtp;
+isq_t irq_routines[256]; 
+
 
 /* This exists in 'start.asm', and is used to load our IDT */
 extern void idt_load();
@@ -145,9 +148,7 @@ const char* exception_messages[32] = {
 };
 
 /* similar with GDT */
-void idt_set(u8 k, size_t base,
-             u16 selector, u8 flags)
-{
+void idt_set(u8 k, size_t base, u16 selector, u8 flags) {
     /* The interrupt routine's base address */
     idt[k].base_lo = (base & 0xFFFF);
     idt[k].base_hi = (base >> 16) & 0xFFFF;
@@ -159,11 +160,22 @@ void idt_set(u8 k, size_t base,
     idt[k].flags = flags;
 }
 
-extern isq_t irq_routines[];
+void irq_enable(u8 irq){
+    u16 irq_mask = (inb(0xA0+1)<<8) + inb(0x20+1);
+    irq_mask &= ~(1<<irq);
+    outb(0x21, irq_mask);
+    outb(0xA1, irq_mask >> 8);
+}
+
+void irq_eoi(u32 nr) {
+    outb(0x20, 0x20);
+    if(nr >= 40) {
+        outb(0xA0, 0x20);
+    }
+}
 
 /* Installs the IDT */
-void idt_init()
-{
+void idt_init() {
     puts("idt_init ...\n");
     
     /* Sets the special IDT pointer up, just like in 'gdt.c' */
@@ -182,8 +194,9 @@ void idt_init()
     outb(0xA1, 0x02);
     outb(0x21, 0x01);
     outb(0xA1, 0x01);
-    outb(0x21, 0x0);
-    outb(0xA1, 0x0);
+    outb(0x21, 0xFF);
+    outb(0xA1, 0xFF);
+    irq_enable(2);
 
     /* Add any new ISRs to the IDT here using idt_set_gate */
     /* Points the processor's internal register to the new IDT */
@@ -244,36 +257,52 @@ void idt_init()
         :: "m"(idtp));
 
     asm volatile("sti");
-    memset(&irq_routines , 0, sizeof(isq_t)*256);
 }
 
-extern void page_fault_handler(struct registers_t* regs);
+
+/* This installs a custom IRQ handler for the given IRQ */
+void irq_install_handler(int irq, isq_t handler) {
+    irq_routines[irq] = handler;
+}
+
+/* This clears the handler for a given IRQ */
+void irq_uninstall_handler(int irq) {
+    irq_routines[irq] = 0;
+}
+
 // This gets called from our ASM interrupt handler stub.
-void isr_handler(struct registers_t* regs) {
+void hwint_handler(struct registers_t* regs) {
 #if 0
     puts("recieved interrupt: ");
     printk_hex(regs->int_no);
     puts("\n");
 #endif
 
+    if ((regs->cs & 3) == 3) {
+        current_task->p_trap = regs; 
+    }
+
     /* Find out if we have a custom handler to run for this
     *  IRQ, and then finally, run it */
     isq_t handler = irq_routines[regs->int_no];
-    if (handler) {
-        handler(regs);
-        return;
-    }
-
     /* Is this a fault whose number is from 0 to 31? */
     if (regs->int_no < 32) {
-        printk("no handler : %s\n", exception_messages[regs->int_no]);
-        for (;;);
+        if(handler)
+            handler(regs);
+    } else {
+        irq_eoi(regs->int_no);
+        if(handler)
+            handler(regs);
+    }   
+    
+    if((regs->cs & 3) == 3) {
+        sched();
     }
 }
 
-void test_idt()
-{
+void test_idt(){
     asm volatile ("int $0xD");
     asm volatile ("int $0x04");
     asm volatile ("int $0x06");
 }
+

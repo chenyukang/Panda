@@ -15,8 +15,7 @@
 static int shift_state = 0 ;
 
 /* Handles the keyboard interrupt */ 
-void keyboard_handler(void)
-{
+void keyboard_handler(void) {
     unsigned char scancode;
     scancode = inb(0x60); //read the data buffer
 
@@ -42,9 +41,9 @@ void keyboard_handler(void)
     }
 }
 
-void kb_init()
-{
+void kb_init() {
     puts("kb init ...\n");
+    irq_enable(1);
     irq_install_handler(33, (isq_t)(&keyboard_handler));
 }
 

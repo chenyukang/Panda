@@ -83,7 +83,7 @@ _do_swtch:
     cli                         ; Disable interrupts firstly.
     push byte 0                 ; Push a dummy error code.
     push byte %1                ; Push the interrupt number.
-    jmp isr_common_stub         ; Go to our common handler code.
+    jmp common_stub         ; Go to our common handler code.
 %endmacro
 
 ; This macro creates a stub for an ISR which passes it's own
@@ -93,7 +93,7 @@ _do_swtch:
   isr%1:
     cli                         ; Disable interrupts.
     push byte %1                ; Push the interrupt number
-    jmp isr_common_stub
+    jmp common_stub
 %endmacro
 
 ; This macro creates a stub for an IRQ - the first parameter is
@@ -104,7 +104,7 @@ _do_swtch:
     cli
     push byte 0
     push byte %2
-    jmp irq_common_stub
+    jmp common_stub
 %endmacro
 
 global isr14
@@ -164,24 +164,27 @@ IRQ  14,    46
 IRQ  15,    47
 	
 ; In isr.c
-extern isr_handler
+extern hwint_handler
 
-isr_common_stub:
+common_stub:
     pusha
     push ds
     push es
     push fs
     push gs
+    
     mov ax, 0x10   ; Load the Kernel Data Segment descriptor!
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
     mov eax, esp   ; Push us the stack
+    
     push eax
-    mov eax, isr_handler
+    mov eax, hwint_handler
     call eax       ; A special call, preserves the 'eip' register
     pop eax
+    
     pop gs
     pop fs
     pop es
@@ -189,35 +192,6 @@ isr_common_stub:
     popa
     add esp, 8     ; Cleans up the pushed error code and pushed ISR number
     iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
-
-extern irq_handler
-
-irq_common_stub:
-    pusha
-    push ds
-    push es
-    push fs
-    push gs
-
-    mov ax, 0x10
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    mov eax, esp
-
-    push eax
-    mov eax, irq_handler
-    call eax
-    pop eax
-
-    pop gs
-    pop fs
-    pop es
-    pop ds
-    popa
-    add esp, 8
-    iret
 
 extern page_fault_handler
 

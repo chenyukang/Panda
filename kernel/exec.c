@@ -85,15 +85,16 @@ int do_exec(char* path, char** argv) {
 
     ip = inode_name(path);
     if(ip == 0) {
+        kassert(0);
         return -1;
     }
-    
     buf = buf_read(ip->dev, 0);
     head = (struct header*)buf->b_data;
     if(head->a_magic != NMAGIC ) {
         goto error;
     }
 
+    kassert(0);
     res = store_argv(path, argv);
     
     vm = &current_task->p_vm;
@@ -108,11 +109,13 @@ int do_exec(char* path, char** argv) {
     buf_release(buf);
     idrop(ip);
     enter_user(vm->vm_entry, esp);
+    kassert(0);
     return 0;
 
 error:
     buf_release(buf);
     idrop(ip);
+    kassert(0);
     return -1;
 }
 

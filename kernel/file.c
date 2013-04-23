@@ -10,6 +10,7 @@ struct file file_buf[NFILE];
 
 
 void file_init(void) {
+    puts("file_init ...\n");
     memset(file_buf, 0, sizeof(file_buf));
 }
 

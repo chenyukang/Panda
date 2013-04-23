@@ -32,7 +32,6 @@ u32 k_dir_nr;     //this is number of page mapped by kernel
 void page_fault_handler(struct registers_t* regs);
 
 void flush_pgd(struct pde* pg_dir) {
-    cli();
     u32 cr0, cr4;
     // put page table addr
     cu_pg_dir = pg_dir;
@@ -45,7 +44,6 @@ void flush_pgd(struct pde* pg_dir) {
     asm volatile("mov %%cr0, %0": "=r"(cr0));
     cr0 |= 0x80000000;                        // enable paging!
     asm volatile("mov %0, %%cr0":: "r"(cr0));
-    sti();
 }
 
 /* ========================== begin pyhsical page =========================== */
@@ -61,12 +59,10 @@ static void* _alloc(u32 size ) {
 void init_pages() {
     u32 k;
     page_nr = (end_addr)/(PAGE_SIZE);
-    printk("page_nr: %d\n", page_nr);
-    
     pages = (struct page*)_alloc(sizeof(struct page) * page_nr);
     used_addr = PAGE_ROUND_UP(used_addr);
     free_page_nr = (used_addr)/0x1000;
-
+    
     for(k=0; k<free_page_nr; k++) { //this is used by kernel
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 1;
@@ -84,9 +80,11 @@ void init_pages() {
     }
     
     //fill this for danglig refs.
+#if 0
     for(k=free_page_nr; k<page_nr; k++) {
         memset((void*)(k*PAGE_SIZE), 1, PAGE_SIZE);
     }
+#endif
     printk("free pages: %d\n", page_nr - free_page_nr);
 }
 

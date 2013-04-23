@@ -3,6 +3,7 @@
 #include "string.h"
 #include "hd.h"
 #include "task.h"
+#include "asm.h"
 
 struct buf_cache bcache;
 
@@ -29,7 +30,7 @@ buf_get(u32 dev, u32 sector) {
     printk("dev: %d sector: %d\n", dev, sector);
     //u32 step = 0;
     struct buf* bp;
-    acquire_lock(&bcache.lock);
+    //acquire_lock(&bcache.lock);
 
 loop:
     for(bp = bcache.head.b_next; bp != &bcache.head; bp = bp->b_next) {
@@ -40,7 +41,7 @@ loop:
         if(bp->b_dev == dev && bp->b_sector == sector) {
             if(! (bp->b_flag & B_BUSY) ) {
                 bp->b_flag |= B_BUSY;
-                release_lock(&bcache.lock);
+                //release_lock(&bcache.lock);
                 return bp;
             }
             sleep(bp, &bcache.lock);
@@ -53,7 +54,8 @@ loop:
             bp->b_dev = dev;
             bp->b_sector = sector;
             bp->b_flag = B_BUSY;
-            release_lock(&bcache.lock);
+            //   printk("return: %x\n", (u32)bp);
+            //release_lock(&bcache.lock);
             return bp;
         }
     }
@@ -78,7 +80,9 @@ void buf_write(struct buf* bp) {
     kassert(bp);
     if((bp->b_flag & B_BUSY) == 0)
         PANIC("buf_write: error buf");
+    cli();
     bp->b_flag |= B_DIRTY;
+    sti();
     hd_rw(bp);
 }
 
@@ -92,7 +96,8 @@ void buf_release(struct buf* bp) {
     if((bp->b_flag & B_BUSY) == 0)
         PANIC("buf_release: error buf");
     
-    acquire_lock(&bcache.lock);
+    //acquire_lock(&bcache.lock);
+    cli();
     bp->b_next->b_prev = bp->b_prev;
     bp->b_prev->b_next = bp->b_next;
     bp->b_next = bcache.head.b_next;
@@ -100,9 +105,10 @@ void buf_release(struct buf* bp) {
     bcache.head.b_next->b_prev = bp;
     bcache.head.b_next = bp;
     bp->b_flag &= ~B_BUSY;
-    
+
     wakeup(bp);
+    sti();
     
-    release_lock(&bcache.lock);
+    //release_lock(&bcache.lock);
 }
 

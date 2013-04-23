@@ -45,7 +45,7 @@ struct registers_t {
     unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
     unsigned int int_no, err_code;
     unsigned int eip, cs, eflags, useresp, ss;    
-};
+} __attribute__((packed));
 
 typedef void (*isq_t) (struct registers_t* r);
 typedef void (*isr_t) (struct registers_t* r);
@@ -61,6 +61,8 @@ u32 get_sys_ticks(void);
 extern void gdt_init(void);
 extern void idt_init(void);
 extern void kb_init(void);
+extern void irq_enable(u8);
+extern void irq_eoi(u32);
 extern void test_idt();
 
 #endif

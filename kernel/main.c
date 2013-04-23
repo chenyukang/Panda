@@ -38,7 +38,6 @@ void kmain(u32 init_stack) {
     init_esp_start = init_stack;
     init_video();
     puts_color_str("Booting Panda OS ...\n", 0x0B);
-
     puts_color_str("Welcome ...\n", 0x0A);
 
     cli();
@@ -64,7 +63,6 @@ void kmain(u32 init_stack) {
             printk("kernel running ...\n");
             init = 1;
         }
-        sti();
         sched();
     }
 }
@@ -72,7 +70,9 @@ void kmain(u32 init_stack) {
 
 void init_user() {
     do_exec("/init", NULL);
-    for(; ; );
+    while(1) {
+        sched();
+    }
 }
 
 static int astep = 0;

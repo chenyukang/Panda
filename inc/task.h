@@ -71,13 +71,6 @@ enum task_status {
     EXITING
 };
 
-struct trap {
-    int        gs, fs, es, ds;                             /* pushed the segs last */
-    int        edi, esi, ebp, _esp, ebx, edx, ecx, eax;    /* pushed by 'pusha', note the esp here is ignored. */
-    int        int_no, err_code;                           /* our 'push byte #' and ecodes do this */
-    int        eip, cs, eflags, esp, ss;                   /* pushed by the processor automatically */ 
-} __attribute__((packed));
-
 
 struct task {
     struct proc_stack* kstack;
@@ -103,7 +96,7 @@ struct task {
     char                name[64];              /* process name*/
     struct vm           p_vm;
     struct jmp_buf      p_context;
-    struct trap*        p_trap;
+    struct registers_t* p_trap;
 };
 
 typedef struct task task_t;
@@ -112,9 +105,9 @@ void init_multi_task();
 void sched();
 
 struct task* spawn(void* func);
+extern struct task* current_task;
 
 char* get_current_name();
-
 int fork();
 int getpid();
 

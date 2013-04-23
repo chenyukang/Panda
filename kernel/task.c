@@ -19,16 +19,14 @@
 #include <gdt.h>
 
 #define PROC_NUM 126
-#define PAGE 0x1000
-
 
 struct {
     struct spinlock lock;
-    struct task procs[PROC_NUM];
+    struct task* procs[PROC_NUM];
 } proc_table;
 
 struct tss_desc tss;
-struct task* procs[PROC_NUM];
+//struct task* procs[PROC_NUM];
 
 struct task*       current_task = 0;
 extern struct pde  pg_dir0;
@@ -50,14 +48,23 @@ char* get_current_name() {
 
 struct task* alloc_proc() {
     u32 i;
-    acquire_lock(&proc_table.lock);
+    //acquire_lock(&proc_table.lock);
+#if 0
     for(i=0; i<PROC_NUM; i++) {
         if(proc_table.procs[i].stat == UNUSED) {
-            release_lock(&proc_table.lock);
+            //release_lock(&proc_table.lock);
             return &proc_table.procs[i];
         }
     }
-    release_lock(&proc_table.lock);
+#endif
+    for(i=0; i<PROC_NUM; i++) {
+        if(proc_table.procs[i] == 0) {
+            proc_table.procs[i] = (struct task*)alloc_mem();
+            //release_lock(&proc_table.lock);
+            return proc_table.procs[i];
+        }
+    }
+    //release_lock(&proc_table.lock);
     return 0;
 }
 
@@ -67,8 +74,8 @@ static u32 next_pid() {
 repeat:
     id++;
     for(i=0; i<PROC_NUM; i++) {
-        if(proc_table.procs[i].stat == UNUSED) continue;
-        if(proc_table.procs[i].pid == id)
+        if(proc_table.procs[i] == 0) continue;
+        if(proc_table.procs[i]->pid == id)
             goto repeat;
     }
     return id;
@@ -84,15 +91,15 @@ static void init_proc0() {
     t->r_time = 0;
     t->cwd = inode_name("/");
     tss.ss0  = KERN_DS;
-    tss.esp0 = (u32)t + PAGE;
+    tss.esp0 = (u32)t + PAGE_SIZE;
     strcpy(t->name, "init");
 }
 
 static void init_proctable() {
     init_lock(&proc_table.lock, "proc_table");
-    acquire_lock(&proc_table.lock);
+    //acquire_lock(&proc_table.lock);
     memset(proc_table.procs, 0, sizeof(proc_table.procs));
-    release_lock(&proc_table.lock);
+    //release_lock(&proc_table.lock);
 }
 
 void init_multi_task() {
@@ -107,13 +114,15 @@ struct task* spawn(void* func) {
     new_task = alloc_proc();
     new_task->pid = next_pid();
     new_task->ppid = parent->pid;
+#if 1
     new_task->pg_dir = (struct pde*)(alloc_pde());
     init_page_dir(new_task->pg_dir);
     copy_pgd(current_task->pg_dir, new_task->pg_dir);
+#endif
     //new_task->pg_dir = current_task->pg_dir;
     new_task->p_context = parent->p_context;
     new_task->p_context.eip = (u32)func;
-    new_task->p_context.esp = (u32)new_task+PAGE;
+    new_task->p_context.esp = (u32)new_task+PAGE_SIZE;
     new_task->stat = RUNNABLE;
     new_task->r_time = 0;
     if(new_task->pid == 2)
@@ -125,20 +134,17 @@ struct task* spawn(void* func) {
     return new_task;
 }
 
-static int step = 0;
+//static int step = 0;
 void swtch_to(struct task *to){
-    struct task *from;
-    tss.esp0 = (u32)to + PAGE; 
-    from = current_task;
+    struct task *from = current_task;
+    tss.esp0 = (u32)to + PAGE_SIZE; 
     from->stat = RUNNABLE;
     to->stat   = RUNNING;
     to->r_time++;
     current_task = to;
-    cu_pg_dir = to->pg_dir;
-    flush_pgd(cu_pg_dir);
-    printk("switch %d from: %s to %s\n", step++, from->name, to->name);
+    flush_pgd(to->pg_dir);
+//    printk("switch %d from: %s to %s\n", step++, from->name, to->name);
     _do_swtch(&(from->p_context), &(to->p_context));
-    //_do_swtch(&(from->cpu_s), &(to->cpu_s));
 }
 
 void sched() {
@@ -150,7 +156,8 @@ void sched() {
         return;
     min = -1;
     for(i=PROC_NUM-1; i>=0; i--) {
-        t = &proc_table.procs[i];
+        t = proc_table.procs[i];
+        if(t == 0) continue;
         if(t->stat != RUNNABLE || t == current_task ) 
             continue;
         else {
@@ -160,39 +167,41 @@ void sched() {
             }
         }
     }
-    if(next) 
+
+    if(next) {
         swtch_to(next);
+    }
 }
 
 void sleep(void* change, struct spinlock* lock) {
-    printk("sleep...\n");
     if(current_task == 0)
         PANIC("sleep: no task");
     if(lock == 0)
         PANIC("sleep: no lock");
-    
+
+    //acquire_lock(&proc_table.lock);
     cli();
-    acquire_lock(&proc_table.lock);
     current_task->chan = change;
     current_task->stat = WAIT;
-    release_lock(&proc_table.lock);
     sti();
+    //release_lock(&proc_table.lock);
     sched();
 }
 
 void wakeup(void* change) {
-    struct task* p;
     u32 i;
+    struct task* p;
+
     if(change == 0)
         PANIC("wakeup: change error");
     
-    cli();
     for(i=0; i<PROC_NUM; i++) {
-        p = &proc_table.procs[i];
-        if(p->stat == WAIT && p->chan == change)
+        p = proc_table.procs[i];
+        if(p == 0) continue;
+        if(p->stat == WAIT && p->chan == change) {
             p->stat = RUNNABLE;
+        }
     }
-    sti();
 }
 
 

@@ -3,7 +3,7 @@ BOOT="./boot"
 KERNEL="./kernel"
 INCLUDE="./inc"
 NASM="nasm -f elf -g"
-CFLAGS="-Wall -g -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+CFLAGS="-Wall -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
 BOCHS="bochs"
 
 if [ `uname` = "Linux" ]; then
@@ -105,6 +105,7 @@ do_link() {
 	echo "making a.img"
 	cmd="cat boot.bin setup.bin kernel.bin > ../a.img"
 	echo $cmd; cat boot.bin setup.bin kernel.bin > ../a.img;
+    ls -lh kernel.bin;
 	cd ../;
     fi
 }
@@ -174,5 +175,5 @@ do
 done
 
 
-do_all "qemu";
+do_all "bochs";
 show_help;

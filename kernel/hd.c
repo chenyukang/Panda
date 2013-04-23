@@ -78,25 +78,27 @@ ide_start(struct buf *b) {
 }
 
 void hd_interupt_handler(void) {
-    printk("in hd_interupt_handler\n");
+    //printk("in hd_interupt_handler:%d\n", hdlock.locked);
+
     //acquire_lock(&hdlock);
     waitfor_ready(1);
     struct buf* bp = ide_queue;
     if(bp == 0) {
-        printk("returning\n");
-        //release_lock(&hdlock);
+        release_lock(&hdlock);
         return;
     }
     
     ide_queue = bp->b_qnext;
     if(!(bp->b_flag & B_DIRTY) && waitfor_ready(1) >= 0){
         insl(0x1F0, bp->b_data, 512/4);
-        printk("waiting...\n");
+        printk("waiting ... \n");
     }
 
     bp->b_flag |= B_VALID;
     bp->b_flag &= ~B_DIRTY;
+    cli();
     wakeup(bp);
+    sti();
 
     if(ide_queue) {
         ide_start(ide_queue);
@@ -105,6 +107,7 @@ void hd_interupt_handler(void) {
 }
 
 void hd_rw(struct buf* bp) {
+
     if(!(bp->b_flag & B_BUSY))
         PANIC("hd_rw: buf is not busy");
     if(bp->b_dev != 0 && havedisk1 == 0)
@@ -122,15 +125,13 @@ void hd_rw(struct buf* bp) {
     if(ide_queue == bp) {
         ide_start(bp);
     }
-    
     while((bp->b_flag & (B_VALID | B_DIRTY)) != B_VALID) {
         sleep(bp, &hdlock);
     }
-    //release_lock(&hdlock);
+//    release_lock(&hdlock);
 }
 
 void init_hd() {
-
     init_lock(&hdlock, "disklock");
     void* bios = (void*)0x90080;
     
@@ -142,9 +143,10 @@ void init_hd() {
     hd_inf[0].lzone = *(u16*)(12+bios);
     hd_inf[0].sect  = *(u8*)(14+bios);
 
-    u32 hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
-    printk("hd_size: %d KB\n", hd_size/1024);
+    //u32 hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
+    //printk("hd_size: %d KB\n", hd_size/1024);
 
+    irq_enable(14);
     irq_install_handler(32+14, (isq_t)(&hd_interupt_handler));
     waitfor_ready(0);
 

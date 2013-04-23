@@ -30,7 +30,7 @@ static void timer_callback(void) {
         print_time_local();
     }
 
-    if(ticks%100 == 0){
+    if(ticks%32 == 0){
         sched();
     }
 }
@@ -38,6 +38,7 @@ static void timer_callback(void) {
 void timer_init() {
     puts("timer init ...\n");
     // Firstly, register our timer callback.
+    irq_enable(0);
     irq_install_handler(32, (isq_t)(&timer_callback));
 
     // The value we send to the PIT is the value to divide it's input clock
