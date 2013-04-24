@@ -15,12 +15,11 @@
 
 //4kb
 
-extern char __kimg_end__;
+extern char  __kimg_end__;
+struct pde   pg_dir0[1024] __attribute__((aligned(4096)));
+struct pde*  cu_pg_dir;
 
-struct pde pg_dir0[1024] __attribute__((aligned(4096)));
-struct pde* cu_pg_dir;
-
-struct page* pages;
+struct page  pages[NPAGE];
 struct page  freepg_list;
 
 u32 end_addr, ker_addr, used_addr;
@@ -31,12 +30,13 @@ u32 k_dir_nr;     //this is number of page mapped by kernel
 
 void page_fault_handler(struct registers_t* regs);
 
-void flush_pgd(struct pde* pg_dir) {
-    u32 cr0, cr4;
-    // put page table addr
-    cu_pg_dir = pg_dir;
-    asm volatile("mov %0, %%cr3":: "r"((u32)pg_dir)); 
 
+void flush_pgd(struct pde* pgdir) {
+    asm volatile("mov %%eax, %%cr3":: "a"(pgdir));    // put page table addr
+}
+
+void enable_page() {
+    s32 cr0 , cr4;
     asm volatile("mov %%cr4, %0": "=r"(cr4));
     cr4 |= 0x10;                              // enable 4MB page
     asm volatile("mov %0, %%cr4":: "r"(cr4));
@@ -44,6 +44,8 @@ void flush_pgd(struct pde* pg_dir) {
     asm volatile("mov %%cr0, %0": "=r"(cr0));
     cr0 |= 0x80000000;                        // enable paging!
     asm volatile("mov %0, %%cr0":: "r"(cr0));
+
+
 }
 
 /* ========================== begin pyhsical page =========================== */
@@ -59,7 +61,8 @@ static void* _alloc(u32 size ) {
 void init_pages() {
     u32 k;
     page_nr = (end_addr)/(PAGE_SIZE);
-    pages = (struct page*)_alloc(sizeof(struct page) * page_nr);
+    printk("page_nr: %d\n", page_nr);
+    //pages = (struct page*)_alloc(sizeof(struct page) * page_nr);
     used_addr = PAGE_ROUND_UP(used_addr);
     free_page_nr = (used_addr)/0x1000;
     
@@ -68,23 +71,16 @@ void init_pages() {
         pages[k].pg_refcnt = 1;
         pages[k].pg_next = 0;
     }
-    for(k=free_page_nr; k<page_nr; k++) { //free pages 
+    for(k=free_page_nr; k<NPAGE; k++) { //free pages 
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 0;
         pages[k].pg_next = 0;
     }
     struct page* pg = &freepg_list; //usr freepg_list link all free pages
-    for(k=free_page_nr; k<page_nr; k++) {
+    for(k=free_page_nr; k<NPAGE; k++) {
         pg->pg_next = &pages[k];
         pg = pg->pg_next;
     }
-    
-    //fill this for danglig refs.
-#if 0
-    for(k=free_page_nr; k<page_nr; k++) {
-        memset((void*)(k*PAGE_SIZE), 1, PAGE_SIZE);
-    }
-#endif
     //printk("free pages: %d\n", page_nr - free_page_nr);
 }
 
@@ -107,14 +103,15 @@ void free_page(struct page* pg) {
     sti();
 }
 
+//int page_alloc_cn = 0;
 struct page* alloc_page() {
     struct page* pg = &freepg_list;
     if(pg->pg_next) {
-        //printk("alloc page\n");
         cli();  //no interupt now!
         pg = pg->pg_next;
         freepg_list.pg_next = pg->pg_next;
         pg->pg_refcnt = 1;
+        //printk("page_alloc_cn: %d\n", page_alloc_cn++);
         sti();
         return pg;
     }
@@ -132,7 +129,6 @@ void free_mem(u32 addr) {
     struct page* pg = find_page((addr >> 12));
     free_page(pg);
 }
-
 
 /*========================end pyhsical page ========================== */
 
@@ -158,15 +154,14 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
     if((pde->pt_flags & PTE_P) == 0) { //not present
         if(new == 0)
             return 0;
-
-        pg = alloc_page();
-        if(pg == 0) 
+        pg = alloc_page(); //kassert(0);
+        if(pg == 0)
             return 0;
         pde->pt_flags = PTE_P | PTE_U | PTE_W;
         pde->pt_base = (pg->pg_idx);
         pte = (struct pte*)(pde->pt_base * PAGE_SIZE );
         memset(pte, 0, PAGE_SIZE);
-        flush_pgd(pg_dir);
+        flush_pgd(current_task->p_vm.vm_pgd);
     }
     pte = (struct pte*)(pde->pt_base * PAGE_SIZE);
     return &pte[PTEX(vaddr)];
@@ -174,10 +169,9 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
 
 /* set vaddr presented */
 struct pte* put_page(struct pde* pg_dir, u32 vaddr, struct page* pg) {
-    struct pte* pte = find_pte(pg_dir, vaddr, 1);
-    kassert(pte);
+    struct pte* pte = find_pte(pg_dir, vaddr, 1);  kassert(pte);
     pte->pt_base = pg->pg_idx;
-    pte->pt_flags = PTE_U|PTE_W|PTE_P;
+    pte->pt_flags = PTE_U | PTE_W | PTE_P;
     flush_pgd(pg_dir);
     return pte;
 }
@@ -215,10 +209,8 @@ s32 free_pgd(struct pde* pgd) {
     return 0;
 }
 
-
 void init_page_dir(struct pde* pg_dir) {
     u32 k;
-    memset(pg_dir, 0, sizeof(pg_dir[0])*1024);
     k_dir_nr = (end_addr)/(PAGE_SIZE*1024);
     for(k=0; k<k_dir_nr; k++) {
         pg_dir[k].pt_base  = k<<10;
@@ -246,21 +238,22 @@ void mm_init() {
     // don't use ker_addr ~ 0x100000
     // free memory begin with 0x100000
     used_addr = 0x100000;
-    printk("mem_size : %d MB\n", end_addr/(KB*KB));
+    printk("end_addr: %x\n",  (u32)end_addr);
+    printk("mem_size : %dMB\n", end_addr/(KB*KB));
     printk("ker_size : %dKB\n", ker_addr/(KB));
     printk("page_size: %dKB\n", PAGE_SIZE/(KB));
     printk("used_size: %dKB\n", used_addr/(KB));
 
     init_page_dir(&(pg_dir0[0])); //init the kernel pg_dir
-
     init_pages();
 
     irq_install_handler(13, (isq_t)(&page_fault_handler));
     flush_pgd(&(pg_dir0[0]));
+    enable_page();
 }
 
-
 void do_wt_page(void* vaddr) {
+    printk("do_wt_page...:%x\n", (u32)vaddr);
     struct vma *vp;
     struct pte *pte;
     struct page *pg;
@@ -269,6 +262,7 @@ void do_wt_page(void* vaddr) {
     vp = find_vma((u32)vaddr);
     if (vp->v_flag & VMA_RDONLY) {
         //sigsend(cu->p_pid, SIGSEGV, 1);
+        kassert(0);
         return;
     }
     if (vp->v_flag & VMA_PRIVATE) {
@@ -291,7 +285,7 @@ void do_wt_page(void* vaddr) {
 }
 
 void do_no_page(void* vaddr) {
-    //printk("do_no_page..\n");
+//    printk("do_no_page...:%x\n", (u32)vaddr);
     struct vm *vm;
     struct vma *vp;
     struct pte *pte;
@@ -305,13 +299,15 @@ void do_no_page(void* vaddr) {
         vm->vm_stack.v_base -= PAGE_SIZE;
         vm->vm_stack.v_size += PAGE_SIZE;
         pg = alloc_page();
+        printk("stack\n");
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         return;
     }
     // else
     vp = find_vma((u32)vaddr);
-    if (vp==NULL) {
+    if (vp == NULL) {
         //sigsend(current_task->p_pid, SIGSEGV, 1);
+        printk("vaddr: %x\n", vaddr);
         kassert(0);
         return;
     }
@@ -320,22 +316,23 @@ void do_no_page(void* vaddr) {
         pg = alloc_page();
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         memset((void*)PG_ADDR(vaddr), 0, PAGE_SIZE);
+        printk("zero\n");
         return;
     }
     // demand file
     if (vp->v_flag & VMA_MMAP) {
-        pg = alloc_page();
+        pg = alloc_page();   kassert(pg);
         pte = put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
+        printk("pte: %x %d\n", (u32)pte, pte->pt_flags & PTE_P);
         // fill this new-allocated page
-        // hint: vaddr is *ALWAYS* greater than or equal with vp->v_base
         buf = (char*)PG_ADDR(vaddr);
         off = (u32)buf - vp->v_base + vp->v_ioff;
         ilock(vp->v_ino);
+        // printk("v_ino: %x %x\n", (u32)vp->v_ino, (u32)vaddr);
         readi(vp->v_ino, buf, off, PAGE_SIZE);
         idrop(vp->v_ino);
-        pte->pt_flags &= ~(vp->v_flag&VMA_RDONLY? 0:PTE_W);
+        pte->pt_flags &= ~(vp->v_flag & VMA_RDONLY? 0:PTE_W);
         flush_pgd(current_task->p_vm.vm_pgd);
-        return;
     }
 }
 
@@ -352,9 +349,8 @@ void page_fault_handler(struct registers_t* regs) {
         do_wt_page((void*)fault_addr);
         return;
     }
-    //if (rw) {puts("read-only ");}
     if (regs->err_code & 0x4) {
-        puts("user-mode ");
+        PANIC("user-mode ");
     }
     if (regs->err_code & 0x8) {
         PANIC("touch reserved address");

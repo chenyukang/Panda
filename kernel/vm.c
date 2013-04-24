@@ -23,9 +23,6 @@ u32 vm_clone(struct vm* to) {
     for(i=0; i<NVMA; i++) {
         pva = &(current_task->p_vm.vm_area[i]);
         if(pva->v_flag != 0) {
-            if(pva->v_ino) {
-                //inc count
-            }
             to->vm_area[i] = *pva;
         }
     }
@@ -78,9 +75,10 @@ u32 vm_verify(u32 vaddr, u32 size) {
     u32 addr = (u32)vaddr;
     
     if (addr<end_addr || size<0) {
-        kassert(0);        return -1;
+        kassert(0);
+        return -1;
     }
-    // TODO: special case on checking string.
+    
     for (page=PG_ADDR(addr); page<=PG_ADDR(addr+size-1); page+=PAGE_SIZE) {
         pte = find_pte(current_task->p_vm.vm_pgd, page, 1);
         if ((pte->pt_flags & PTE_P)==0) {

@@ -20,14 +20,12 @@ fd_alloc(struct file* f) {
 }
 
 int test_file() {
-    printk("test_file \n");
     int fd = _open("/README");
     char buf[1024];
     memset(buf, 0, sizeof(buf));
     if(fd > 0) {
-        printk("open file: README\n");
         file_read(current_task->ofile[fd], buf, 300);
-        //printk("contents: %s\n", buf);
+        printk("contents: %s\n", buf);
     }
     else {
         printk("failed to open file: README\n");

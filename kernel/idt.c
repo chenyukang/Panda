@@ -296,6 +296,7 @@ void hwint_handler(struct registers_t* regs) {
     }   
     
     if((regs->cs & 3) == 3) {
+        kassert(0);
         sched();
     }
 }

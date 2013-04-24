@@ -19,11 +19,14 @@
 #define  PAGE_ROUND_DWON(addr) ((addr) & (-PAGE_SIZE))
 #define  PG_ADDR(addr)         ((u32)(addr) & ~0xFFF)
 
-#define  PG_TO_VADDR(pte_ptr) (((pte_ptr)->pt_base) * PAGE)
+#define  PG_TO_VADDR(pte_ptr) (((pte_ptr)->pt_base) * PAGE_SIZE)
 #define  PDEX(vaddr)          ((u32) ((vaddr>>22) & 0x3FF))
 #define  PTEX(vaddr)          ((u32) ((vaddr>>12) & 0x3FF))
 #define  PPN(vaddr)           (((u32) (vaddr)) >> 12)
 
+//64MB
+#define PMEM     0x4000000
+#define NPAGE    (PMEM/PAGE_SIZE)
 //Present
 //Writeable
 //User

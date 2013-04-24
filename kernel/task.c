@@ -26,7 +26,6 @@ struct {
 } proc_table;
 
 struct tss_desc tss;
-//struct task* procs[PROC_NUM];
 
 struct task*       current_task = 0;
 extern struct pde  pg_dir0;
@@ -85,7 +84,6 @@ static void init_proc0() {
     struct task* t = current_task = alloc_proc();
     t->pid = next_pid();
     t->ppid = 0;
-    //t->pg_dir = &pg_dir0;
     t->p_vm.vm_pgd = &pg_dir0;
     t->stat = RUNNABLE;
     t->next = 0;
@@ -98,9 +96,7 @@ static void init_proc0() {
 
 static void init_proctable() {
     init_lock(&proc_table.lock, "proc_table");
-    //acquire_lock(&proc_table.lock);
     memset(proc_table.procs, 0, sizeof(proc_table.procs));
-    //release_lock(&proc_table.lock);
 }
 
 void init_multi_task() {
@@ -122,7 +118,6 @@ struct task* spawn(void* func) {
     
 #endif
     vm_clone(&new_task->p_vm);
-    //new_task->pg_dir = current_task->pg_dir;
     new_task->p_context = parent->p_context;
     new_task->p_context.eip = (u32)func;
     new_task->p_context.esp = (u32)new_task+PAGE_SIZE;
@@ -130,14 +125,11 @@ struct task* spawn(void* func) {
     new_task->r_time = 0;
     if(new_task->pid == 2)
         strcpy(new_task->name, "proc2");
-    else if(new_task->pid == 3)
-        strcpy(new_task->name, "proc3");
-    else strcpy(new_task->name, "proc4");
     sti();
     return new_task;
 }
 
-//#define DEBUG_PROC 1
+#define DEBUG_PROC 1
 #ifdef DEBUG_PROC
 static int step = 0;
 #endif
@@ -191,9 +183,7 @@ void sleep(void* change, struct spinlock* lock) {
     current_task->chan = change;
     current_task->stat = WAIT;
     sti();
-    
     sched();
-
 }
 
 void wakeup(void* change) {
@@ -210,18 +200,3 @@ void wakeup(void* change) {
         }
     }
 }
-
-
-#if 0
-void init_userproc() {
-    struct task* p;
-    extern char _binary_initcode_start[];
-    extern char _binary_initcode_size[];
-    init_task = p = alloc_proc();
-    p->pg_dir = (struct pde*)alloc_pde();
-    copy_pgd(current_task->pd_dir, p->pg_dir);
-    memset(p->tf, 0 , sizeof(*p->tf));
-    p->cwd = nameid("/");
-    p->stat = RUNNABLE;
-}
-#endif

@@ -106,7 +106,7 @@ _do_swtch:
     push byte %2
     jmp common_stub
 %endmacro
-
+	
 global isr14
 isr14:
 	cli                         ; Disable interrupts firstly.

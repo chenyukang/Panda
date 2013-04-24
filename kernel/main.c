@@ -71,6 +71,7 @@ void kmain(u32 init_stack) {
 void init_user() {
     test_file();
     do_exec("/init", NULL);
+    printk("finished exec\n");
     while(1) {
         ;
     }

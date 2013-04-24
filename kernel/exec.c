@@ -60,14 +60,12 @@ u32 ustack_push_argv(u32* esp, char** args) {
         arglen += (strlen(s) + 1);
         argc++;
     }
-    printk("argc now: %d\n", argc);
     arglen += sizeof(char*) * argc;
     if(vm_verify(*esp - arglen, arglen) < 0) {
         return -1;
     }
     uargv = (char**)(*esp - arglen);
     for(i=argc-1; i>=0; i--) {
-        printk("now ..%d \n", i);
         s = args[i];
         ustack_push(esp, s, strlen(s) + 1);
         uargv[i] = (char*) (*esp);
@@ -81,8 +79,8 @@ int do_exec(char* path, char** argv) {
     struct inode* ip;
     struct header head;
     struct vm* vm;
-    char** res;
     u32 esp, argc;
+    char** store;
 
     ip = inode_name(path);
     if(ip == 0) {
@@ -97,25 +95,22 @@ int do_exec(char* path, char** argv) {
         kassert(0);
         goto error;
     }
-#if 1
-    res = store_argv(path, argv);
+    store = store_argv(path, argv);
     vm = &current_task->p_vm;
+    
     vm_clear(vm);
     vm_renew(vm, &head, ip);
 
     esp = VM_STACK;
-    argc = ustack_push_argv(&esp, res);
+    argc = ustack_push_argv(&esp, store);
     if(argc < 0){
         kassert(0);
     }
-    printk("argc: %d\n", argc);
-//    ustack_push(&esp, (char*)&argc, sizeof(u32));
-    free_argv(res);
+    ustack_push(&esp, (char*)&argc, sizeof(u32));
+    free_argv(store);
 
     idrop(ip);
     enter_user(vm->vm_entry, esp);
-    kassert(0);
-#endif
     return 0;
 
 error:

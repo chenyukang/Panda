@@ -73,8 +73,6 @@ enum task_status {
 
 
 struct task {
-    struct proc_stack* kstack;
-    struct pde* pg_dir;
     struct task* next;
     u32 privilege;
     void* kstack_base;

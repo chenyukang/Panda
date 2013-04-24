@@ -53,9 +53,6 @@ static int waitfor_ready(int check_error) {
     return 0;
 }
 
-void set_ready(struct buf* pb) {
-}
-
 // Start the request for b.  Caller must hold idelock.
 static void
 ide_start(struct buf *b) {
@@ -80,11 +77,9 @@ ide_start(struct buf *b) {
 void hd_interupt_handler(void) {
     //printk("in hd_interupt_handler:%d\n", hdlock.locked);
 
-    //acquire_lock(&hdlock);
     waitfor_ready(1);
     struct buf* bp = ide_queue;
     if(bp == 0) {
-        //release_lock(&hdlock);
         return;
     }
     
@@ -100,7 +95,6 @@ void hd_interupt_handler(void) {
     if(ide_queue) {
         ide_start(ide_queue);
     }
-    //release_lock(&hdlock);
 }
 
 void hd_rw(struct buf* bp) {
@@ -138,8 +132,10 @@ void init_hd() {
     hd_inf[0].lzone = *(u16*)(12+bios);
     hd_inf[0].sect  = *(u8*)(14+bios);
 
-    //u32 hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
-    //printk("hd_size: %d KB\n", hd_size/1024);
+#if 0
+    u32 hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
+    printk("hd_size: %d KB\n", hd_size/1024);
+#endif
 
     irq_enable(14);
     irq_install_handler(32+14, (isq_t)(&hd_interupt_handler));
@@ -152,7 +148,7 @@ void init_hd() {
     for(i=0; i<1000; i++){
         if(inb(0x1f7) != 0){
             havedisk1 = 1;
-            printk("have disk1\n");
+            //printk("have disk1\n");
             break;
         }
     }
