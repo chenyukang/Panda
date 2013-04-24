@@ -80,7 +80,7 @@ void init_pages() {
     }
     
     //fill this for danglig refs.
-#if 1
+#if 0
     for(k=free_page_nr; k<page_nr; k++) {
         memset((void*)(k*PAGE_SIZE), 1, PAGE_SIZE);
     }

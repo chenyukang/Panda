@@ -80,11 +80,11 @@ ide_start(struct buf *b) {
 void hd_interupt_handler(void) {
     //printk("in hd_interupt_handler:%d\n", hdlock.locked);
 
-    acquire_lock(&hdlock);
+    //acquire_lock(&hdlock);
     waitfor_ready(1);
     struct buf* bp = ide_queue;
     if(bp == 0) {
-        release_lock(&hdlock);
+        //release_lock(&hdlock);
         return;
     }
     
@@ -100,7 +100,7 @@ void hd_interupt_handler(void) {
     if(ide_queue) {
         ide_start(ide_queue);
     }
-    release_lock(&hdlock);
+    //release_lock(&hdlock);
 }
 
 void hd_rw(struct buf* bp) {
