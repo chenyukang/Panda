@@ -27,7 +27,7 @@ int test_file() {
     if(fd > 0) {
         printk("open file: README\n");
         file_read(current_task->ofile[fd], buf, 300);
-        printk("contents: %s\n", buf);
+        //printk("contents: %s\n", buf);
     }
     else {
         printk("failed to open file: README\n");

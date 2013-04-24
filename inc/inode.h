@@ -41,13 +41,14 @@ void            init_inodes();
 struct inode*   idup(struct inode*);
 void            iinit(void);
 void            ilock(struct inode*);
-void            idrop(struct inode* ip);
+void            idrop(struct inode*);
 void            iput(struct inode*);
 void            iunlock(struct inode*);
 void            iunlockput(struct inode*);
 void            iupdate(struct inode*);
+u32             bmap(struct inode*, u32);
 
-s32             dir_link(struct inode* dp, char* name, u32 inum);
+s32             dir_link(struct inode*, char*, u32);
 int             namecmp(const char*, const char*);
 struct inode*   namei(char*);
 struct inode*   nameiparent(char*, char*);

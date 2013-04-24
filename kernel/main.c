@@ -52,9 +52,8 @@ void kmain(u32 init_stack) {
     init_inodes();
     init_ide();
     init_multi_task();
-    printk("proc name: %s\n", current_task->name);
-
     sti();
+    
     spawn(init_user);
 
     init = 0;
@@ -71,7 +70,6 @@ void kmain(u32 init_stack) {
 
 void init_user() {
     test_file();
-    kassert(0);
     do_exec("/init", NULL);
     while(1) {
         ;

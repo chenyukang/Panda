@@ -81,23 +81,24 @@ int do_exec(char* path, char** argv) {
     struct header* head;
     struct vm* vm;
     char** res;
+    u32 pn;
     u32 esp, argc;
+
 
     ip = inode_name(path);
     if(ip == 0) {
         kassert(0);
         return -1;
     }
-    buf = buf_read(ip->dev, 0);
+    pn = bmap(ip, 0);
+    printk("dev:%d pn:%d\n", ip->dev, pn);
+    buf = buf_read(ip->dev, pn);
     head = (struct header*)buf->b_data;
     printk("head: %x\n", head);
     if(head->a_magic != NMAGIC ) {
         goto error;
     }
-
-    kassert(0);
     res = store_argv(path, argv);
-    
     vm = &current_task->p_vm;
     vm_clear(vm);
     vm_renew(vm, head, ip);

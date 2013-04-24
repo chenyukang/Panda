@@ -67,12 +67,14 @@ loop:
 
 struct buf*
 buf_read(u32 dev, u32 sector) {
+    //printk("reading: dev->%d sector:%d\n", dev, sector);
     struct buf* bp;
     bp = buf_get(dev, sector);
     kassert(bp);
     if(!(bp->b_flag & B_VALID)) {
         hd_rw(bp);
     }
+    //printk("return buf_read:%x\n", (u32)bp);
     return bp;
 }
 

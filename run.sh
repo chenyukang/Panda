@@ -63,8 +63,9 @@ do_compile() {
     # $OBJCPY -S -O binary $OBJDIR/initcode.out $OBJDIR/initcode;
     # rm -rf $OBJDIR/initcode.o;
     
-    $GCC $CFLAGS -nostdinc -I.  $KERNEL/init.c -o $OBJDIR/init.o;
-    $LD $OBJDIR/init.o -e main -Ttext 0 -o $OBJDIR/init;
+    $GCC -fno-builtin -fno-stack-protector -nostdinc -I. -c $KERNEL/init.c -o $OBJDIR/init.o;
+    #$LD $OBJDIR/init.o -e main -T $TOOL/user.ld -o $OBJDIR/init;
+    $LD $OBJDIR/init.o -e main -T $TOOL/user.ld -o $OBJDIR/init;
 
     flist=`cd $KERNEL/; ls *.c;`
     `cd ../`
@@ -117,9 +118,9 @@ do_prepare_hd() {
     rm -rf hd.img;
     echo "making hard disk"
     #bximage hd.img -hd -mode=flat -size=10 -q;
-    cp $OBJDIR/init ./;
+    #cp $OBJDIR/init ./;
     ./tool/mkfs.exe hd.img README init;
-    rm -rf init;
+    #rm -rf init;
     #fi
 }
 
@@ -176,5 +177,5 @@ do
 done
 
 
-do_all "qemu";
+do_all "bochs";
 show_help;

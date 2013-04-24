@@ -168,15 +168,16 @@ void i_unlock_drop(struct inode* ip) {
 }
 
 
-static u32
-bmap(struct inode* ip, u32 bn) {
+u32 bmap(struct inode* ip, u32 bn) {
     u32 addr;
     u32* extend;
     struct buf* bp;
 
+    //printk("bmap: %d\n", bn);
     if(bn < NDIRECT) {
         if((addr = ip->addrs[bn]) == 0)
             ip->addrs[bn] = addr = blk_alloc(ip->dev);
+        //printk("return: %d\n", addr);
         return addr;
     }
     

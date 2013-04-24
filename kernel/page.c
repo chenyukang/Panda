@@ -85,7 +85,7 @@ void init_pages() {
         memset((void*)(k*PAGE_SIZE), 1, PAGE_SIZE);
     }
 #endif
-    printk("free pages: %d\n", page_nr - free_page_nr);
+    //printk("free pages: %d\n", page_nr - free_page_nr);
 }
 
 struct page* find_page(u32 nr) {

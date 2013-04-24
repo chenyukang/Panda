@@ -19,6 +19,6 @@ SECTIONS {
         . = ALIGN(0x1000);
     }
     /DISCARD/ : {
-        *(.note .note.* .gnu.* .dynsym .comment .pdr .init .plt .fini .interp)
+        *(.note .note.* .gnu.* .dynsym .comment .pdr .init .plt .fini .interp .hash .dynstr .ctors .dtors )
     }
 }
