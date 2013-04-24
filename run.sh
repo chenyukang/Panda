@@ -118,9 +118,9 @@ do_prepare_hd() {
     rm -rf hd.img;
     echo "making hard disk"
     #bximage hd.img -hd -mode=flat -size=10 -q;
-    #cp $OBJDIR/init ./;
+    cp $OBJDIR/init ./;
     ./tool/mkfs.exe hd.img README init;
-    #rm -rf init;
+    rm -rf init;
     #fi
 }
 

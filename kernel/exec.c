@@ -77,45 +77,43 @@ u32 ustack_push_argv(u32* esp, char** args) {
 
 int do_exec(char* path, char** argv) {
     struct inode* ip;
-    struct buf* buf;
-    struct header* head;
+    struct header head;
     struct vm* vm;
     char** res;
-    u32 pn;
     u32 esp, argc;
-
 
     ip = inode_name(path);
     if(ip == 0) {
         kassert(0);
         return -1;
     }
-    pn = bmap(ip, 0);
-    printk("dev:%d pn:%d\n", ip->dev, pn);
-    buf = buf_read(ip->dev, pn);
-    head = (struct header*)buf->b_data;
-    printk("head: %x\n", head);
-    if(head->a_magic != NMAGIC ) {
+    ilock(ip);
+    if(readi(ip, (char*)&head, 0, sizeof(head)) < sizeof(head)){
         goto error;
     }
+    printk("head: %x\n", head.a_magic);
+    if(head.a_magic != NMAGIC ) {
+        kassert(0);
+        goto error;
+    }
+#if 1
     res = store_argv(path, argv);
     vm = &current_task->p_vm;
     vm_clear(vm);
-    vm_renew(vm, head, ip);
+    //vm_renew(vm, head, ip);
 
     esp = VM_STACK;
     argc = ustack_push_argv(&esp, res);
     ustack_push(&esp, (char*)&argc, sizeof(u32));
     free_argv(res);
 
-    buf_release(buf);
     idrop(ip);
     enter_user(vm->vm_entry, esp);
     kassert(0);
+#endif
     return 0;
 
 error:
-    buf_release(buf);
     idrop(ip);
     return -1;
 }
