@@ -56,6 +56,12 @@ void kmain(u32 init_stack) {
     
     spawn(init_user);
 
+    int* p = (int*)0x08001000;
+    *p = 1;
+    *p = 2;
+
+    printk("value: %d\n", *p);
+    kassert(0);
     init = 0;
     while(1) {
         if(!init) {

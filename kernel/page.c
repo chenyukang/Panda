@@ -86,7 +86,7 @@ void init_pages() {
 
 struct page* find_page(u32 nr) {
     kassert(nr > free_page_nr &&
-            nr < 1024);
+            nr < NPAGE);
     return &pages[nr];
 }
 
@@ -146,7 +146,8 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
     struct pte* pte;
     struct page* pg;
     
-    if( vaddr < end_addr ) {
+    if( vaddr < 0x8000000 ) {
+        printk("vaddr: %x\n", vaddr);
         PANIC("find_pte() error: invalid virtual address");
     }
 
@@ -232,7 +233,8 @@ void mm_init() {
     // we put the end_addr at 0x90002
     // during booting process, so got it
     // 0~ker_addr is for kernel code and data
-    end_addr = (1<<20) + ((*(u16*)0x90002)<<10);
+    //end_addr = (1<<20) + ((*(u16*)0x90002)<<10);
+    end_addr = 0x8000000;
     ker_addr = (u32)(&(__kimg_end__));
     ker_addr = PAGE_ROUND_UP(ker_addr);
     // don't use ker_addr ~ 0x100000
@@ -299,7 +301,6 @@ void do_no_page(void* vaddr) {
         vm->vm_stack.v_base -= PAGE_SIZE;
         vm->vm_stack.v_size += PAGE_SIZE;
         pg = alloc_page();
-        printk("stack\n");
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         return;
     }
@@ -308,7 +309,10 @@ void do_no_page(void* vaddr) {
     if (vp == NULL) {
         //sigsend(current_task->p_pid, SIGSEGV, 1);
         printk("vaddr: %x\n", vaddr);
-        kassert(0);
+        pg = alloc_page();   kassert(pg);
+        pte = put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
+        printk("vaddr: %x pte: %x %d\n", (u32)vaddr, (u32)pte, pte->pt_flags & PTE_P);
+        flush_pgd(current_task->p_vm.vm_pgd);
         return;
     }
     // demand zero
@@ -323,7 +327,8 @@ void do_no_page(void* vaddr) {
     if (vp->v_flag & VMA_MMAP) {
         pg = alloc_page();   kassert(pg);
         pte = put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
-        printk("pte: %x %d\n", (u32)pte, pte->pt_flags & PTE_P);
+        printk("vaddr: %x pte: %x %d\n", (u32)vaddr, (u32)pte, pte->pt_flags & PTE_P);
+
         // fill this new-allocated page
         buf = (char*)PG_ADDR(vaddr);
         off = (u32)buf - vp->v_base + vp->v_ioff;

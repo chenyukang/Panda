@@ -74,8 +74,7 @@ u32 vm_verify(u32 vaddr, u32 size) {
     u32 page;
     u32 addr = (u32)vaddr;
     
-    if (addr<end_addr || size<0) {
-        kassert(0);
+    if (addr<0x8000000 || size<0) {
         return -1;
     }
     

@@ -25,7 +25,7 @@
 #define  PPN(vaddr)           (((u32) (vaddr)) >> 12)
 
 //64MB
-#define PMEM     0x4000000
+#define PMEM     0x8000000
 #define NPAGE    (PMEM/PAGE_SIZE)
 //Present
 //Writeable
