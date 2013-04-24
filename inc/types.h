@@ -11,8 +11,10 @@
 
 
 #ifndef USE_SYS
+
 #define NULL 0
 typedef unsigned long      size_t;
+
 #endif
 
 typedef unsigned long long u64;

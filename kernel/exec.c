@@ -6,6 +6,7 @@
 #include <vm.h>
 #include <task.h>
 #include <blk.h>
+#include <asm.h>
 
 extern struct task* current_task;
 extern void enter_user(u32, u32);
@@ -49,7 +50,7 @@ u32 ustack_push(u32* esp, char* buf, u32 len) {
 }
 
 u32 ustack_push_argv(u32* esp, char** args) {
-    u32 arglen, argc, i;
+    s32 arglen, argc, i;
     char* s;
     char** uargv;
 
@@ -59,13 +60,14 @@ u32 ustack_push_argv(u32* esp, char** args) {
         arglen += (strlen(s) + 1);
         argc++;
     }
+    printk("argc now: %d\n", argc);
     arglen += sizeof(char*) * argc;
     if(vm_verify(*esp - arglen, arglen) < 0) {
         return -1;
     }
-
     uargv = (char**)(*esp - arglen);
     for(i=argc-1; i>=0; i--) {
+        printk("now ..%d \n", i);
         s = args[i];
         ustack_push(esp, s, strlen(s) + 1);
         uargv[i] = (char*) (*esp);
@@ -91,7 +93,6 @@ int do_exec(char* path, char** argv) {
     if(readi(ip, (char*)&head, 0, sizeof(head)) < sizeof(head)){
         goto error;
     }
-    printk("head: %x\n", head.a_magic);
     if(head.a_magic != NMAGIC ) {
         kassert(0);
         goto error;
@@ -100,11 +101,15 @@ int do_exec(char* path, char** argv) {
     res = store_argv(path, argv);
     vm = &current_task->p_vm;
     vm_clear(vm);
-    //vm_renew(vm, head, ip);
+    vm_renew(vm, &head, ip);
 
     esp = VM_STACK;
     argc = ustack_push_argv(&esp, res);
-    ustack_push(&esp, (char*)&argc, sizeof(u32));
+    if(argc < 0){
+        kassert(0);
+    }
+    printk("argc: %d\n", argc);
+//    ustack_push(&esp, (char*)&argc, sizeof(u32));
     free_argv(res);
 
     idrop(ip);

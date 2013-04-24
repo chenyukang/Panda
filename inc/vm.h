@@ -1,8 +1,9 @@
 #ifndef _VM_H__
 #define _VM_H__
 
-#include "aout.h"
-#include "inode.h"
+#include <aout.h>
+#include <inode.h>
+#include <page.h>
 
 /* each vma asscociated with a file descripter, on page fault raised
  * do what it deserves. */
@@ -10,8 +11,8 @@ struct vma {
     u32            v_flag;
     u32            v_base; // must be one page aligned
     u32            v_size; // must be one page aligned
-    struct inode   *v_ino;  // inode
     u32            v_ioff; // keep block aligned
+    struct inode   *v_ino; // inode
 };
 
 #define VMA_RDONLY  0x1  // read only 
@@ -27,7 +28,7 @@ struct vma {
  * and misc on address space.
  * */
 struct vm {
-    struct pde  *vm_pgd;
+    struct pde*  vm_pgd;
     u32          vm_entry;
     struct vma   vm_area[0];  // trick here, treat the fields downblow as an array.
     struct vma   vm_text;

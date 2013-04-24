@@ -110,6 +110,7 @@ void free_page(struct page* pg) {
 struct page* alloc_page() {
     struct page* pg = &freepg_list;
     if(pg->pg_next) {
+        //printk("alloc page\n");
         cli();  //no interupt now!
         pg = pg->pg_next;
         freepg_list.pg_next = pg->pg_next;
@@ -172,15 +173,13 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
 }
 
 /* set vaddr presented */
-int put_page(struct pde* pg_dir, u32 vaddr, struct page* pg) {
+struct pte* put_page(struct pde* pg_dir, u32 vaddr, struct page* pg) {
     struct pte* pte = find_pte(pg_dir, vaddr, 1);
-    if(pte == 0)
-        return 0;
     kassert(pte);
     pte->pt_base = pg->pg_idx;
-    pte->pt_flags |= PTE_P;
+    pte->pt_flags = PTE_U|PTE_W|PTE_P;
     flush_pgd(pg_dir);
-    return 1;
+    return pte;
 }
 
 void copy_pgd(struct pde* from, struct pde* targ) {
@@ -211,7 +210,11 @@ void copy_pgd(struct pde* from, struct pde* targ) {
         }
     }
 }
-            
+
+s32 free_pgd(struct pde* pgd) {
+    return 0;
+}
+
 
 void init_page_dir(struct pde* pg_dir) {
     u32 k;
@@ -257,18 +260,83 @@ void mm_init() {
 }
 
 
-void do_wt_page(void* addr) {
-    printk("in do_wt_page\n");
-    return;
+void do_wt_page(void* vaddr) {
+    struct vma *vp;
+    struct pte *pte;
+    struct page *pg;
+    char *old_page, *new_page;
+
+    vp = find_vma((u32)vaddr);
+    if (vp->v_flag & VMA_RDONLY) {
+        //sigsend(cu->p_pid, SIGSEGV, 1);
+        return;
+    }
+    if (vp->v_flag & VMA_PRIVATE) {
+        pte = find_pte(current_task->p_vm.vm_pgd, (u32)vaddr, 1);
+        pg = find_page(pte->pt_base);
+        if (pg->pg_refcnt > 1) {
+            pg->pg_refcnt--; //decrease the reference count of the old page.
+            old_page = (char*)(pte->pt_base * PAGE_SIZE);
+            new_page = (char*)alloc_mem();
+            memcpy(new_page, old_page, PAGE_SIZE);
+            pte->pt_base = PPN(new_page);
+            pte->pt_flags |= PTE_W;
+            flush_pgd(current_task->p_vm.vm_pgd);
+        }
+        else if (pg->pg_refcnt==1) {
+            pte->pt_flags |= PTE_W;
+            flush_pgd(current_task->p_vm.vm_pgd);
+        }
+    }
 }
 
-void do_no_page(void* addr) {
-    struct page* pg = alloc_page();
-    if(pg == 0) {
-        PANIC("out of memory");
-    }
+void do_no_page(void* vaddr) {
+    //printk("do_no_page..\n");
+    struct vm *vm;
+    struct vma *vp;
+    struct pte *pte;
+    struct page *pg;
+    u32 off;
+    char *buf;
 
-    put_page(cu_pg_dir, (u32)PG_ADDR(addr), pg);
+    vm = &current_task->p_vm;
+    // if this page lies on the edge of user stack, grows the stack.
+    if (vm->vm_stack.v_base - (u32)vaddr <= PAGE_SIZE) {
+        vm->vm_stack.v_base -= PAGE_SIZE;
+        vm->vm_stack.v_size += PAGE_SIZE;
+        pg = alloc_page();
+        put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
+        return;
+    }
+    // else
+    vp = find_vma((u32)vaddr);
+    if (vp==NULL) {
+        //sigsend(current_task->p_pid, SIGSEGV, 1);
+        kassert(0);
+        return;
+    }
+    // demand zero
+    if (vp->v_flag & VMA_ZERO) {
+        pg = alloc_page();
+        put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
+        memset((void*)PG_ADDR(vaddr), 0, PAGE_SIZE);
+        return;
+    }
+    // demand file
+    if (vp->v_flag & VMA_MMAP) {
+        pg = alloc_page();
+        pte = put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
+        // fill this new-allocated page
+        // hint: vaddr is *ALWAYS* greater than or equal with vp->v_base
+        buf = (char*)PG_ADDR(vaddr);
+        off = (u32)buf - vp->v_base + vp->v_ioff;
+        ilock(vp->v_ino);
+        readi(vp->v_ino, buf, off, PAGE_SIZE);
+        idrop(vp->v_ino);
+        pte->pt_flags &= ~(vp->v_flag&VMA_RDONLY? 0:PTE_W);
+        flush_pgd(current_task->p_vm.vm_pgd);
+        return;
+    }
 }
 
 void page_fault_handler(struct registers_t* regs) {

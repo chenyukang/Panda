@@ -85,7 +85,8 @@ static void init_proc0() {
     struct task* t = current_task = alloc_proc();
     t->pid = next_pid();
     t->ppid = 0;
-    t->pg_dir = &pg_dir0;
+    //t->pg_dir = &pg_dir0;
+    t->p_vm.vm_pgd = &pg_dir0;
     t->stat = RUNNABLE;
     t->next = 0;
     t->r_time = 0;
@@ -114,11 +115,13 @@ struct task* spawn(void* func) {
     new_task = alloc_proc();
     new_task->pid = next_pid();
     new_task->ppid = parent->pid;
-#if 1
+#if 0
     new_task->pg_dir = (struct pde*)(alloc_pde());
     init_page_dir(new_task->pg_dir);
     copy_pgd(current_task->pg_dir, new_task->pg_dir);
+    
 #endif
+    vm_clone(&new_task->p_vm);
     //new_task->pg_dir = current_task->pg_dir;
     new_task->p_context = parent->p_context;
     new_task->p_context.eip = (u32)func;
@@ -134,7 +137,7 @@ struct task* spawn(void* func) {
     return new_task;
 }
 
-#define DEBUG_PROC 1
+//#define DEBUG_PROC 1
 #ifdef DEBUG_PROC
 static int step = 0;
 #endif
@@ -145,7 +148,7 @@ void swtch_to(struct task *to){
     to->stat   = RUNNING;
     to->r_time++;
     current_task = to;
-    flush_pgd(to->pg_dir);
+    flush_pgd(to->p_vm.vm_pgd);
 #ifdef DEBUG_PROC
     printk("switch %d from: %s to %s\n", step++, from->name, to->name);
 #endif

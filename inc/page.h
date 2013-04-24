@@ -19,16 +19,23 @@
 #define  PAGE_ROUND_DWON(addr) ((addr) & (-PAGE_SIZE))
 #define  PG_ADDR(addr)         ((u32)(addr) & ~0xFFF)
 
-#define PG_TO_VADDR(pte_ptr) (((pte_ptr)->pt_base) * PAGE)
-#define PDEX(vaddr)          ((u32) ((vaddr>>22) & 0x3FF))
-#define PTEX(vaddr)          ((u32) ((vaddr>>12) & 0x3FF))
+#define  PG_TO_VADDR(pte_ptr) (((pte_ptr)->pt_base) * PAGE)
+#define  PDEX(vaddr)          ((u32) ((vaddr>>22) & 0x3FF))
+#define  PTEX(vaddr)          ((u32) ((vaddr>>12) & 0x3FF))
+#define  PPN(vaddr)           (((u32) (vaddr)) >> 12)
 
-#define PTE_P  0x001 //Present
-#define PTE_W  0x002 //Writeable
-#define PTE_U  0x004 //User
-#define PTE_A  0x020 //Accessed
-#define PTE_D  0x040 //Dirty
-#define PTE_PS 0x080 //PAGE SIZE
+//Present
+//Writeable
+//User
+//Accessed
+//Dirty
+//PAGE SIZE
+#define PTE_P  0x001 
+#define PTE_W  0x002
+#define PTE_U  0x004 
+#define PTE_A  0x020
+#define PTE_D  0x040
+#define PTE_PS 0x080
 
 /*
 31 ---------------------------------------- 0
@@ -45,6 +52,7 @@ struct pde {
     u32 pt_avial  : 3;  //for system programmer
     u32 pt_base   : 20; //base addr
 };
+
 //so struct pde* (with 1024) == pg_dir
 
 struct pte {
@@ -65,12 +73,19 @@ struct page* alloc_page();
 struct page* find_page(u32 nr);
 struct pde* alloc_pde();
 
-void init_page_dir(struct pde* pg_dir);
 void free_page(struct page* pg);
+void init_page_dir(struct pde* pgd);
+s32  free_pgd(struct pde* pgd);
 void copy_pgd(struct pde* from, struct pde* targ);
+struct pte* find_pte(struct pde* pg_dir, u32 vaddr , u32 new);
 
 u32  alloc_mem();
 void free_mem();
 
 void flush_pgd(struct pde* pg_dir);
+
+void do_no_page(void* addr);
+void do_wt_page(void* addr);
+
 #endif
+

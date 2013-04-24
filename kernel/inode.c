@@ -168,7 +168,8 @@ void i_unlock_drop(struct inode* ip) {
 }
 
 
-u32 bmap(struct inode* ip, u32 bn) {
+static u32
+bmap(struct inode* ip, u32 bn) {
     u32 addr;
     u32* extend;
     struct buf* bp;
@@ -251,7 +252,7 @@ int writei(struct inode* ip, char* addr, u32 off, u32 n) {
 }
 
 
-int namecmp(const char* s, const char* t) {
+s32 namecmp(const char* s, const char* t) {
     return strncmp(s, t, DIRSIZ); //DIRSIZE is the max length of name
 }
 
