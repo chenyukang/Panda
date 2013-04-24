@@ -63,7 +63,8 @@ do_compile() {
     # $OBJCPY -S -O binary $OBJDIR/initcode.out $OBJDIR/initcode;
     # rm -rf $OBJDIR/initcode.o;
     
-    $GCC $CFLAGS -nostdinc -I.  $KERNEL/init.c -o $OBJDIR/init;
+    $GCC $CFLAGS -nostdinc -I.  $KERNEL/init.c -o $OBJDIR/init.o;
+    $LD $OBJDIR/init.o -e main -Ttext 0 -o $OBJDIR/init;
 
     flist=`cd $KERNEL/; ls *.c;`
     `cd ../`
@@ -117,7 +118,7 @@ do_prepare_hd() {
     echo "making hard disk"
     #bximage hd.img -hd -mode=flat -size=10 -q;
     cp $OBJDIR/init ./;
-    ./tool/mkfs.exe hd.img init;
+    ./tool/mkfs.exe hd.img README init;
     rm -rf init;
     #fi
 }
@@ -163,13 +164,13 @@ do_wc_line() {
 while [ $# -gt 0 ]
 do
     case $1 in
-        -all|-a) do_all "qemu"; exit 0;;
-        -clean|-x) do_clean; exit 0;;
-        -compile|-c) do_clean; do_compile; exit 0;;
-        -commit |-u) shift; log=$1; do_commit; exit 0;;
-        -line |-l) do_wc_line; exit 0;;
-        -qemu|-q) do_all "qemu"; exit 0;;
-        -bochs|-b) do_all "bochs"; exit 0;
+        -all|-a)     do_all "qemu";  exit 0;;
+        -clean|-x)   do_clean;       exit 0;;
+        -compile|-c) do_clean;       do_compile; exit 0;;
+        -commit |-u) shift; log=$1;  do_commit;  exit 0;;
+        -line |-l)   do_wc_line;     exit 0;;
+        -qemu|-q)    do_all "qemu";  exit 0;;
+        -bochs|-b)   do_all "bochs"; exit 0;
     esac
     shift
 done

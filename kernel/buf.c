@@ -27,7 +27,7 @@ void buf_init() {
 
 static struct buf*
 buf_get(u32 dev, u32 sector) {
-    printk("dev: %d sector: %d\n", dev, sector);
+    //printk("dev: %d sector: %d\n", dev, sector);
     //u32 step = 0;
     struct buf* bp;
     //acquire_lock(&bcache.lock);
@@ -56,7 +56,6 @@ loop:
             bp->b_dev = dev;
             bp->b_sector = sector;
             bp->b_flag = B_BUSY;
-            //   printk("return: %x\n", (u32)bp);
             //release_lock(&bcache.lock);
             return bp;
         }

@@ -10,7 +10,7 @@ extern task_t* current_task;
 static s32
 fd_alloc(struct file* f) {
     u32 fd;
-    for(fd = 0; fd < NOFILE; fd++) {
+    for(fd = 1; fd < NOFILE; fd++) {
         if(current_task->ofile[fd] == 0) {
             current_task->ofile[fd] = f;
             return fd;
@@ -21,9 +21,13 @@ fd_alloc(struct file* f) {
 
 int test_file() {
     printk("test_file \n");
-    int fd = _open("README");
+    int fd = _open("/README");
+    char buf[1024];
+    memset(buf, 0, sizeof(buf));
     if(fd > 0) {
         printk("open file: README\n");
+        file_read(current_task->ofile[fd], buf, 300);
+        printk("contents: %s\n", buf);
     }
     else {
         printk("failed to open file: README\n");

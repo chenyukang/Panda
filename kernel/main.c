@@ -70,6 +70,8 @@ void kmain(u32 init_stack) {
 
 
 void init_user() {
+    test_file();
+    kassert(0);
     do_exec("/init", NULL);
     while(1) {
         ;

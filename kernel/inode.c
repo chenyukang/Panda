@@ -121,6 +121,7 @@ void itrunc(struct inode* ip) {
         blk_free(ip->dev, addr[NDIRECT]);
         ip->addrs[NDIRECT] = 0;
     }
+    kassert(0);
     ip->size = 0;
     iupdate(ip);
 }
@@ -210,6 +211,7 @@ int readi(struct inode* ip, char* addr, u32 off, u32 n) {
     }
     if(off + n > ip->size)
         n = ip->size - off;
+    printk("ip->size: %d need read: %d\n", ip->size, n);
     for(total=0; total<n; total+=done, off+=done, addr+=done) {
         bp = buf_read(ip->dev, bmap(ip, off/BSIZE));
         done = min(n-total, BSIZE - off%BSIZE);
@@ -257,7 +259,6 @@ struct inode*
 dir_lookup(struct inode* dp, char* name, u32* poff) {
     u32 off;
     struct dirent dire;
-    //printk("in dir_lookup: %s\n", name);
     if(dp->type != T_DIR)
         PANIC("dir_lookup: error type of inode ");
     for(off=0; off<dp->size; off+=sizeof(dire)) {
@@ -302,10 +303,8 @@ static char*
 _skip(char* path, char* name) {
     const char* s;
     int len;
-
     while( *path == '/') path++;
-    if( *path == 0) return 0;
-
+    if(*path == 0) return 0;
     s = path;
     while( *path != '/' && *path != 0 )
         path++;

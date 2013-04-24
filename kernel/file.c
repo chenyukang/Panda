@@ -24,6 +24,7 @@ struct file* file_alloc(void) {
             return f;
         }
     }
+    kassert(0);
     return 0;
 }
 
@@ -59,14 +60,15 @@ int file_stat(struct file* f, struct stat* st) {
 
 int file_read(struct file* f, char* addr, int n) {
     int r;
-    if(f->readable == 0)
+    if(f->readable == 0){
         return -1;
+    }
     if(f->type == FD_INODE) {
-        r = readi(f->ip, addr, f->offset, n);
-        if(r > 0) {
+        ilock(f->ip);
+        if((r = readi(f->ip, addr, f->offset, n)) > 0)
             f->offset += r;
-            return r;
-        }
+        idrop(f->ip);
+        return r;
     }
     return -1;
 }
