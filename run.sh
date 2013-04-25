@@ -177,5 +177,5 @@ do
 done
 
 
-do_all "qemu";
+do_all "bochs";
 show_help;

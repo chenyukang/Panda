@@ -19,7 +19,7 @@ extern char  __kimg_end__;
 struct pde   pg_dir0[1024] __attribute__((aligned(4096)));
 struct pde*  cu_pg_dir;
 
-struct page  pages[NPAGE];
+struct page  pages[NPAGE] __attribute__((aligned(4096)));;
 struct page  freepg_list;
 
 u32 end_addr, ker_addr, used_addr;
@@ -49,13 +49,14 @@ void enable_page() {
 }
 
 /* ========================== begin pyhsical page =========================== */
-
+#if 0
 static void* _alloc(u32 size ) {
     used_addr = PAGE_ROUND_UP(used_addr);
     u32 addr = used_addr;
     used_addr += size;
     return (void*)addr;
 }
+#endif
 
 //init page list, link free pages with a list 
 void init_pages() {
@@ -212,7 +213,7 @@ s32 free_pgd(struct pde* pgd) {
 
 void init_page_dir(struct pde* pg_dir) {
     u32 k;
-    k_dir_nr = (end_addr)/(PAGE_SIZE*1024);
+    k_dir_nr = (PMEM)/(PAGE_SIZE*1024);
     for(k=0; k<k_dir_nr; k++) {
         pg_dir[k].pt_base  = k<<10;
         pg_dir[k].pt_flags = PTE_P | PTE_W | PTE_PS;
@@ -308,7 +309,6 @@ void do_no_page(void* vaddr) {
     vp = find_vma((u32)vaddr);
     if (vp == NULL) {
         //sigsend(current_task->p_pid, SIGSEGV, 1);
-        printk("vaddr: %x\n", vaddr);
         pg = alloc_page();   kassert(pg);
         pte = put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         printk("vaddr: %x pte: %x %d\n", (u32)vaddr, (u32)pte, pte->pt_flags & PTE_P);

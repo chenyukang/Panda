@@ -65,8 +65,8 @@ struct pte {
 };
 
 struct page {
-    u32 pg_idx;
-    u32 pg_refcnt;
+    u16 pg_idx;
+    u8  pg_refcnt;
     struct page* pg_next;
 };
 
