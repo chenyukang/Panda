@@ -33,8 +33,8 @@ void do_init_Cjob();
 void init_user();
 
 int init = 0;
-void kmain(u32 init_stack) {
 
+void kmain(u32 init_stack) {
     init_esp_start = init_stack;
     init_video();
     puts_color_str("Booting Panda OS ...\n", 0x0B);
@@ -56,12 +56,14 @@ void kmain(u32 init_stack) {
     
     spawn(init_user);
 
-    int* p = (int*)0x08001000;
+#if 0
+    int* p = (int*)0x08000010;
+    printk("value: %d\n", *p);
     *p = 1;
-    *p = 2;
-
     printk("value: %d\n", *p);
     kassert(0);
+#endif
+    
     init = 0;
     while(1) {
         if(!init) {

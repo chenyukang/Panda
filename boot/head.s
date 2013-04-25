@@ -49,7 +49,6 @@ move_text_mode:
 	mov ah, 0x0
 	mov al, 0x03
 	int 0x10
-	
 
 global _do_swtch
 _do_swtch:
@@ -110,9 +109,8 @@ _do_swtch:
 global isr14
 isr14:
 	cli                         ; Disable interrupts firstly.
-    push byte 0                 ; Push a dummy error code.
     push byte 14                ; Push the interrupt number.
-    jmp isr_pagefault_stub         ; Go to our common handler code.
+    jmp  common_stub         ; Go to our common handler code.
 	
 ISR_NOERRCODE 0
 ISR_NOERRCODE 1
@@ -194,7 +192,6 @@ common_stub:
     iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
 
 extern page_fault_handler
-
 isr_pagefault_stub:
     pusha
     push ds

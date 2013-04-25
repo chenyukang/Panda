@@ -31,7 +31,7 @@ static void timer_callback(void) {
     }
 
     if(ticks%100 == 0){
-        //sched();
+        sched();
     }
 }
 

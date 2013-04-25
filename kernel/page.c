@@ -44,8 +44,6 @@ void enable_page() {
     asm volatile("mov %%cr0, %0": "=r"(cr0));
     cr0 |= 0x80000000;                        // enable paging!
     asm volatile("mov %0, %%cr0":: "r"(cr0));
-
-
 }
 
 /* ========================== begin pyhsical page =========================== */
@@ -249,8 +247,7 @@ void mm_init() {
 
     init_page_dir(&(pg_dir0[0])); //init the kernel pg_dir
     init_pages();
-
-    irq_install_handler(13, (isq_t)(&page_fault_handler));
+    irq_install_handler(14, (isq_t)(&page_fault_handler));
     flush_pgd(&(pg_dir0[0]));
     enable_page();
 }
@@ -288,7 +285,7 @@ void do_wt_page(void* vaddr) {
 }
 
 void do_no_page(void* vaddr) {
-//    printk("do_no_page...:%x\n", (u32)vaddr);
+    //printk("do_no_page...:%x\n", (u32)vaddr);
     struct vm *vm;
     struct vma *vp;
     struct pte *pte;
@@ -308,11 +305,8 @@ void do_no_page(void* vaddr) {
     // else
     vp = find_vma((u32)vaddr);
     if (vp == NULL) {
+        kassert(0);
         //sigsend(current_task->p_pid, SIGSEGV, 1);
-        pg = alloc_page();   kassert(pg);
-        pte = put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
-        printk("vaddr: %x pte: %x %d\n", (u32)vaddr, (u32)pte, pte->pt_flags & PTE_P);
-        flush_pgd(current_task->p_vm.vm_pgd);
         return;
     }
     // demand zero
@@ -327,13 +321,11 @@ void do_no_page(void* vaddr) {
     if (vp->v_flag & VMA_MMAP) {
         pg = alloc_page();   kassert(pg);
         pte = put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
-        printk("vaddr: %x pte: %x %d\n", (u32)vaddr, (u32)pte, pte->pt_flags & PTE_P);
-
         // fill this new-allocated page
         buf = (char*)PG_ADDR(vaddr);
         off = (u32)buf - vp->v_base + vp->v_ioff;
         ilock(vp->v_ino);
-        // printk("v_ino: %x %x\n", (u32)vp->v_ino, (u32)vaddr);
+        printk("v_ino: %x %x\n", (u32)vp->v_ino, (u32)vaddr);
         readi(vp->v_ino, buf, off, PAGE_SIZE);
         idrop(vp->v_ino);
         pte->pt_flags &= ~(vp->v_flag & VMA_RDONLY? 0:PTE_W);
@@ -346,11 +338,11 @@ void page_fault_handler(struct registers_t* regs) {
     u32 fault_addr;
     asm volatile("mov %%cr2, %0" : "=r" (fault_addr));
 
-    if((regs->err_code & 0x1) == 0) { //present error
+    if((regs->err_code & 0x001) == 0) { //present error
         do_no_page((void*)fault_addr);
         return;
     }
-    if(regs->err_code & 0x2) {
+    if(regs->err_code & 0x002) {
         do_wt_page((void*)fault_addr);
         return;
     }
