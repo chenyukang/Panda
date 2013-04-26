@@ -64,8 +64,11 @@ do_compile() {
     # rm -rf $OBJDIR/initcode.o;
     
     $GCC -fno-builtin -fno-stack-protector -nostdinc -I. -c $KERNEL/init.c -o $OBJDIR/init.o;
+    $GCC -fno-builtin -fno-stack-protector -nostdinc -I. -c ./usr/clib.c -o $OBJDIR/clib.o;
+    $NASM -f elf ./usr/entry.s -o $OBJDIR/entry.o;
+    
     #$LD $OBJDIR/init.o -e main -T $TOOL/user.ld -o $OBJDIR/init;
-    $LD $OBJDIR/init.o -e main -T $TOOL/user.ld -o $OBJDIR/init;
+    $LD $OBJDIR/entry.o $OBJDIR/clib.o $OBJDIR/init.o -o $OBJDIR/init -T $TOOL/user.ld;
 
     flist=`cd $KERNEL/; ls *.c;`
     `cd ../`
@@ -177,5 +180,5 @@ do
 done
 
 
-do_all "qemu";
+do_all "bochs";
 show_help;

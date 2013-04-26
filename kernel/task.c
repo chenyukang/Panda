@@ -129,7 +129,7 @@ struct task* spawn(void* func) {
     return new_task;
 }
 
-#define DEBUG_PROC 1
+//#define DEBUG_PROC 1
 #ifdef DEBUG_PROC
 static int step = 0;
 #endif
@@ -142,7 +142,7 @@ void swtch_to(struct task *to){
     current_task = to;
     flush_pgd(to->p_vm.vm_pgd);
 #ifdef DEBUG_PROC
-    printk("switch %d from: %s to %s\n", step++, from->name, to->name);
+    printk("switch %d from: %s to %s %x\n", step++, from->name, to->name, (u32)to->p_context.eip);
 #endif
     _do_swtch(&(from->p_context), &(to->p_context));
 }

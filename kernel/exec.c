@@ -10,6 +10,7 @@
 
 extern struct task* current_task;
 extern void enter_user(u32, u32);
+extern void _umode();
 
 static char** store_argv(char* path, char** args) {
     char **res;
@@ -110,6 +111,17 @@ int do_exec(char* path, char** argv) {
     free_argv(store);
 
     idrop(ip);
+#if 0
+    int* p = (int*)0x00000023;
+    printk("value: %d\n", *p);
+    *p = 1;
+    printk("value: %d\n", *((int*)0x0000381A));
+#endif
+    //current_task->p_context.eip = (u32)vm->vm_entry;
+    //printk("eip: %x\n", (u32)current_task->p_context.eip);
+    //current_task->p_context.esp = (u32)esp;
+    //_umode();
+    //swtch_to(current_task);
     enter_user(vm->vm_entry, esp);
     return 0;
 

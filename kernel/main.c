@@ -63,6 +63,14 @@ void kmain(u32 init_stack) {
     printk("value: %d\n", *p);
     kassert(0);
 #endif
+
+#if 0
+    int* p = (int*)0x00000023;
+    printk("value: %d\n", *p);
+    *p = 1;
+    printk("value: %d\n", *p);
+    kassert(0);
+#endif
     
     init = 0;
     while(1) {
@@ -80,6 +88,7 @@ void init_user() {
     test_file();
     do_exec("/init", NULL);
     printk("finished exec\n");
+    kassert(0);
     while(1) {
         ;
     }

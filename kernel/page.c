@@ -254,9 +254,9 @@ void mm_init() {
 
 void do_wt_page(void* vaddr) {
     printk("do_wt_page...:%x\n", (u32)vaddr);
-    struct vma *vp;
-    struct pte *pte;
-    struct page *pg;
+    struct vma*  vp;
+    struct page* pg;
+    struct pte*  pte;
     char *old_page, *new_page;
 
     vp = find_vma((u32)vaddr);
@@ -285,7 +285,7 @@ void do_wt_page(void* vaddr) {
 }
 
 void do_no_page(void* vaddr) {
-    //printk("do_no_page...:%x\n", (u32)vaddr);
+    printk("do_no_page...:%x\n", (u32)vaddr);
     struct vm *vm;
     struct vma *vp;
     struct pte *pte;
@@ -314,7 +314,6 @@ void do_no_page(void* vaddr) {
         pg = alloc_page();
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         memset((void*)PG_ADDR(vaddr), 0, PAGE_SIZE);
-        printk("zero\n");
         return;
     }
     // demand file
@@ -325,7 +324,7 @@ void do_no_page(void* vaddr) {
         buf = (char*)PG_ADDR(vaddr);
         off = (u32)buf - vp->v_base + vp->v_ioff;
         ilock(vp->v_ino);
-        printk("v_ino: %x %x\n", (u32)vp->v_ino, (u32)vaddr);
+        //printk("v_ino: %x %x\n", (u32)vp->v_ino, (u32)vaddr);
         readi(vp->v_ino, buf, off, PAGE_SIZE);
         idrop(vp->v_ino);
         pte->pt_flags &= ~(vp->v_flag & VMA_RDONLY? 0:PTE_W);
@@ -346,9 +345,12 @@ void page_fault_handler(struct registers_t* regs) {
         do_wt_page((void*)fault_addr);
         return;
     }
+#if 1
     if (regs->err_code & 0x4) {
+        printk("addr = %x\n", fault_addr);
         PANIC("user-mode ");
     }
+#endif
     if (regs->err_code & 0x8) {
         PANIC("touch reserved address");
     }

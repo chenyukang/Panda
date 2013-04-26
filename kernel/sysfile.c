@@ -25,7 +25,7 @@ int test_file() {
     memset(buf, 0, sizeof(buf));
     if(fd > 0) {
         file_read(current_task->ofile[fd], buf, 300);
-        printk("contents: %s\n", buf);
+        //printk("contents: %s\n", buf);
     }
     else {
         printk("failed to open file: README\n");

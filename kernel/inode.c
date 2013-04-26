@@ -213,9 +213,8 @@ int readi(struct inode* ip, char* addr, u32 off, u32 n) {
     }
     if(off + n > ip->size)
         n = ip->size - off;
-    //printk("ip->size: %x %d need read: %d\n", (u32)addr, ip->size, n);
+    printk("addr: %x ip->size:%d need read: %d\n", (u32)addr, ip->size, n);
     for(total=0; total<n; total+=done, off+=done, addr+=done) {
-        //printk("reading ... \n");
         bp = buf_read(ip->dev, bmap(ip, off/BSIZE));
         done = min(n-total, BSIZE - off%BSIZE);
         memmove(addr, bp->b_data + off%BSIZE, done);

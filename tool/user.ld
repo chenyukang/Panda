@@ -5,6 +5,8 @@ SECTIONS {
     . = 0x8000020;
     .text : {
         __text__ = .;
+        ./objs/entry.o(.text) *(.text)
+        *(.rodata .gnu.linkonce.*)
         . = ALIGN(0x1000);
         __text_end__ = .;
     }
@@ -19,6 +21,6 @@ SECTIONS {
         . = ALIGN(0x1000);
     }
     /DISCARD/ : {
-        *(.note .note.* .gnu.* .dynsym .comment .pdr .init .plt .fini .interp .hash .dynstr .ctors .dtors )
+        *(.note .note.* .gnu.* .dynsym .comment .pdr .init .plt .fini .interp)
     }
 }
