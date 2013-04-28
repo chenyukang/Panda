@@ -3,6 +3,7 @@
 #include <sysfile.h>
 #include <inode.h>
 #include <file.h>
+#include <system.h>
 #include <string.h>
 
 extern task_t* current_task;

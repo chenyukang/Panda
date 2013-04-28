@@ -27,6 +27,7 @@ fi
 
 OBJDIR="./objs"
 TOOL="./tool"
+USEROBJDIR="./objs/usr"
 
 do_clean() {
     echo "clean up"
@@ -58,17 +59,6 @@ do_compile() {
 	fi
     done
 
-    # $GCC $CFLAGS -nostdinc -I. -c $KERNEL/initcode.S -o $OBJDIR/initcode.o;
-    # $LD  $LDFLAGS -N -e start -Ttext 0 -o $OBJDIR/initcode.out $OBJDIR/initcode.o;
-    # $OBJCPY -S -O binary $OBJDIR/initcode.out $OBJDIR/initcode;
-    # rm -rf $OBJDIR/initcode.o;
-    
-    $GCC -fno-builtin -fno-stack-protector -nostdinc -I. -c $KERNEL/init.c -o $OBJDIR/init.o;
-    $GCC -fno-builtin -fno-stack-protector -nostdinc -I. -c ./usr/clib.c -o $OBJDIR/clib.o;
-    $NASM -f elf ./usr/entry.s -o $OBJDIR/entry.o;
-    
-    #$LD $OBJDIR/init.o -e main -T $TOOL/user.ld -o $OBJDIR/init;
-    $LD $OBJDIR/entry.o $OBJDIR/clib.o $OBJDIR/init.o -o $OBJDIR/init -T $TOOL/user.ld;
 
     flist=`cd $KERNEL/; ls *.c;`
     `cd ../`
@@ -81,6 +71,19 @@ do_compile() {
 	then exit;
 	fi
     done
+
+    # $GCC $CFLAGS -nostdinc -I. -c $KERNEL/initcode.S -o $OBJDIR/initcode.o;
+    # $LD  $LDFLAGS -N -e start -Ttext 0 -o $OBJDIR/initcode.out $OBJDIR/initcode.o;
+    # $OBJCPY -S -O binary $OBJDIR/initcode.out $OBJDIR/initcode;
+    # rm -rf $OBJDIR/initcode.o;
+    
+    mkdir ./objs/usr;
+    $GCC -fno-builtin -fno-stack-protector -nostdinc -I. -c $KERNEL/init.c -o $USEROBJDIR/init.o;
+    $GCC -I./inc -DUSR -fno-builtin -fno-stack-protector -nostdinc -I. -c $KERNEL/string.c -o $USEROBJDIR/string.o;
+    $GCC -fno-builtin -fno-stack-protector -nostdinc -I. -c ./usr/clib.c -o $USEROBJDIR/clib.o;
+
+    $NASM -f elf ./usr/entry.s -o $USEROBJDIR/entry.o;
+    $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o $USEROBJDIR/init.o  -e _start -o $USEROBJDIR/init -T $TOOL/user.ld;
 
     do_link;
 }
@@ -117,11 +120,10 @@ do_link() {
 
 do_prepare_hd() {
     `$ON_GCC ./tool/mkfs.c -o ./tool/mkfs.exe`
-    #if [ ! -f "hd.img" ]; then
     rm -rf hd.img;
     echo "making hard disk"
     #bximage hd.img -hd -mode=flat -size=10 -q;
-    cp $OBJDIR/init ./;
+    cp $USEROBJDIR/init ./;
     ./tool/mkfs.exe hd.img README init;
     rm -rf init;
     #fi
@@ -180,5 +182,5 @@ do
 done
 
 
-do_all "bochs";
+do_all "qemu";
 show_help;

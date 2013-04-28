@@ -142,7 +142,7 @@ void swtch_to(struct task *to){
     current_task = to;
     flush_pgd(to->p_vm.vm_pgd);
 #ifdef DEBUG_PROC
-    printk("switch %d from: %s to %s %x\n", step++, from->name, to->name, (u32)to->p_context.eip);
+    printk("switch %d from: %s to %s\n", step++, from->name, to->name);
 #endif
     _do_swtch(&(from->p_context), &(to->p_context));
 }

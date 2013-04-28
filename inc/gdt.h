@@ -61,6 +61,8 @@ struct gdt_ptr {
 #define STS_CG      0xC     // 32-bit Call Gate
 #define STS_IG      0xE     // 32-bit Interrupt Gate
 #define STS_TRG     0xF     // 32-bit Trap Gate
+#define RING0 0
+#define RING3 3
 
 #define KERN_CS (1<<3)
 #define KERN_DS (2<<3)

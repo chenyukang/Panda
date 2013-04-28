@@ -14,7 +14,6 @@
 #include <task.h>
 
 //4kb
-
 extern char  __kimg_end__;
 struct pde   pg_dir0[1024] __attribute__((aligned(4096)));
 struct pde*  cu_pg_dir;
@@ -254,9 +253,9 @@ void mm_init() {
 
 void do_wt_page(void* vaddr) {
     printk("do_wt_page...:%x\n", (u32)vaddr);
-    struct vma*  vp;
-    struct page* pg;
-    struct pte*  pte;
+    struct vma *vp;
+    struct pte *pte;
+    struct page *pg;
     char *old_page, *new_page;
 
     vp = find_vma((u32)vaddr);
@@ -314,6 +313,7 @@ void do_no_page(void* vaddr) {
         pg = alloc_page();
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         memset((void*)PG_ADDR(vaddr), 0, PAGE_SIZE);
+        printk("zero\n");
         return;
     }
     // demand file
@@ -345,12 +345,9 @@ void page_fault_handler(struct registers_t* regs) {
         do_wt_page((void*)fault_addr);
         return;
     }
-#if 1
     if (regs->err_code & 0x4) {
-        printk("addr = %x\n", fault_addr);
         PANIC("user-mode ");
     }
-#endif
     if (regs->err_code & 0x8) {
         PANIC("touch reserved address");
     }

@@ -53,19 +53,12 @@ void kmain(u32 init_stack) {
     init_ide();
     init_multi_task();
     sti();
-    
+
+    //detect_cpu();
     spawn(init_user);
 
 #if 0
     int* p = (int*)0x08000010;
-    printk("value: %d\n", *p);
-    *p = 1;
-    printk("value: %d\n", *p);
-    kassert(0);
-#endif
-
-#if 0
-    int* p = (int*)0x00000023;
     printk("value: %d\n", *p);
     *p = 1;
     printk("value: %d\n", *p);
@@ -88,7 +81,6 @@ void init_user() {
     test_file();
     do_exec("/init", NULL);
     printk("finished exec\n");
-    kassert(0);
     while(1) {
         ;
     }

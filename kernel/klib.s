@@ -1,7 +1,6 @@
 
 [SECTION .text]
 
-
 [global read_eip]
 read_eip:
     pop eax                     ; Get the return address
@@ -13,7 +12,7 @@ read_eip:
 ;; note:  
 ;;    USER_CS = 0x1B
 ;;    USER_DS = 0x23
-
+;; 
 [global enter_user]
 enter_user:
     pop dword eax       ;; ignore the returned eip
@@ -31,42 +30,8 @@ enter_user:
     push dword ebx      ;; eip
     iretd
 
-;; [global _umode]
-;; _umode:
-;;     sti
-;;     mov ax, 0x13
-;;     mov ds, ax
-;;     mov es, ax
-;;     mov fs, ax
-;;     mov gs, ax
-;;     mov eax, esp
-;;     push dword 0x13
-;;     push dword eax
-;;     pushf
-;;     push dword 0x0f
-;;     push _umode_ret
-;;     iret
-;; _umode_ret:
-;;     ret
-    
-;; [global enter_user]
-;; enter_user: 
-;;     cli
-;; 		mov ax, 0x23	    user mode data selector is 0x20 (GDT entry 3). Also sets RPL to 3
-;; 		mov ds, ax
-;; 		mov es, ax
-;; 		mov fs, ax
-;; 		mov gs, ax
-;; 		push dword 0x23		SS, notice it uses same selector as above
-;; 		push esp		    ESP
-;; 		pushfd			    EFLAGS
-;; 		push dword 0x1b		CS, user mode code selector is 0x18. With RPL 3 this is 0x1b
-;; 		lea eax, [a]        EIP first
-;; 		push eax
-;; 		iretd
-;; 	a:
-;; 		add esp, 4
 
+	
 global gdt_flush	
 extern gp
 gdt_flush:
@@ -153,7 +118,14 @@ isr14:
 	cli                         ; Disable interrupts firstly.
     push byte 14                ; Push the interrupt number.
     jmp  common_stub         ; Go to our common handler code.
-	
+
+;;; system call
+global sys_call
+sys_call:
+	push  dword 0
+	push  dword 128
+	jmp   common_stub
+
 ISR_NOERRCODE 0
 ISR_NOERRCODE 1
 ISR_NOERRCODE 2
@@ -260,4 +232,8 @@ isr_pagefault_stub:
     popa
     add esp, 8
     iret
-    
+
+section .bss
+	resb 8192	; 80KB for stack
+stack_top:	; top of our stack here
+	

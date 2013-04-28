@@ -74,8 +74,8 @@ enum task_status {
 
 struct task {
     struct task* next;
-    u32          privilege;
-    void*        kstack_base;
+    u32 privilege;
+    void* kstack_base;
     
     u32 pid;        /* process id */
     u32 ppid;       /* parent id */
@@ -85,6 +85,7 @@ struct task {
     s32 exit_code;  /* exit code process exit */
     u32 esp, ebp;   /* stack and base pointers */
     u32 eip;        /* instruction pointer */
+    u32 p_error;
     u32 stack_base;
     
     enum task_status    stat;
@@ -109,7 +110,6 @@ char* get_current_name();
 int fork();
 int getpid();
 
-void swtch_to(struct task *to);
 void sleep(void* change, struct spinlock* lock);
 void wakeup(void* change);
 

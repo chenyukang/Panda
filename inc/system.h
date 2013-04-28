@@ -11,7 +11,7 @@
 
 #include <types.h>
 
-#define abs(x) ((x < 0) ? (-(x)): (x) )
+
 #define KB  1024
 
 //debug option
@@ -51,8 +51,10 @@ typedef void (*isq_t) (struct registers_t* r);
 typedef void (*isr_t) (struct registers_t* r);
 
 void irq_install_handler(int irq, isq_t handler);
-void idt_set(u8 k, size_t base,
-             u16 selector, u8 flags);
+//void idt_set(u8 k, u16 base, u16 selector, u8 flags);
+//void idt_set(u8 k, u16 base, u16 selector, u8 type, u8 dpl);
+
+
 
 void timer_init(void);
 void timer_wait(int ticks);

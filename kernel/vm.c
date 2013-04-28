@@ -59,11 +59,11 @@ u32 vm_renew(struct vm* vm, struct header* header, struct inode* ip) {
     //
     init_page_dir(vm->vm_pgd);
     vm->vm_entry = header->a_entry;
-    vma_init(&(vm->vm_text),  text,  header->a_tsize, VMA_MMAP | VMA_PRIVATE | VMA_RDONLY, ip, text-base);
+    vma_init(&(vm->vm_text),  text,  header->a_tsize, VMA_MMAP | VMA_RDONLY | VMA_PRIVATE, ip, text-base);
     vma_init(&(vm->vm_data),  data,  header->a_dsize, VMA_MMAP | VMA_PRIVATE, ip, data-base);
     vma_init(&(vm->vm_bss),   bss,   header->a_bsize, VMA_ZERO | VMA_PRIVATE, NULL, 0);
-    vma_init(&(vm->vm_heap),  heap,  PAGE_SIZE,       VMA_ZERO | VMA_PRIVATE, NULL, 0);
-    vma_init(&(vm->vm_stack), VM_STACK, PAGE_SIZE,    VMA_STACK | VMA_ZERO | VMA_PRIVATE, NULL, 0);
+    vma_init(&(vm->vm_heap),  heap,  PAGE_SIZE,        VMA_ZERO | VMA_PRIVATE, NULL, 0);
+    vma_init(&(vm->vm_stack), VM_STACK, PAGE_SIZE,     VMA_STACK | VMA_ZERO | VMA_PRIVATE, NULL, 0);
     return 0;
 }
 

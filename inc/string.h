@@ -9,7 +9,9 @@
 #if !defined(STRING_H)
 #define STRING_H
 
-#include <system.h>
+#include <types.h>
+
+#define abs(x) ((x < 0) ? (-(x)): (x) )
 
 void strcpy(char* dest, char* src);
 void strncpy(char* dest, char* src, size_t cnt);

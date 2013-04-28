@@ -9,11 +9,17 @@
 
 #include <string.h>
 
+#ifdef USR
+
+void putch() {
+}
+
+#else
+#include <screen.h>
+#endif
+
 const char* digits = "0123456789";
-
 typedef char* va_list;
-
-extern void putch(char);
 
 #define INTSIZEOF(n) ((sizeof(n)+sizeof(int)-1) & ~(sizeof(int)-1))
 #define va_start(ap, format) ( ap = (va_list)(&format) + INTSIZEOF(format))
@@ -91,6 +97,16 @@ unsigned short *memsetw(unsigned short *dest,
     return dest;
 }
 
+s32 strcmp(const char* v1, const char* v2) {
+    const char* p = v1;
+    const char* q = v2;
+    while(*p && *q && *p++ == *q++)
+        ;
+    if(*p) return 1;
+    if(*q) return -1;
+    return (u8)*p - (u8)*q;
+}
+
 s32 strncmp(const char* v1, const char* v2, u32 n) {
     const char* p = v1;
     const char* q = v2;
@@ -113,8 +129,7 @@ size_t strlen(const char *str) {
 /* Uses the above routine to output a string... */
 inline void puts(const char* text) {
     u32 i;
-    for (i = 0; i < strlen(text); i++)
-    {
+    for (i = 0; i < strlen(text); i++) {
         putch(text[i]);
     }
 }
@@ -155,8 +170,7 @@ inline void printk_int(u32 val) {
 
 //be careful with 1<<32
 static inline char*
-int_to_str(char* str, const s32 num,
-                        const s32 radix) {
+int_to_str(char* str, const s32 num, const s32 radix) {
     char* ptr = str;
     char* end ;
     int i, j;
