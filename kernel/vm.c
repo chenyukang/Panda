@@ -16,8 +16,9 @@ u32 vma_init(struct vma* vp, u32 base, u32 size, u32 flag,
 }
 
 u32 vm_clone(struct vm* to) {
-    int i;
     struct vma* pva;
+    int i;
+
     to->vm_pgd = (struct pde*)alloc_pde();
     init_page_dir(to->vm_pgd);
     for(i=0; i<NVMA; i++) {

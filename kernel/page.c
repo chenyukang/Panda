@@ -83,14 +83,13 @@ void init_pages() {
 }
 
 struct page* find_page(u32 nr) {
-    kassert(nr > free_page_nr &&
+    kassert(nr >= 0 &&
             nr < NPAGE);
     return &pages[nr];
 }
 
 void free_page(struct page* pg) {
-    kassert(pg &&
-            pg->pg_refcnt > 0 &&
+    kassert(pg && pg->pg_refcnt > 0 &&
             "try free invalid page");
     cli();
     pg->pg_refcnt--;
@@ -154,13 +153,15 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
         if(new == 0)
             return 0;
         pg = alloc_page(); //kassert(0);
-        if(pg == 0)
+        if(pg == 0) {
             return 0;
+        }
         pde->pt_flags = PTE_P | PTE_U | PTE_W;
         pde->pt_base = (pg->pg_idx);
         pte = (struct pte*)(pde->pt_base * PAGE_SIZE );
         memset(pte, 0, PAGE_SIZE);
         flush_pgd(current_task->p_vm.vm_pgd);
+    } else {
     }
     pte = (struct pte*)(pde->pt_base * PAGE_SIZE);
     return &pte[PTEX(vaddr)];
@@ -190,7 +191,7 @@ void copy_pgd(struct pde* from, struct pde* targ) {
             tpte = (struct pte*)(alloc_page()->pg_idx * PAGE_SIZE);
             tpte->pt_base = ((u32)tpte>>12);
             for(k=0; k<1024; k++) {
-                tpte[k].pt_base = fpte[k].pt_base;
+                tpte[k].pt_base  = fpte[k].pt_base;
                 tpte[k].pt_flags = fpte[k].pt_flags;
                 if(fpte[k].pt_flags & PTE_P) {
                     //turn off PTE_W 
@@ -238,7 +239,6 @@ void mm_init() {
     // don't use ker_addr ~ 0x100000
     // free memory begin with 0x100000
     used_addr = 0x100000;
-    printk("end_addr: %x\n",  (u32)end_addr);
     printk("mem_size : %dMB\n", end_addr/(KB*KB));
     printk("ker_size : %dKB\n", ker_addr/(KB));
     printk("page_size: %dKB\n", PAGE_SIZE/(KB));
@@ -252,7 +252,7 @@ void mm_init() {
 }
 
 void do_wt_page(void* vaddr) {
-    printk("do_wt_page...:%x\n", (u32)vaddr);
+    //printk("do_wt_page...:%x\n", (u32)vaddr);
     struct vma *vp;
     struct pte *pte;
     struct page *pg;
@@ -289,8 +289,8 @@ void do_no_page(void* vaddr) {
     struct vma *vp;
     struct pte *pte;
     struct page *pg;
-    u32 off;
     char *buf;
+    u32 off;
 
     vm = &current_task->p_vm;
     // if this page lies on the edge of user stack, grows the stack.
@@ -304,6 +304,7 @@ void do_no_page(void* vaddr) {
     // else
     vp = find_vma((u32)vaddr);
     if (vp == NULL) {
+        printk("vaddr: %x\n", (u32)vaddr);
         kassert(0);
         //sigsend(current_task->p_pid, SIGSEGV, 1);
         return;
@@ -313,7 +314,6 @@ void do_no_page(void* vaddr) {
         pg = alloc_page();
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         memset((void*)PG_ADDR(vaddr), 0, PAGE_SIZE);
-        printk("zero\n");
         return;
     }
     // demand file
@@ -324,7 +324,6 @@ void do_no_page(void* vaddr) {
         buf = (char*)PG_ADDR(vaddr);
         off = (u32)buf - vp->v_base + vp->v_ioff;
         ilock(vp->v_ino);
-        //printk("v_ino: %x %x\n", (u32)vp->v_ino, (u32)vaddr);
         readi(vp->v_ino, buf, off, PAGE_SIZE);
         idrop(vp->v_ino);
         pte->pt_flags &= ~(vp->v_flag & VMA_RDONLY? 0:PTE_W);
@@ -341,22 +340,21 @@ void page_fault_handler(struct registers_t* regs) {
         do_no_page((void*)fault_addr);
         return;
     }
-    if(regs->err_code & 0x002) {
+    if(regs->err_code & 0x002) {  //write
         do_wt_page((void*)fault_addr);
         return;
     }
-    if (regs->err_code & 0x4) {
+    if (regs->err_code & 0x004) {
+        printk("address: %x\n", (u32)fault_addr);
+        //do_no_page((void*)fault_addr);
         PANIC("user-mode ");
+        return;
     }
-    if (regs->err_code & 0x8) {
+    if (regs->err_code & 0x008) {
         PANIC("touch reserved address");
     }
     if (regs->err_code & 0x10) {
         PANIC("instruction fetch error");
     }
-    puts("Page fault! ( ");
-    puts(") at ");
-    printk_hex(fault_addr);
-    puts("\n");
-    PANIC("Page fault");
+    printk("Page fault at [%x]\n", (u32)fault_addr);
 }

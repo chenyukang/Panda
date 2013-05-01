@@ -63,7 +63,7 @@ struct proc_stack {
 
 enum task_status {
     UNUSED = 0,
-    CREATED,
+    NEW,
     WAIT,
     RUNNING,
     RUNNABLE,
@@ -94,8 +94,8 @@ struct task {
     void*               chan;
     char                name[64];              /* process name*/
     struct vm           p_vm;
-    struct jmp_buf      p_context;
-    struct registers_t* p_trap;
+    struct jmp_buf      p_context;     //switch to here to run process
+    struct registers_t* p_trap;        //trapframe for syscall
 };
 
 typedef struct task task_t;
@@ -107,7 +107,6 @@ struct task* spawn(void* func);
 extern struct task* current_task;
 
 char* get_current_name();
-int fork();
 int getpid();
 
 void sleep(void* change, struct spinlock* lock);

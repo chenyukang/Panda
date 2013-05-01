@@ -1,4 +1,4 @@
-
+[bits 32]
 [SECTION .text]
 
 [global read_eip]
@@ -7,7 +7,6 @@ read_eip:
     jmp eax                     ; Return. Can't use RET because return
                                 ; address popped off the stack. 
 
-;;
 ;; return to user mode via an IRET instruction.
 ;; note:  
 ;;    USER_CS = 0x1B
@@ -30,8 +29,6 @@ enter_user:
     push dword ebx      ;; eip
     iretd
 
-
-	
 global gdt_flush	
 extern gp
 gdt_flush:
@@ -81,6 +78,7 @@ _do_swtch:
     push dword [eax]
     ret
 
+	
 ;;; This macro creates a stub for an ISR which does NOT pass it's own
 ; error code (adds a dummy errcode byte).
 %macro ISR_NOERRCODE 1
@@ -116,8 +114,8 @@ _do_swtch:
 global isr14
 isr14:
 	cli                         ; Disable interrupts firstly.
-    push byte 14                ; Push the interrupt number.
-    jmp  common_stub         ; Go to our common handler code.
+	push byte 14                ; Push the interrupt number.
+	jmp  common_stub         ; Go to our common handler code.
 
 ;;; system call
 global sys_call
@@ -177,8 +175,9 @@ IRQ  15,    47
 	
 ; In isr.c
 extern hwint_handler
-
+	
 common_stub:
+    sti
     pusha
     push ds
     push es
@@ -196,7 +195,9 @@ common_stub:
     mov eax, hwint_handler
     call eax       ; A special call, preserves the 'eip' register
     pop eax
-    
+
+global stub_ret	
+stub_ret:
     pop gs
     pop fs
     pop es
@@ -205,33 +206,6 @@ common_stub:
     add esp, 8     ; Cleans up the pushed error code and pushed ISR number
     iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
 
-extern page_fault_handler
-isr_pagefault_stub:
-    pusha
-    push ds
-    push es
-    push fs
-    push gs
-
-    mov ax, 0x10
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    mov eax, esp
-
-    push eax
-    mov eax, page_fault_handler
-    call eax
-    pop eax
-
-    pop gs
-    pop fs
-    pop es
-    pop ds
-    popa
-    add esp, 8
-    iret
 
 section .bss
 	resb 8192	; 80KB for stack

@@ -27,12 +27,11 @@ struct {
 
 struct tss_desc tss;
 
-struct task*       current_task = 0;
 extern struct pde  pg_dir0;
 extern struct pde* cu_pg_dir;
+struct task*       current_task = 0;
 extern u32         init_esp_start;
 
-extern u32 read_eip();
 extern void _do_swtch(struct jmp_buf* from, struct jmp_buf* to);
 
 int getpid(void) {
@@ -69,7 +68,6 @@ struct task* alloc_proc() {
 
 static u32 next_pid() {
     u32 i, id = 0;
-    
 repeat:
     id++;
     for(i=0; i<PROC_NUM; i++) {
@@ -104,32 +102,34 @@ void init_multi_task() {
     init_proc0();
 }
 
+void forkret() {
+    static int first = 1;
+    if(first) {
+        first = 0;
+    }
+}
+
 struct task* spawn(void* func) {
-    cli();
     struct task *parent, *new_task;
     parent = current_task;
     new_task = alloc_proc();
+    new_task->stat = NEW;
     new_task->pid = next_pid();
     new_task->ppid = parent->pid;
-#if 0
-    new_task->pg_dir = (struct pde*)(alloc_pde());
-    init_page_dir(new_task->pg_dir);
-    copy_pgd(current_task->pg_dir, new_task->pg_dir);
-    
-#endif
     vm_clone(&new_task->p_vm);
     new_task->p_context = parent->p_context;
     new_task->p_context.eip = (u32)func;
     new_task->p_context.esp = (u32)new_task+PAGE_SIZE;
-    new_task->stat = RUNNABLE;
     new_task->r_time = 0;
     if(new_task->pid == 2)
         strcpy(new_task->name, "proc2");
-    sti();
+    else if(new_task->pid == 3)
+        strcpy(new_task->name, "proc3");
     return new_task;
 }
 
 //#define DEBUG_PROC 1
+
 #ifdef DEBUG_PROC
 static int step = 0;
 #endif

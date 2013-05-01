@@ -1,3 +1,6 @@
+
+#ifndef _SYS_CALL_H
+#define _SYS_CALL_H
 #include <system.h>
 
 // System call numbers
@@ -25,8 +28,11 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 
+extern int errno;
+
 void do_syscall(struct registers_t* tf);
-    
+void syscall_init();
+
 #define _SYS0(T0, FN)                           \
     T0 FN(){                                    \
         register int r;                         \
@@ -84,3 +90,18 @@ void do_syscall(struct registers_t* tf);
         );                                      \
         return r;                               \
     }
+
+
+
+enum {
+    NR_setup,
+    NR_fork,
+    NR_exec,
+    NR_write
+};
+    
+static inline _SYS1(int, write, char);
+static inline _SYS0(int, fork);
+static inline _SYS2(int, exec, char*, char**);
+
+#endif

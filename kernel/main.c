@@ -19,6 +19,7 @@
 #include <file.h>
 #include <sysfile.h>
 #include <exec.h>
+#include <syscall.h>
 
 u32 init_esp_start;
 
@@ -44,6 +45,7 @@ void kmain(u32 init_stack) {
     time_init();
     gdt_init();
     idt_init();
+    syscall_init();
     timer_init();
     kb_init();
     mm_init();
@@ -52,10 +54,10 @@ void kmain(u32 init_stack) {
     init_inodes();
     init_ide();
     init_multi_task();
-    sti();
 
     //detect_cpu();
-    spawn(init_user);
+    struct task* t = spawn(init_user);
+    t->stat = RUNNABLE;
 
 #if 0
     int* p = (int*)0x08000010;
@@ -64,8 +66,11 @@ void kmain(u32 init_stack) {
     printk("value: %d\n", *p);
     kassert(0);
 #endif
-    
+
+    sti();
     init = 0;
+    //test_idt();
+    //kassert(0);
     while(1) {
         if(!init) {
             printk("kernel running ...\n");

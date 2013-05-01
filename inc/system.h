@@ -16,14 +16,12 @@
 
 //debug option
 //#define NDEBUG 1
-
 #ifndef NDEBUG
 #define kassert(_Expression)                                            \
   if(!(_Expression))                                                    \
   {                                                                     \
       printk("FILE:%s LINE:%d  (Assertion: \"%s\" FAILED)\n",           \
              __FILE__, __LINE__ , #_Expression);                        \
-      __asm__ volatile("cli");                                          \
       while(1) ;                                                        \
   }                                                                     \
 
@@ -41,24 +39,20 @@
 
 /* This defines what the stack looks like after an ISR was running */
 struct registers_t {
-    unsigned int gs, fs, es, ds;
-    unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    unsigned int int_no, err_code;
-    unsigned int eip, cs, eflags, useresp, ss;    
+    s32 gs, fs, es, ds;
+    s32 edi, esi, ebp, _esp, ebx, edx, ecx, eax;
+    s32 int_no, err_code;
+    s32 eip, cs, eflags, esp, ss;    
 } __attribute__((packed));
 
 typedef void (*isq_t) (struct registers_t* r);
 typedef void (*isr_t) (struct registers_t* r);
 
 void irq_install_handler(int irq, isq_t handler);
-//void idt_set(u8 k, u16 base, u16 selector, u8 flags);
-//void idt_set(u8 k, u16 base, u16 selector, u8 type, u8 dpl);
-
-
 
 void timer_init(void);
 void timer_wait(int ticks);
-u32 get_sys_ticks(void);
+u32  get_sys_ticks(void);
 
 extern void gdt_init(void);
 extern void idt_init(void);

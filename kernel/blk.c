@@ -6,7 +6,7 @@
  *      @author : Yukang Chen (moorekang@gmail.com)
  *      @date   : 2012-05-28 23:19:23
  *
- *      @brief  :
+ *      @brief  : ref xv6
  *
  *******************************************************************************/
 
@@ -24,7 +24,6 @@ void readsb(u32 dev, struct superblock* sb) {
 void blk_zero(u32 dev, u32 bn) {
     struct buf* bp = buf_read(dev, bn);
     memset(bp->b_data, 0, BSIZE);
-    //write log 
     buf_release(bp);
 }
 

@@ -30,7 +30,7 @@ static void timer_callback(void) {
         //print_time_local();
     }
 
-    if(ticks%100 == 0){
+    if(ticks%2 == 0){
         sched();
     }
 }

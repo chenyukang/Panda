@@ -4,8 +4,7 @@
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-08 21:51:43
 //
-// @Brief  : string util, this is used both by kernel and user space program,
-//           defined USR will be compiled for user space.
+// @Brief  :
 
 
 #include <string.h>
@@ -20,10 +19,10 @@
 const char* digits = "0123456789";
 typedef char* va_list;
 
-#define INTSIZEOF(n)          ((sizeof(n)+sizeof(int)-1) & ~(sizeof(int)-1))
-#define va_start(ap, format)  ( ap = (va_list)(&format) + INTSIZEOF(format))
-#define va_arg(ap, type)      (*(type*) ((ap += INTSIZEOF(type)) - INTSIZEOF(type)))
-#define va_end(ap)            ( ap=(va_list)0 )
+#define INTSIZEOF(n) ((sizeof(n)+sizeof(int)-1) & ~(sizeof(int)-1))
+#define va_start(ap, format) ( ap = (va_list)(&format) + INTSIZEOF(format))
+#define va_end(ap) ( ap=(va_list)0 )
+#define va_arg(ap, type) ( *(type*) ((ap += INTSIZEOF(type)) - INTSIZEOF(type)))
 
 void strcpy(char* dest, char* src) {
     char* p = src;
@@ -132,6 +131,7 @@ inline void puts(const char* text) {
         putch(text[i]);
     }
 }
+
 
 //be careful with 1<<32
 static inline char*

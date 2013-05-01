@@ -5,7 +5,7 @@
 // Copyright (c) 2006-2007 -  http://brynet.biz.tm - <brynet@gmail.com>
 //
 // modify by  Yukang Chen (moorekang@gmail.com) 
-// @Date   : 2012-01-07 23:42:55
+// @Date   :  2012-01-07 23:42:55
 //
 // @Brief  :  detect cpu info
 

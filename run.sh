@@ -72,18 +72,15 @@ do_compile() {
 	fi
     done
 
-    # $GCC $CFLAGS -nostdinc -I. -c $KERNEL/initcode.S -o $OBJDIR/initcode.o;
-    # $LD  $LDFLAGS -N -e start -Ttext 0 -o $OBJDIR/initcode.out $OBJDIR/initcode.o;
-    # $OBJCPY -S -O binary $OBJDIR/initcode.out $OBJDIR/initcode;
-    # rm -rf $OBJDIR/initcode.o;
-    
     mkdir ./objs/usr;
-    $GCC -fno-builtin -fno-stack-protector -nostdinc -I. -c $KERNEL/init.c -o $USEROBJDIR/init.o;
-    $GCC -I./inc -DUSR -fno-builtin -fno-stack-protector -nostdinc -I. -c $KERNEL/string.c -o $USEROBJDIR/string.o;
-    $GCC -fno-builtin -fno-stack-protector -nostdinc -I. -c ./usr/clib.c -o $USEROBJDIR/clib.o;
+    $GCC -I./inc -DUSR -fno-builtin -fno-stack-protector -nostdinc -c ./usr/string.c -o $USEROBJDIR/string.o;
+    $GCC -I./inc -DUSR -fno-builtin -fno-stack-protector -nostdinc  -c ./usr/init.c -o $USEROBJDIR/init.o;
+    $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/clib.c -o $USEROBJDIR/clib.o;
+    $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/sh.c -o $USEROBJDIR/sh.o;
 
     $NASM -f elf ./usr/entry.s -o $USEROBJDIR/entry.o;
-    $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o $USEROBJDIR/init.o  -e _start -o $USEROBJDIR/init -T $TOOL/user.ld;
+    $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/init.o  -e _start -o $USEROBJDIR/init -T $TOOL/user.ld;
+    $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/sh.o  -e _start -o $USEROBJDIR/sh -T $TOOL/user.ld;
 
     do_link;
 }
@@ -97,13 +94,10 @@ do_link() {
     #head.O must puted at first
     objs=`ls *.o`
     #cmd="$LD head.O $objs -b binary initcode -o kernel.bin -T ../$TOOL/kernel.ld"
-    cmd="$LD -m elf_i386 -T ../$TOOL/kernel.ld -o kernel.elf head.O $objs "
-    #echo $cmd; 
-    `$cmd`;
+    $LD -m elf_i386 -T ../$TOOL/kernel.ld -o kernel.elf head.O $objs;
 
     #$OBJDUMP -t kernel.bin | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
-    cmd="$OBJCPY -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin"
-    echo $cmd; `$cmd`;
+    $OBJCPY -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin;
 
     if [ $? -ne 0 ]
     then
@@ -113,7 +107,7 @@ do_link() {
 	echo "making a.img"
 	cmd="cat boot.bin setup.bin kernel.bin > ../a.img"
 	echo $cmd; cat boot.bin setup.bin kernel.bin > ../a.img;
-    ls -lh kernel.bin;
+	ls -lh kernel.bin;
 	cd ../;
     fi
 }
@@ -123,8 +117,8 @@ do_prepare_hd() {
     rm -rf hd.img;
     echo "making hard disk"
     #bximage hd.img -hd -mode=flat -size=10 -q;
-    cp $USEROBJDIR/init ./;
-    ./tool/mkfs.exe hd.img README init;
+    cp $USEROBJDIR/init $USEROBJDIR/sh ./;
+    ./tool/mkfs.exe hd.img README init sh;
     rm -rf init;
     #fi
 }
