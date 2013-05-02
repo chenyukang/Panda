@@ -1,21 +1,12 @@
-
-align 4
 [bits 16]
-	
+
 ;;; [0x7c00] will be seted in boot.ld
-
-jmp start
-
 [global start]
 start:	
 	;; puts loading
 	mov si, msg
-	call print_str
+	call print
 
-	xor edx, edx
-	mov [bootdriver], dl	;the driver number which boot from	
-	mov ax, bootseg
-	mov ds, ax
 	;; read the setup code from floppy
 	;; begin with second
 .readfloppy:
@@ -30,12 +21,11 @@ start:
 	int 0x13		;interupt to read
 	jc  .readfloppy
 
-
 	;; ok, let finish boot and jump to setup
 	;; jmp setupseg:setupoffset
-    jmp 0x9000:0x0100
+jmp setupseg:setupoffset
 
-print_str:
+print:
 	mov ah, 0x0E
 .next:
 	lodsb
@@ -45,17 +35,18 @@ print_str:
 	jmp .next
 .done:
 	ret
-
 	
 msg	db "Loading Panda OS"	;
 	db 13, 10, 0  		;
 	
 ;;; some constants
 bootseg 	equ 0x0000	;boot begin address
+	
 setupseg 	equ 0x9000    	;setup address
-setupoffset equ 0x0100	;
-setupsize 	equ 512	;
-bootdriver 	db  0		;
+setupoffset     equ 0x0100	;
+setupsize 	equ 512
+	
+bootdriver 	db  0		
 ; Magic number for sector
 times 510-($-$$) db 0
 dw 0xAA55

@@ -1,7 +1,4 @@
-align 4
 [bits 16]
-	
-jmp setup
 	
 [global setup]
 setup:
@@ -13,7 +10,7 @@ setup:
 
 	;; puts loading
 	mov si, setup_msg
-	call print_str		;
+	call print		;
 
 read_info:
 	mov ax, 0x9000
@@ -26,41 +23,23 @@ read_info:
 	int 0x15
 	mov [2], ax
 
-	;; just get hd0 info data
-	;; save the disk info at 0x90080
-	;; mov ax, 0x0000
-	;; mov ds, ax
-	;; lds si, [4 * 0x41]
-	;; mov ax, 0x9000
-	;; mov es, ax
-	;; mov di, 0x80
-	;; mov cx, 0x10
-	;; rep movsb
-
-	mov ax, setupseg
-	mov ds, ax
-	mov es, ax
-	mov ss, ax
-	mov sp, 0xffff
-
 .readfloppy:
 	mov ax, setupseg
 	mov es, ax
-	mov bx, setupoffset+setupsize ; put kernel at here now 
+	mov bx, setupoffset + setupsize ; put kernel at here now 
 	mov ah, 2
 	mov dl, [0]
 	mov ch, 0
 	;0,1 is for boot, setupsize/512 for setup.bin
-	mov cl, 1+1+setupsize/512  
+	mov cl, 1 + 1 + setupsize/512  
 	mov al, systemsize/512
 	int 0x13
 	jc .readfloppy
 
-
 	;; move system to 0x00000
 	;; this is OK for our kernel.bin is small
 	cld
-	mov si, setupoffset+setupsize
+	mov si, setupoffset + setupsize
 	mov ax, systemseg
 	mov es, ax
 	mov di, systemoffset
@@ -70,9 +49,9 @@ read_info:
 	;;
 	cli
 	lgdt [gdt_addr]
-
-	;; A20
-	call empty_8042
+	
+	;; enable A20
+	;; call empty_8042
 	mov al, 0xd1
 	out 0x64, al
 	call empty_8042
@@ -87,15 +66,13 @@ read_info:
     ;; jump into head, which puted at 0x00000
 	jmp dword 0x8:0x0
 
-
 empty_8042:
 	in al, 0x64
 	test al, 0x2
 	jnz  empty_8042
 	ret
 
-
-print_str:
+print:
 	mov ah, 0x0E
 .next:
 	lodsb
@@ -106,14 +83,13 @@ print_str:
 .done:
 	ret
 
-setupseg 	equ 	0x9000
-setupoffset	equ 	0x0100
-setupsize 	equ 	512
-
+setupseg 	    equ     0x9000
+setupoffset	    equ     0x0100
+setupsize 	    equ     512
 
 systemseg 	    equ	    0x0000
-systemoffset	equ 	0x0000
-systemsize 	    equ 	1024*36 ; this will bigger than kernel.bin
+systemoffset        equ     0x0000
+systemsize 	    equ     1024*40 ; this will bigger than kernel.bin
 
 setup_msg db "Setup Panda OS"	;
 	db 13, 10, 0  		;

@@ -116,11 +116,9 @@ do_prepare_hd() {
     `$ON_GCC ./tool/mkfs.c -o ./tool/mkfs.exe`
     rm -rf hd.img;
     echo "making hard disk"
-    #bximage hd.img -hd -mode=flat -size=10 -q;
     cp $USEROBJDIR/init $USEROBJDIR/sh ./;
     ./tool/mkfs.exe hd.img README init sh;
     rm -rf init;
-    #fi
 }
 
 do_all() {
@@ -130,10 +128,7 @@ do_all() {
     then
         if [ $1 == "qemu" ] 
         then 
-	    #$QEMU -no-kqemu -fda a.img -hda hd.img -m 128 -localtime -d exec,cpu,pcall;
-            #$QEMU -fda a.img -hda fs.img -localtime -m 128;
 	    $QEMU -hdb hd.img -fda a.img -localtime -m 128;
-
         else
      	    $BOCHS -f $BOCHS_CONF -q;
         fi
@@ -167,10 +162,10 @@ do
         -all|-a)     do_all "qemu";  exit 0;;
         -clean|-x)   do_clean;       exit 0;;
         -compile|-c) do_clean;       do_compile; exit 0;;
-        -commit |-u) shift; log=$1;  do_commit;  exit 0;;
         -line |-l)   do_wc_line;     exit 0;;
         -qemu|-q)    do_all "qemu";  exit 0;;
-        -bochs|-b)   do_all "bochs"; exit 0;
+        -bochs|-b)   do_all "bochs"; exit 0;;
+        -commit |-u) shift; log=$1;  do_commit;  exit 0;
     esac
     shift
 done

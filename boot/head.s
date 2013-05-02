@@ -1,8 +1,6 @@
-
 extern kmain
 [BITS 32]
-    mov esp, stack_top
-
+	mov esp, stack_top
 	mov ax, 0x10
 	mov ds, ax
 	mov cl, '2'
@@ -18,12 +16,10 @@ err:	inc eax
 	je err
 
 	;; Finally, we goto OS's c world
-    push esp
+	push esp
 	call kmain
     ;; 	jmp $
 ;------------------------------------------------------------------------
-
-	
 
 section .bss
 	resb 8192	; 80KB for stack
