@@ -4,6 +4,7 @@
 #include <string.h>
 #include <screen.h>
 #include <exec.h>
+#include <sysfile.h>
 
 typedef int (*sysc_func) (struct registers_t* r);
 extern void stub_ret(void);
@@ -40,6 +41,16 @@ int sys_write(struct registers_t* regs) {
     return 1;
 }
 
+int sys_read(struct registers_t* regs) {
+    char* buf = (char*)regs->ecx;
+    u32 fd    = regs->ebx;
+    u32 cnt   = regs->edx;
+    if(vm_verify((u32)buf, cnt) < 0) {
+        return -1;
+    }
+    return do_read(fd, buf, cnt);
+}
+
 void do_syscall(struct registers_t* regs){
     int ret;
     sysc_func func = 0;
@@ -66,4 +77,5 @@ void syscall_init() {
     sys_routines[NR_fork]  = &sys_fork;
     sys_routines[NR_exec]  = &sys_exec;
     sys_routines[NR_write] = &sys_write;
+    sys_routines[NR_read]  = &sys_read;
 }

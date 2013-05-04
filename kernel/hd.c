@@ -159,7 +159,7 @@ void init_hd() {
 }
 
 void init_ide() {
-    printk("init_ide ...\n");
+    printk("hd_ide ...\n");
     init_hd();
     waitfor_ready(0);
     ide_queue = 0;

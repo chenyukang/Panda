@@ -97,11 +97,12 @@ enum {
     NR_setup,
     NR_fork,
     NR_exec,
+    NR_read,
     NR_write
 };
     
 static inline _SYS1(int, write, char);
 static inline _SYS0(int, fork);
 static inline _SYS2(int, exec, char*, char**);
-
+static inline _SYS3(int, read, int, char*, int);
 #endif

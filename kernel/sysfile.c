@@ -6,7 +6,13 @@
 #include <system.h>
 #include <string.h>
 
-extern task_t* current_task;
+int do_read(u32 fd, char* buf, u32 cnt) {
+    printk("do_read\n");
+    while(1) {
+    }
+    
+    return 1;
+}
 
 static s32
 fd_alloc(struct file* f) {
