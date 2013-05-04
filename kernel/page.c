@@ -59,7 +59,7 @@ static void* _alloc(u32 size ) {
 void init_pages() {
     u32 k;
     page_nr = (end_addr)/(PAGE_SIZE);
-    printk("page_nr: %d\n", page_nr);
+    //printk("page_nr: %d\n", page_nr);
     //pages = (struct page*)_alloc(sizeof(struct page) * page_nr);
     used_addr = PAGE_ROUND_UP(used_addr);
     free_page_nr = (used_addr)/0x1000;
@@ -189,7 +189,7 @@ void copy_pgd(struct pde* from, struct pde* targ) {
         if(fpde->pt_flags & PTE_P) {
             fpte = (struct pte*)(fpde->pt_base * PAGE_SIZE);
             tpte = (struct pte*)(alloc_page()->pg_idx * PAGE_SIZE);
-            tpte->pt_base = ((u32)tpte>>12);
+            tpde->pt_base = ((u32)tpte>>12);
             for(k=0; k<1024; k++) {
                 tpte[k].pt_base  = fpte[k].pt_base;
                 tpte[k].pt_flags = fpte[k].pt_flags;
@@ -239,11 +239,12 @@ void mm_init() {
     // don't use ker_addr ~ 0x100000
     // free memory begin with 0x100000
     used_addr = 0x100000;
+#if 0    
     printk("mem_size : %dMB\n", end_addr/(KB*KB));
     printk("ker_size : %dKB\n", ker_addr/(KB));
     printk("page_size: %dKB\n", PAGE_SIZE/(KB));
     printk("used_size: %dKB\n", used_addr/(KB));
-
+#endif
     init_page_dir(&(pg_dir0[0])); //init the kernel pg_dir
     init_pages();
     irq_install_handler(14, (isq_t)(&page_fault_handler));
@@ -284,7 +285,7 @@ void do_wt_page(void* vaddr) {
 }
 
 void do_no_page(void* vaddr) {
-    printk("do_no_page...:%x\n", (u32)vaddr);
+    //printk("do_no_page...:%x\n", (u32)vaddr);
     struct vm *vm;
     struct vma *vp;
     struct pte *pte;

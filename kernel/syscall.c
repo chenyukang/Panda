@@ -5,11 +5,9 @@
 #include <screen.h>
 #include <exec.h>
 
-extern void stub_ret(void);
 typedef int (*sysc_func) (struct registers_t* r);
-
+extern void stub_ret(void);
 static sysc_func sys_routines[NSYSC];
-
 
 int errno = 0;
 
@@ -24,7 +22,6 @@ int sys_exec(struct registers_t* regs) {
 }
 
 int sys_fork(struct registers_t* regs) {
-    cli();
     struct task* t;
     struct registers_t* r = 0;
     t = spawn(&stub_ret);
@@ -34,7 +31,6 @@ int sys_fork(struct registers_t* regs) {
     t->p_context.esp = (u32)r;
     t->p_trap = r;
     t->stat = RUNNABLE;
-    sti();
     return t->pid;
 }
 
@@ -53,13 +49,14 @@ void do_syscall(struct registers_t* regs){
     }
     current_task->p_error = 0;
     func = sys_routines[regs->eax];
-    
     if (func == NULL)
         func = &nosys;
     ret = (*func)(regs);
     //
-    regs->eax = ret;
-    regs->ebx = current_task->p_error;
+    if(ret < 0 )
+        regs->eax = -current_task->p_error;
+    else
+        regs->eax = ret;
 }
 
 void syscall_init() {
