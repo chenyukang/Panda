@@ -123,7 +123,7 @@ u32 alloc_mem() {
 }
 
 void free_mem(u32 addr) {
-    struct page* pg = find_page((addr >> 12));
+    struct page* pg = find_page(PPN(addr));
     free_page(pg);
 }
 
@@ -206,6 +206,26 @@ void copy_pgd(struct pde* from, struct pde* targ) {
 }
 
 s32 free_pgd(struct pde* pgd) {
+    return 0;
+    struct pde* pde;
+    struct pte* pte;
+    struct pte* pt;
+    struct page* page;
+    u32 pdr, pr;
+    for(pdr = PDEX(PMEM); pdr < 1024; pdr++) {
+        pde = &pgd[pdr];
+        if(pde->pt_flags & PTE_P) {
+            pt = (struct pte*)(pde->pt_base * PAGE_SIZE);
+            for(pr = 0; pr < 1024; pr++) {
+                pte = &pt[pr];
+                if(pte->pt_flags & PTE_P) {
+                    page = find_page(pte->pt_base);
+                    free_page(page);
+                }
+            }
+            free_mem((u32)pt);
+        }
+    }
     return 0;
 }
 
@@ -346,8 +366,7 @@ void page_fault_handler(struct registers_t* regs) {
         return;
     }
     if (regs->err_code & 0x004) {
-        printk("address: %x\n", (u32)fault_addr);
-        //do_no_page((void*)fault_addr);
+        printk("address: %x %d %d\n", (u32)fault_addr, current_task->pid, current_task->stat);
         PANIC("user-mode ");
         return;
     }

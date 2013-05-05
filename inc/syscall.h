@@ -6,28 +6,6 @@
 // System call numbers
 #define NSYSC       64
 
-#define SYS_fork    1
-#define SYS_exit    2
-#define SYS_wait    3
-#define SYS_pipe    4
-#define SYS_read    5
-#define SYS_kill    6
-#define SYS_exec    7
-#define SYS_fstat   8
-#define SYS_chdir   9
-#define SYS_dup    10
-#define SYS_getpid 11
-#define SYS_sbrk   12
-#define SYS_sleep  13
-#define SYS_uptime 14
-#define SYS_open   15
-#define SYS_write  16
-#define SYS_mknod  17
-#define SYS_unlink 18
-#define SYS_link   19
-#define SYS_mkdir  20
-#define SYS_close  21
-
 extern int errno;
 
 void do_syscall(struct registers_t* tf);
@@ -92,17 +70,21 @@ void syscall_init();
     }
 
 
-
 enum {
     NR_setup,
     NR_fork,
     NR_exec,
     NR_read,
+    NR_exitc,
+    NR_wait,
     NR_write
 };
     
 static inline _SYS1(int, write, char);
+static inline _SYS1(int, exitc,  int);
 static inline _SYS0(int, fork);
+static inline _SYS2(int, wait, int, int*);
 static inline _SYS2(int, exec, char*, char**);
 static inline _SYS3(int, read, int, char*, int);
+
 #endif

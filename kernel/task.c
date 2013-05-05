@@ -34,7 +34,7 @@ extern u32         init_esp_start;
 
 extern void _do_swtch(struct jmp_buf* from, struct jmp_buf* to);
 
-int getpid(void) {
+u32 getpid(void) {
     kassert(current_task);
     return current_task->pid;
 }
@@ -63,6 +63,16 @@ struct task* alloc_proc() {
         }
     }
     release_lock(&proc_table.lock);
+    return 0;
+}
+
+static struct task* find_task(u32 pid ) {
+    u32 i;
+    for(i=0; i<PROC_NUM; i++) {
+        if(proc_table.procs[i] == 0) continue;
+        if(proc_table.procs[i]->pid == pid)
+            return proc_table.procs[i];
+    }
     return 0;
 }
 
@@ -97,16 +107,9 @@ static void init_proctable() {
     memset(proc_table.procs, 0, sizeof(proc_table.procs));
 }
 
-void init_multi_task() {
+void init_tasks() {
     init_proctable();
     init_proc0();
-}
-
-void forkret() {
-    static int first = 1;
-    if(first) {
-        first = 0;
-    }
 }
 
 struct task* spawn(void* func) {
@@ -131,8 +134,7 @@ static int step = 0;
 void swtch_to(struct task *to){
     struct task *from = current_task;
     tss.esp0 = (u32)to + PAGE_SIZE; 
-    from->stat = RUNNABLE;
-    to->stat   = RUNNING;
+    //to->stat   = RUNNING;
     to->r_time++;
     current_task = to;
     flush_pgd(to->p_vm.vm_pgd);
@@ -153,17 +155,19 @@ void sched() {
     for(i=PROC_NUM-1; i>=0; i--) {
         t = proc_table.procs[i];
         if(t == 0) continue;
-        if(t->stat != RUNNABLE || t == current_task ) 
-            continue;
-        else {
-            if(min == -1 || t->r_time <= min) {
-                min = t->r_time;
-                next = t;
-            }
+        if(t == current_task) continue;
+        if(t->stat == ZOMBIE) continue;
+        if(min == -1 || t->r_time <= min) {
+            min = t->r_time;
+            next = t;
         }
     }
 
     if(next) {
+        if(next->pid == 4) {
+            //printk("to 4: %d\n", next->stat);
+        }
+        kassert(next->stat != ZOMBIE);
         swtch_to(next);
     }
 }
@@ -193,9 +197,57 @@ void wakeup(void* change) {
         p = proc_table.procs[i];
         if(p == 0) continue;
         if(p->stat == WAIT && p->chan == change) {
+            p->chan = 0;
             p->stat = RUNNABLE;
         }
     }
+}
+
+s32 do_exit(int ret) {
+    //printk("in task exiting ... \n");
+    u32 i;
+    struct file* fp;
+    struct task* parent;
+    for(i=0; i<NOFILE; i++) {
+        fp = current_task->ofile[i];
+        if(fp) {
+            //close_fp
+        }
+        current_task->ofile[i] = 0;
+    }
+    vm_clear(&current_task->p_vm);
+    free_mem(current_task->p_vm.vm_pgd);
+    current_task->chan = 0;
+    current_task->stat = ZOMBIE;
+    current_task->exit_code = ret;
+    parent = find_task(current_task->ppid);
+    wakeup(parent);
+    return 0;
+}
+
+s32 wait_p(u32 pid, s32* stat) {
+    struct task* p;
+    u32 i;
+    if(vm_verify((u32)stat, sizeof(s32)) < 0) {
+        return -1;
+    }
+    printk("try waiting... :%d\n", pid);
+try_find:
+    for(i=0; i<PROC_NUM; i++) {
+        p = proc_table.procs[i];
+        if(!p || p->pid != pid) continue;
+        switch(p->stat) {
+        case ZOMBIE:
+            *stat = p->exit_code;
+            free_mem(find_task(pid));
+            printk("fucking...\n");
+            return pid;
+        default:
+            continue;
+        }
+    }
+    sleep(current_task, NULL);
+    goto try_find;
 }
 
 void task_debug() {

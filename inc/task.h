@@ -83,11 +83,10 @@ struct task {
     u32 r_time;
 
     s32 exit_code;  /* exit code process exit */
+    u32 p_error;
     u32 esp, ebp;   /* stack and base pointers */
     u32 eip;        /* instruction pointer */
-    u32 p_error;
-    u32 stack_base;
-    
+
     enum task_status    stat;
     struct inode*       cwd;           /* Current directory */
     void*               ofile[NOFILE];
@@ -99,15 +98,16 @@ struct task {
 };
 
 typedef struct task task_t;
-
-void init_multi_task();
-void sched();
-
-struct task* spawn(void* func);
 extern struct task* current_task;
 
+void init_tasks();
+void sched();
+
+s32  do_exit(s32 ret);
+u32  getpid();
+s32  wait_p(u32 pid, s32* stat);
+struct task* spawn(void* func);
 char* get_current_name();
-int getpid();
 
 void sleep(void* change, struct spinlock* lock);
 void wakeup(void* change);

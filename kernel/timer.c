@@ -13,7 +13,6 @@
 #include <task.h>
 
 static u32 ticks = 0;
-extern task_t* current_task;
 
 u32 get_sys_ticks(void) {
     return ticks;

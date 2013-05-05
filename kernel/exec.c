@@ -8,7 +8,6 @@
 #include <blk.h>
 #include <asm.h>
 
-extern struct task* current_task;
 extern void enter_user(u32, u32);
 
 static char** store_argv(char* path, char** args) {
@@ -109,7 +108,7 @@ int do_exec(char* path, char** argv) {
 
     idrop(ip);
     enter_user(vm->vm_entry, esp);
-    return 0;
+    return 0; //never return for succ
 
 error:
     idrop(ip);

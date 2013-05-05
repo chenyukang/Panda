@@ -19,9 +19,7 @@ int nosys(struct registers_t* r) {
 int sys_exec(struct registers_t* regs) {
     char *path = (char*)regs->ebx;
     char **argv = (char**)regs->ecx;
-    s32 ret = do_exec(path, argv);
-    regs->eax = ret;
-    return ret;
+    return do_exec(path, argv);
 }
 
 int sys_fork(struct registers_t* regs) {
@@ -35,6 +33,18 @@ int sys_fork(struct registers_t* regs) {
     t->p_trap = r;
     t->stat = RUNNABLE;
     return t->pid;
+}
+
+int sys_exit(struct registers_t* regs) {
+    s32 code = (s32)regs->ebx;
+    return do_exit(code);
+}
+
+int sys_wait(struct registers_t* regs) {
+    u32 pid = regs->ebx;
+    s32* stat = (s32*)regs->ecx;
+    regs->eax = wait_p(pid, stat);
+    return 0;
 }
 
 int sys_write(struct registers_t* regs) {
@@ -68,6 +78,8 @@ void do_syscall(struct registers_t* regs){
     if (func == NULL)
         func = &nosys;
     ret = (*func)(regs);
+    regs->eax = ret;
+#if 0
     //
     if(ret < 0 ) {
         //regs->eax = -current_task->p_error; //fix me
@@ -75,6 +87,7 @@ void do_syscall(struct registers_t* regs){
     }
     else
         regs->eax = ret;
+#endif
 }
 
 void syscall_init() {
@@ -85,4 +98,6 @@ void syscall_init() {
     sys_routines[NR_exec]  = &sys_exec;
     sys_routines[NR_write] = &sys_write;
     sys_routines[NR_read]  = &sys_read;
+    sys_routines[NR_exitc] = &sys_exit;
+    sys_routines[NR_wait] = &sys_wait;
 }

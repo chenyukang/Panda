@@ -25,7 +25,6 @@ u32 init_esp_start;
 
 extern char __kimg_end__;
 extern u32 end_addr;
-extern task_t* current_task;
 
 void do_init_Ajob();
 void do_init_Bjob();
@@ -53,7 +52,7 @@ void kmain(u32 init_stack) {
     file_init();
     init_inodes();
     init_ide();
-    init_multi_task();
+    init_tasks();
 
     //detect_cpu();
     struct task* t = spawn(init_user);

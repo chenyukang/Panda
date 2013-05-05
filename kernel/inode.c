@@ -17,8 +17,6 @@
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-extern task_t* current_task;
-
 struct inode icache[NINODE];
 
 static struct inode* iget(u32 dev, u32 num);

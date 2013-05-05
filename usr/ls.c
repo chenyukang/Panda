@@ -3,8 +3,8 @@
 
 int main() {
     printf("%s\n", "Hello world!\n");
-    while(1) {
-        ;
+    int k;
+    for(k=0; k<10; k++) {
+        printf("haha \n");
     }
-    return 0;
 }
