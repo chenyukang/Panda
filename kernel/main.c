@@ -39,7 +39,7 @@ void kmain(u32 init_stack) {
     init_esp_start = init_stack;
     init_video();
     puts_color_str("Booting Panda OS ...\n", 0x0B);
-    puts_color_str("Welcome ...\n", 0x0A);
+    puts_color_str("Welcome ...\n", 0x0E);
 
     cli();
     time_init();

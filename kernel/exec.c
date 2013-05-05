@@ -84,7 +84,6 @@ int do_exec(char* path, char** argv) {
 
     ip = inode_name(path);
     if(ip == 0) {
-        kassert(0);
         return -1;
     }
     ilock(ip);
@@ -92,12 +91,11 @@ int do_exec(char* path, char** argv) {
         goto error;
     }
     if(head.a_magic != NMAGIC ) {
-        kassert(0);
         goto error;
     }
     store = store_argv(path, argv);
     vm = &current_task->p_vm;
-    
+    strcpy(current_task->name, path);
     vm_clear(vm);
     vm_renew(vm, &head, ip);
 
@@ -111,7 +109,6 @@ int do_exec(char* path, char** argv) {
 
     idrop(ip);
     enter_user(vm->vm_entry, esp);
-    //kassert(0);
     return 0;
 
 error:

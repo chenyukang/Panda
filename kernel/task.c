@@ -121,15 +121,10 @@ struct task* spawn(void* func) {
     new_task->p_context.eip = (u32)func;
     new_task->p_context.esp = (u32)new_task+PAGE_SIZE;
     new_task->r_time = 0;
-    if(new_task->pid == 2)
-        strcpy(new_task->name, "proc2");
-    else if(new_task->pid == 3)
-        strcpy(new_task->name, "proc3");
     return new_task;
 }
 
 //#define DEBUG_PROC 1
-
 #ifdef DEBUG_PROC
 static int step = 0;
 #endif
@@ -176,8 +171,10 @@ void sched() {
 void sleep(void* change, struct spinlock* lock) {
     if(current_task == 0)
         PANIC("sleep: no task");
+#if 0
     if(lock == 0)
         PANIC("sleep: no lock");
+#endif
 
     cli();
     current_task->chan = change;
@@ -200,3 +197,15 @@ void wakeup(void* change) {
         }
     }
 }
+
+void task_debug() {
+    u32 i;
+    struct task* p;
+    for(i=0; i<PROC_NUM; i++) {
+        p = proc_table.procs[i];
+        if(p) {
+            printk("task[%d]: %s\n", p->pid, p->name);
+        }
+    }
+}
+

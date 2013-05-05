@@ -19,7 +19,9 @@ int nosys(struct registers_t* r) {
 int sys_exec(struct registers_t* regs) {
     char *path = (char*)regs->ebx;
     char **argv = (char**)regs->ecx;
-    return do_exec(path, argv);
+    s32 ret = do_exec(path, argv);
+    regs->eax = ret;
+    return ret;
 }
 
 int sys_fork(struct registers_t* regs) {
@@ -45,10 +47,13 @@ int sys_read(struct registers_t* regs) {
     char* buf = (char*)regs->ecx;
     u32 fd    = regs->ebx;
     u32 cnt   = regs->edx;
+    u32 ret;
     if(vm_verify((u32)buf, cnt) < 0) {
         return -1;
     }
-    return do_read(fd, buf, cnt);
+    ret = do_read(fd, buf, cnt);
+    regs->eax = ret;
+    return ret;
 }
 
 void do_syscall(struct registers_t* regs){
@@ -64,8 +69,10 @@ void do_syscall(struct registers_t* regs){
         func = &nosys;
     ret = (*func)(regs);
     //
-    if(ret < 0 )
-        regs->eax = -current_task->p_error;
+    if(ret < 0 ) {
+        //regs->eax = -current_task->p_error; //fix me
+        regs->eax = ret;
+    }
     else
         regs->eax = ret;
 }

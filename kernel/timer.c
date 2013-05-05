@@ -30,7 +30,11 @@ static void timer_callback(void) {
         //print_time_local();
     }
 
-    if(ticks%2 == 0){
+    if(ticks%100 == 0) {
+        //task_debug();
+    }
+
+    if(ticks%1 == 0){
         sched();
     }
 }

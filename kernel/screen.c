@@ -90,6 +90,8 @@ void putch(char c) {
     /* Handle a backspace, by moving the cursor back one space */
     if(c == 0x08) {
         if(csr_x != 0) csr_x--;
+        where = textmemptr + (csr_y * 80 + csr_x);
+        *where = ' ' | att;	 /* clear last ch */
     }
     /* Handles a tab by incrementing the cursor's x, but only
     *  to a point that will make it divisible by 8 */
@@ -150,7 +152,7 @@ void puts_color_str(char* str, unsigned color) {
         putch(*ptr);
         ptr++;
     }
-    attrib = 0x0E;
+    attrib = 0x0A;
 }
 
 void puts_mid_str(char* str) {

@@ -11,29 +11,32 @@
 #include <screen.h>
 #include <kb.h>
 #include <string.h>
+#include <tty.h>
 
 static int shift_state = 0 ;
 
 void kb_handler(void) {
+    u8 ch;
     u8 code = inb(0x60); //read the data buffer
     if(code == 0x2a || code == 0x36)
         shift_state = 1;
     else if(code == 0xaa || code == 0xb6 )
         shift_state = 0;
-    
+
+    //printk("code: %x\n", code);
     /* If the top bit of the byte we read from the keyboard is
     *  set, that means that a key has just been released */
     if (code & 0x80) {
         /* You can use this one to see if the user released the
         *  shift, alt, or control keys... */
         
-    }
-    else {
+    } else {
         /* Here, a key was just pressed. Please note that if you
         *  hold a key down, you will get repeated key press
         *  interrupts. */
-        putch(shift_state?
-              kbdus_upper[code]:kbdus[code]);
+        ch = shift_state? kbdus_upper[code] : kbdus[code];
+        tty_ch(ch);
+        putch(ch);
     }
 }
 
@@ -41,5 +44,6 @@ void kb_init() {
     puts("kb init ...\n");
     irq_enable(1);
     irq_install_handler(33, (isq_t)(&kb_handler));
+    tty_clear();
 }
 

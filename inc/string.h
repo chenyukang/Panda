@@ -15,6 +15,7 @@
 
 void strcpy(char* dest, char* src);
 void strncpy(char* dest, char* src, size_t cnt);
+void* strcat(char* dest, const char* src);
 s32  strncmp(const char* v1, const char* v2, u32 n);
 s32  strcmp(const char* v1, const char* v2);
 

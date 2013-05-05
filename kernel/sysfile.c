@@ -5,13 +5,16 @@
 #include <file.h>
 #include <system.h>
 #include <string.h>
+#include <tty.h>
 
 int do_read(u32 fd, char* buf, u32 cnt) {
-    printk("do_read\n");
-    while(1) {
+    if(fd == 0) {
+        while(tty_get_buf(buf) == -1) {
+            sleep(&tty_dev, NULL);
+        }
+        return 1;
     }
-    
-    return 1;
+    return -1;
 }
 
 static s32

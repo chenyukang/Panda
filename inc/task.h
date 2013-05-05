@@ -112,4 +112,6 @@ int getpid();
 void sleep(void* change, struct spinlock* lock);
 void wakeup(void* change);
 
+void task_debug();
+
 #endif

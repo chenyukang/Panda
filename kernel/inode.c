@@ -340,7 +340,9 @@ inode_namex(char* path, char* name, u32 parent) {
     else
         ip = idup(current_task->cwd);
 
-    kassert(ip);
+    //kassert(ip); //fix me
+    if(ip == 0)
+        return 0;
     while((path = _skip(path, name)) != 0) {
         ilock(ip);
         if(ip->type != T_DIR) {

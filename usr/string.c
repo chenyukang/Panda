@@ -49,6 +49,17 @@ void* memcpy(void *dest, const void *src, size_t cnt) {
     return dest;
 }
 
+void* strcat(char* dest, const char* src) {
+    char* p = dest;
+    const char* q = src;
+    while(*p != 0)
+        p++;
+    while(*q != 0)
+        *p++ = *q++;
+    *p++ = 0;
+    return dest;
+}
+
 s32 memcmp(const void* v1, const void* v2, u32 n) {
     const unsigned char *s1, *s2;
     s1 = v1, s2 = v2;
