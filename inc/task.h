@@ -105,7 +105,7 @@ void sched();
 
 s32  do_exit(s32 ret);
 u32  getpid();
-s32  wait_p(u32 pid, s32* stat);
+s32  wait_p(s32 pid, s32* stat);
 struct task* spawn(void* func);
 char* get_current_name();
 

@@ -41,7 +41,7 @@ int sys_exit(struct registers_t* regs) {
 }
 
 int sys_wait(struct registers_t* regs) {
-    u32 pid = regs->ebx;
+    s32 pid = regs->ebx;
     s32* stat = (s32*)regs->ecx;
     regs->eax = wait_p(pid, stat);
     return 0;

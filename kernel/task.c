@@ -113,6 +113,7 @@ void init_tasks() {
 }
 
 struct task* spawn(void* func) {
+    cli();
     struct task *parent, *new_task;
     parent = current_task;
     new_task = alloc_proc();
@@ -124,6 +125,7 @@ struct task* spawn(void* func) {
     new_task->p_context.eip = (u32)func;
     new_task->p_context.esp = (u32)new_task+PAGE_SIZE;
     new_task->r_time = 0;
+    sti();
     return new_task;
 }
 
@@ -134,7 +136,6 @@ static int step = 0;
 void swtch_to(struct task *to){
     struct task *from = current_task;
     tss.esp0 = (u32)to + PAGE_SIZE; 
-    //to->stat   = RUNNING;
     to->r_time++;
     current_task = to;
     flush_pgd(to->p_vm.vm_pgd);
@@ -215,12 +216,13 @@ s32 do_exit(int ret) {
     current_task->chan = 0;
     current_task->stat = ZOMBIE;
     current_task->exit_code = ret;
+    printk("exit... : %s\n", current_task->name);
     parent = find_task(current_task->ppid);
     wakeup(parent);
     return 0;
 }
 
-s32 wait_p(u32 pid, s32* stat) {
+s32 wait_p(s32 pid, s32* stat) {
     struct task* p;
     u32 i;
     if(vm_verify((u32)stat, sizeof(s32)) < 0) {
@@ -229,7 +231,8 @@ s32 wait_p(u32 pid, s32* stat) {
 try_find:
     for(i=0; i<PROC_NUM; i++) {
         p = proc_table.procs[i];
-        if(!p || p->pid != pid) continue;
+        if(!p) continue;
+        if(p->pid != pid && pid != -1) continue;
         switch(p->stat) {
         case ZOMBIE:
             *stat = p->exit_code;
@@ -250,7 +253,15 @@ void task_debug() {
     for(i=0; i<PROC_NUM; i++) {
         p = proc_table.procs[i];
         if(p) {
-            printk("task[%d]: %s\n", p->pid, p->name);
+            printk("task[%d]: %s ", p->pid, p->name);
+            switch(p->stat) {
+            case NEW: printk(" NEW\n"); break;
+            case WAIT: printk(" WAIT\n"); break;
+            case RUNNING: printk(" RUNNING\n"); break;
+            case ZOMBIE: printk(" ZOMBIE\n"); break;
+            default: break;
+            }
+            printk("\n");
         }
     }
 }

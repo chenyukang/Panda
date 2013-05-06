@@ -30,10 +30,10 @@ static void timer_callback(void) {
     }
 
     if(ticks%100 == 0) {
-        //task_debug();
+        task_debug();
     }
 
-    if(ticks%10 == 0){
+    if(ticks%30 == 0){
         //sched();
     }
 }

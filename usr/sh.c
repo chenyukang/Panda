@@ -19,8 +19,9 @@ int main() {
                 strcat(cmd, buf);
                 exec(cmd, NULL);
                 exit(1);
-            } 
-            wait(child, &ret);
+            }  else {
+                wait(-1, &ret);
+            }
         }
     }
     return 0;
