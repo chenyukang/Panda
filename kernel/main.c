@@ -24,11 +24,6 @@
 u32 init_esp_start;
 
 extern char __kimg_end__;
-extern u32 end_addr;
-
-void do_init_Ajob();
-void do_init_Bjob();
-void do_init_Cjob();
 
 void init_user();
 
@@ -54,22 +49,11 @@ void kmain(u32 init_stack) {
     init_ide();
     init_tasks();
 
-    //detect_cpu();
     struct task* t = spawn(init_user);
+    kassert(t);
     t->stat = RUNNABLE;
-
-#if 0
-    int* p = (int*)0x08000010;
-    printk("value: %d\n", *p);
-    *p = 1;
-    printk("value: %d\n", *p);
-    kassert(0);
-#endif
-
     sti();
     init = 0;
-    //test_idt();
-    //kassert(0);
     while(1) {
         if(!init) {
             printk("kernel running ...\n");
@@ -84,35 +68,9 @@ void kmain(u32 init_stack) {
 void init_user() {
     test_file();
     do_exec("/init", NULL);
-    printk("finished exec\n");
     while(1) {
         ;
     }
 }
 
-static int astep = 0;
-void do_init_Ajob() {
-    printk("job A: %d\n", astep++);
-    while(1) {
-        //printk("job A: %d\n", astep++);
-        astep++;
-    }
-}
 
-static int bstep = 0;
-void do_init_Bjob() {
-    printk("job B: %d\n", bstep++);
-    while(1) {
-        //printk("job B: %d\n", bstep++);
-        bstep++;
-   }
-}
-
-static int cstep = 0;
-void do_init_Cjob() {
-    printk("job C: %d\n", cstep++);
-    while(1) {
-        cstep++;
-        //printk("job C: %d\n", cstep++);
-    }
-}

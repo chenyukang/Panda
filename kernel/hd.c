@@ -36,8 +36,8 @@ static int havedisk1;
 static struct buf* ide_queue;
 static struct spinlock hdlock;
 
-struct hd_i_struct hd_inf[] = {{0,0,0,0,0,0},
-                               {0,0,0,0,0,0}};
+struct hd_i_struct hd_inf[] = { {0,0,0,0,0,0},
+                                {0,0,0,0,0,0} };
 
 static int waitfor_ready(int check_error) {
     int retries = 1000;
@@ -59,7 +59,7 @@ ide_start(struct buf *b) {
   if(b == 0)
     PANIC("ide_start");
 
-  waitfor_ready(0);
+  waitfor_ready(1);
   outb(0x3f6, 0);  // generate interrupt
   outb(0x1f2, 1);  // number of sectors
   outb(0x1f3, b->b_sector & 0xff);
@@ -75,8 +75,6 @@ ide_start(struct buf *b) {
 }
 
 void hd_interupt_handler(void) {
-    //printk("in hd_interupt_handler:%d\n", hdlock.locked);
-
     waitfor_ready(1);
     struct buf* bp = ide_queue;
     if(bp == 0) {
@@ -98,7 +96,6 @@ void hd_interupt_handler(void) {
 }
 
 void hd_rw(struct buf* bp) {
-
     if(!(bp->b_flag & B_BUSY))
         PANIC("hd_rw: buf is not busy");
     if(bp->b_dev != 0 && havedisk1 == 0)
@@ -113,10 +110,14 @@ void hd_rw(struct buf* bp) {
         p->b_qnext = bp;
     }
     if(ide_queue == bp) {
+        cli();
         ide_start(bp);
     }
+    //NOTE, we need to sti after sleep, since ide_start
+    //may cause a interupt before this
     while((bp->b_flag & (B_VALID | B_DIRTY)) != B_VALID) {
         sleep(bp, &hdlock);
+        sti(); 
     }
 }
 

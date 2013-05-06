@@ -85,7 +85,9 @@ int do_exec(char* path, char** argv) {
     if(ip == 0) {
         return -1;
     }
+
     ilock(ip);
+
     if(readi(ip, (char*)&head, 0, sizeof(head)) < sizeof(head)){
         goto error;
     }
@@ -107,7 +109,6 @@ int do_exec(char* path, char** argv) {
     free_argv(store);
 
     idrop(ip);
-    printk("entering ... \n");
     enter_user(vm->vm_entry, esp);
     return 0; //never return for succ
 

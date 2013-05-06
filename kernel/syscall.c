@@ -19,7 +19,6 @@ int nosys(struct registers_t* r) {
 int sys_exec(struct registers_t* regs) {
     char *path = (char*)regs->ebx;
     char **argv = (char**)regs->ecx;
-    printk("in sys_exec\n");
     return do_exec(path, argv);
 }
 
@@ -44,7 +43,6 @@ int sys_exit(struct registers_t* regs) {
 int sys_wait(struct registers_t* regs) {
     u32 pid = regs->ebx;
     s32* stat = (s32*)regs->ecx;
-    printk("stat: %x\n", (u32)stat);
     regs->eax = wait_p(pid, stat);
     return 0;
 }

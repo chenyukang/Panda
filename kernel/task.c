@@ -119,7 +119,6 @@ struct task* spawn(void* func) {
     new_task->stat = NEW;
     new_task->pid = next_pid();
     new_task->ppid = parent->pid;
-    printk("parent: %d child: %d\n", parent->pid, new_task->pid);
     vm_clone(&new_task->p_vm);
     new_task->p_context = parent->p_context;
     new_task->p_context.eip = (u32)func;
@@ -149,15 +148,14 @@ void sched() {
     int i, min;
     struct task* next = 0;
     struct task* t;
-    
-    if(current_task == 0)
-        return;
+
+    kassert(current_task);
     min = -1;
     for(i=PROC_NUM-1; i>=0; i--) {
         t = proc_table.procs[i];
         if(t == 0) continue;
         if(t == current_task) continue;
-        if(t->stat == ZOMBIE) continue;
+        if(t->stat == ZOMBIE || t->stat == WAIT) continue;
         if(min == -1 || t->r_time <= min) {
             min = t->r_time;
             next = t;
@@ -228,7 +226,6 @@ s32 wait_p(u32 pid, s32* stat) {
     if(vm_verify((u32)stat, sizeof(s32)) < 0) {
         return -1;
     }
-    printk("try waiting... :%d\n", pid);
 try_find:
     for(i=0; i<PROC_NUM; i++) {
         p = proc_table.procs[i];
@@ -238,7 +235,6 @@ try_find:
             *stat = p->exit_code;
             free_mem(p);
             proc_table.procs[i] = 0;
-            printk("fucking...\n");
             return pid;
         default:
             continue;

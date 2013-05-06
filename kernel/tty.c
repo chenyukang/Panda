@@ -59,6 +59,7 @@ u32 tty_get_buf(char* buf) {
     }
     ret = count;
     tty_clear();
+    wakeup(&tty_dev);
     return ret;
 }
 

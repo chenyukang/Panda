@@ -16,7 +16,6 @@ void buf_init() {
     /* now link all buffers with link list */
     for(bp = bcache.buf; bp < bcache.buf+NBUF; bp++) {
         bp->b_next = bcache.head.b_next;
-        //printk("now: %d %x\n", (u32)bp, (u32)bp->b_next);
         bp->b_prev = &bcache.head;
         bp->b_dev  = -1;
         bcache.head.b_next->b_prev = bp;
@@ -41,12 +40,9 @@ loop:
         if(bp->b_dev == dev && bp->b_sector == sector) {
             if(! (bp->b_flag & B_BUSY) ) {
                 bp->b_flag |= B_BUSY;
-                //release_lock(&bcache.lock);
                 return bp;
             }
-            cli();
             sleep(bp, &bcache.lock);
-            sti();
             goto loop;
         }
     }
