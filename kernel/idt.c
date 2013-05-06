@@ -273,7 +273,6 @@ void hwint_handler(struct registers_t* regs) {
     }
 #endif
 
-    cli();
     if ((regs->cs & 3) == 3) {
         current_task->p_trap = regs; 
     }
@@ -294,9 +293,8 @@ void hwint_handler(struct registers_t* regs) {
     }   
 
     if((regs->cs & 3) == 3) {
-        //sched();
+        sched();
     }
-    sti();
 }
 
 void test_idt(){

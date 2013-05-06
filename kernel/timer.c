@@ -33,8 +33,8 @@ static void timer_callback(void) {
         //task_debug();
     }
 
-    if(ticks%1 == 0){
-        sched();
+    if(ticks%10 == 0){
+        //sched();
     }
 }
 

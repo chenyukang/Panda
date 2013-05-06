@@ -4,10 +4,10 @@
 int main(int argc, char **argv) {
     printf("\n====== ENTER USER SPACE =======\n\n");
     if(fork() == 0) {
-        printf("child\n");
+        //printf("child\n");
         exec("/sh", NULL);
     } else {
-        printf("parent\n");
+        //printf("parent\n");
         while(1) {
             ;
         }

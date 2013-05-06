@@ -3,9 +3,8 @@ romimage: file=/usr/share/bochs/BIOS-bochs-latest
 vgaromimage: file=/usr/share/vgabios/vgabios.bin
 vga: extension=vbe
 floppya: 1_44=a.img, status=inserted
-ata0-slave: type=disk, mode=flat, path="hd.img", cylinders=1024, heads=1, spt=1
-#ata0-slave: type=disk, mode=flat, path="fs.img", cylinders=1024, heads=1, spt=1
 boot: floppy
+ata0-slave: type=disk, mode=flat, path="hd.img", cylinders=1024, heads=1, spt=1
 log: bochsout.txt
 mouse: enabled=0
 clock: sync=slowdown

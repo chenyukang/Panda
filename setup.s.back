@@ -1,0 +1,179 @@
+align 4
+    [bits 16]
+	
+[global setup]
+    jmp setup
+    
+_read_sect:
+    push    cx
+    push    bx
+    mov     ax, si              ; disk sector number
+    mov     bx, di              ; buffer address.
+    ; ch = cylinder = sn / 36
+    mov     cl, 36              
+    div     cl                  
+    mov     ch, al              
+    ; dh = head = (sn%36)/18
+    mov     al, ah
+    mov     ah, 0
+    mov     cl, 18
+    div     cl
+    mov     dh, al
+    ; cl = sector = (ln%36)%18+1
+    mov     cl, ah 
+    inc     cl
+    ; dl = drive = 0; 
+    mov     dl, 0
+    ; raise int 13h 
+    mov     ax, 201h
+    int     13h
+    pop     bx
+    pop     cx
+    ret
+    
+setup:
+	mov ax, setupseg
+	mov ds, ax
+	mov es, ax
+	mov ss, ax
+	mov sp, 0xffff
+
+	;; puts loading
+	mov si, setup_msg
+	call print		;
+
+;; read_info:
+;; 	mov ax, 0x9000
+;; 	mov ds, ax
+
+	;; Now get memory size and save at 0x90002
+	;; This may just report up to 64M.
+	;; It only reports contiguous (usable) RAM.
+	;; mov ah, 0x88
+	;; int 0x15
+	;; mov [2], ax
+
+    mov ax, setupseg
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, 0xffff
+
+_reset:
+    xor ax, ax
+    mov dl, 0
+    int 0x13
+    jnz _reset
+    
+;; _readfloppy:
+;; 	mov ax, setupseg
+;; 	mov es, ax
+;; 	mov bx, setupoffset + setupsize ; put kernel at here now 
+;; 	mov ah, 2
+;; 	mov dl, [0]
+;; 	mov ch, 0
+;; 	;0,1 is for boot, setupsize/512 for setup.bin
+;; 	mov cl, 1 + 1 + setupsize/512  
+;; 	mov al, systemsize/512
+;; 	int 0x13
+;; 	jc _readfloppy
+
+    mov ax, setupseg
+    mov es, ax
+    mov si, 2
+    mov di, setupoffset + setupsize
+    mov cx, 72
+_readfloppy:
+    call _read_sect
+    inc si
+    add di, 0x200
+    dec cx
+    jnz _readfloppy
+    
+	;; move system to 0x00000
+	;; this is OK for our kernel.bin is small
+	cld
+	mov si, setupoffset + setupsize
+	mov ax, systemseg
+	mov es, ax
+	mov di, systemoffset
+	mov cx, systemsize/4
+	rep movsd
+
+    
+    mov si, setup_msg
+	call print
+
+	;;
+	cli
+	lgdt [gdt_addr]
+	
+	;; enable A20
+	;; call empty_8042
+	mov al, 0xd1
+	out 0x64, al
+	call empty_8042
+	mov al, 0xdf
+	out 0x60, al
+	call empty_8042
+
+	mov eax, cr0
+	or  eax, 1
+	mov cr0, eax
+
+    ;; jump into head, which puted at 0x00000
+	jmp dword 0x8:0x0
+
+empty_8042:
+	in al, 0x64
+	test al, 0x2
+	jnz  empty_8042
+	ret
+
+print:
+	mov ah, 0x0E
+.next:
+	lodsb
+	or al, al
+	jz .done
+	int 0x10 		;interupt to print
+	jmp .next
+.done:
+	ret
+
+setupseg 	    equ     0x9000
+setupoffset	    equ     0x0100
+setupsize 	    equ     512
+
+systemseg 	    equ	    0x0000
+systemoffset    equ     0x0000
+systemsize 	    equ     1024*36 ; this will bigger than kernel.bin
+
+setup_msg db "Setup Panda OS"	;
+	db 13, 10, 0  		;
+
+gdt_addr:
+	dw 0x7fff
+	dw gdt
+	dw 0x009
+
+gdt:
+gdt_null:
+	dw 0x0000
+	dw 0x0000
+	dw 0x0000
+	dw 0x0000
+gdt_system_code:
+	dw 0x3fff
+	dw 0x0000
+	dw 0x9a00
+	dw 0x00c0
+gdt_syste_data:
+	dw 0x3fff
+	dw 0x0000
+	dw 0x9200
+	dw 0x00c0
+	
+	
+; Magic number for sector
+times 512-($-$$) db 0

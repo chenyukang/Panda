@@ -4,7 +4,7 @@ KERNEL="./kernel"
 INCLUDE="./inc"
 NASM="nasm -f elf -g"
 CFLAGS="-Wall -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
-BOCHS="bochs"
+BOCHS="bochs "
 
 if [ `uname` = "Linux" ]; then
     GCC="gcc "
@@ -72,6 +72,7 @@ do_compile() {
 	fi
     done
 
+    echo "building user"
     mkdir ./objs/usr;
     $GCC -I./inc -DUSR -fno-builtin -fno-stack-protector -nostdinc -c ./usr/string.c -o $USEROBJDIR/string.o;
     $GCC -I./inc -DUSR -fno-builtin -fno-stack-protector -nostdinc  -c ./usr/init.c -o $USEROBJDIR/init.o;
@@ -173,5 +174,5 @@ do
 done
 
 
-do_all "qemu";
+do_all "bochs";
 show_help;

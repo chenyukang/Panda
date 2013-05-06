@@ -18,7 +18,7 @@
 #include <string.h>
 #include <gdt.h>
 
-#define PROC_NUM 126
+#define PROC_NUM 52
 
 struct {
     struct spinlock lock;
