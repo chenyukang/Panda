@@ -152,6 +152,8 @@ show_help() {
     echo "-compile|c : do compile"
     echo "-all|a     : do above two, and run simulation"
     echo "-commit|u  : do git commit"
+    echo "-qemu|q    : do all and run qemu"
+    echo "-bochs|b   : do all and run bochs"
     echo "-line|l    : do count code line :)"
 }
 
@@ -162,6 +164,7 @@ do_wc_line() {
 while [ $# -gt 0 ]
 do
     case $1 in
+        -help|-h)    show_help;      exit 0;;
         -all|-a)     do_all "qemu";  exit 0;;
         -clean|-x)   do_clean;       exit 0;;
         -compile|-c) do_clean;       do_compile; exit 0;;
