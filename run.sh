@@ -79,11 +79,13 @@ do_compile() {
     $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/clib.c -o $USEROBJDIR/clib.o;
     $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/sh.c -o $USEROBJDIR/sh.o;
     $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/ls.c -o $USEROBJDIR/ls.o;
+    $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/pwd.c -o $USEROBJDIR/pwd.o;
 
     $NASM -f elf ./usr/entry.s -o $USEROBJDIR/entry.o;
     $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/init.o  -e _start -o $USEROBJDIR/init -T $TOOL/user.ld;
     $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/sh.o  -e _start -o $USEROBJDIR/sh -T $TOOL/user.ld;
     $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/ls.o  -e _start -o $USEROBJDIR/ls -T $TOOL/user.ld;
+    $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/pwd.o  -e _start -o $USEROBJDIR/pwd -T $TOOL/user.ld;
 
     do_link;
 }
@@ -119,9 +121,9 @@ do_prepare_hd() {
     `$ON_GCC ./tool/mkfs.c -o ./tool/mkfs.exe`
     rm -rf hd.img;
     echo "making hard disk"
-    cp $USEROBJDIR/init $USEROBJDIR/sh $USEROBJDIR/ls ./;
-    ./tool/mkfs.exe hd.img README init sh ls;
-    rm -rf init sh ls;
+    cp $USEROBJDIR/init $USEROBJDIR/sh $USEROBJDIR/ls $USEROBJDIR/pwd ./;
+    ./tool/mkfs.exe hd.img README init sh ls pwd;
+    rm -rf init sh ls pwd;
 }
 
 do_all() {
@@ -177,5 +179,5 @@ do
 done
 
 
-do_all "bochs";
+do_all "qemu";
 show_help;

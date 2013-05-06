@@ -326,6 +326,7 @@ void do_no_page(void* vaddr) {
     vp = find_vma((u32)vaddr);
     if (vp == NULL) {
         printk("vaddr: %x\n", (u32)vaddr);
+        printk("pid: %d name: %s\n", current_task->pid, current_task->name);
         kassert(0);
         //sigsend(current_task->p_pid, SIGSEGV, 1);
         return;

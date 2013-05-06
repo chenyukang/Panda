@@ -119,6 +119,7 @@ struct task* spawn(void* func) {
     new_task->stat = NEW;
     new_task->pid = next_pid();
     new_task->ppid = parent->pid;
+    printk("parent: %d child: %d\n", parent->pid, new_task->pid);
     vm_clone(&new_task->p_vm);
     new_task->p_context = parent->p_context;
     new_task->p_context.eip = (u32)func;
@@ -164,9 +165,6 @@ void sched() {
     }
 
     if(next) {
-        if(next->pid == 4) {
-            //printk("to 4: %d\n", next->stat);
-        }
         kassert(next->stat != ZOMBIE);
         swtch_to(next);
     }
@@ -204,7 +202,6 @@ void wakeup(void* change) {
 }
 
 s32 do_exit(int ret) {
-    //printk("in task exiting ... \n");
     u32 i;
     struct file* fp;
     struct task* parent;
@@ -239,7 +236,8 @@ try_find:
         switch(p->stat) {
         case ZOMBIE:
             *stat = p->exit_code;
-            free_mem(find_task(pid));
+            free_mem(p);
+            proc_table.procs[i] = 0;
             printk("fucking...\n");
             return pid;
         default:
