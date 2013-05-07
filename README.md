@@ -11,8 +11,8 @@ Any contribution  is welcome :)
       step1: clone the code
 	  
       step2: cd Panda; 
-             ./run.sh 
-             (will run bochs or qemu, detail see run.sh)
+             ./do.sh 
+             (will run bochs or qemu, detail see do.sh)
 
 
 

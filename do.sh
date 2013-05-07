@@ -1,21 +1,20 @@
-#!/bin/bash
+#!/bin/sh 
 BOOT="./boot"
 KERNEL="./core"
 INCLUDE="./inc"
 NASM="nasm -f elf -g"
 CFLAGS="-Wall -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
 BOCHS="bochs "
-
+DEFAULT="None"
 if [ `uname` = "Linux" ]; then
     GCC="gcc "
     ON_GCC="gcc"
     LD="ld"
     OBJCPY="objcopy"
-    #QEMU="/usr/local/bin/qemu-system-i386 "
     QEMU="qemu "
     BOCHS_CONF="./.bochs_linux"
-else
-    # on Mac
+    DEFAULT="bochs"
+else #on Mac, I will run Qemu
     GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc "
     ON_GCC="clang "
     LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
@@ -23,6 +22,7 @@ else
     OBJDUMP="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objdump"
     QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386"
     BOCHS_CONF="./.bochs_mac"
+    DEFAULT="qemu"
 fi
 
 OBJDIR="./objs"
@@ -79,7 +79,6 @@ do_compile() {
     for f in $users;
     do 
         cmd="$GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c usr/$f -o $USEROBJDIR/${f/.c/.o}"
-        #echo $cmd
         `$cmd`;
         if [ $? -ne 0 ] 
             then exit;
@@ -195,5 +194,5 @@ do
 done
 
 
-do_all "qemu";
+do_all $DEFAULT;
 show_help;
