@@ -7,7 +7,6 @@
  *
  *      @author   Yukang Chen  @date  2012-05-22 22:23:33
  *
- *      COPYRIGHT (C) 2011, Nextop INC., ALL RIGHTS RESERVED.
  *
  *******************************************************************************/
 
