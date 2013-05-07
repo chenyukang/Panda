@@ -1,10 +1,10 @@
 #include <syscall.h>
-#include <asm.h>
 #include <task.h>
 #include <string.h>
 #include <screen.h>
 #include <exec.h>
 #include <sysfile.h>
+
 
 typedef int (*sysc_func) (struct registers_t* r);
 extern void stub_ret(void);
@@ -12,14 +12,21 @@ static sysc_func sys_routines[NSYSC];
 
 int errno = 0;
 
-int nosys(struct registers_t* r) {
+int nosys(struct registers_t* regs) {
     return -1;
 }
 
 int sys_exec(struct registers_t* regs) {
     char *path = (char*)regs->ebx;
     char **argv = (char**)regs->ecx;
-    return do_exec(path, argv);
+    int r = do_exec(path, argv);
+    if(r == -1) {
+        //cli();
+        //do_exit(1);
+        return -1; //remove warnning message
+    } else {
+        return 0;
+    }
 }
 
 int sys_fork(struct registers_t* regs) {
@@ -43,6 +50,7 @@ int sys_exit(struct registers_t* regs) {
 int sys_wait(struct registers_t* regs) {
     s32 pid = regs->ebx;
     s32* stat = (s32*)regs->ecx;
+    printk("(%d)begin wait\n", current_task->pid);
     regs->eax = wait_p(pid, stat);
     return 0;
 }
@@ -53,6 +61,26 @@ int sys_write(struct registers_t* regs) {
     return 1;
 }
 
+int sys_uname(struct registers_t* regs) {
+    struct utsname* p = (struct utsname*)regs->ebx;
+    if(vm_verify((u32)p, sizeof(struct utsname)) < 0) {
+        return -1;
+    }
+    strcpy(p->sysname, "Panda OS");
+    strcpy(p->release, "debug");
+    strcpy(p->version, "0.11");
+    return 1;
+}
+
+int sys_time(struct registers_t* regs) {
+    struct tm* p = (struct tm*)regs->ebx;
+    if(vm_verify((u32)p, sizeof(struct tm)) < 0) {
+        return -1;
+    }
+    *p = kern_time;
+    return 1;
+}
+    
 int sys_read(struct registers_t* regs) {
     char* buf = (char*)regs->ecx;
     u32 fd    = regs->ebx;
@@ -79,7 +107,7 @@ void do_syscall(struct registers_t* regs){
         func = &nosys;
     ret = (*func)(regs);
     regs->eax = ret;
-#if 0
+#if 1
     //
     if(ret < 0 ) {
         //regs->eax = -current_task->p_error; //fix me
@@ -99,5 +127,7 @@ void syscall_init() {
     sys_routines[NR_write] = &sys_write;
     sys_routines[NR_read]  = &sys_read;
     sys_routines[NR_exitc] = &sys_exit;
-    sys_routines[NR_wait] = &sys_wait;
+    sys_routines[NR_wait]  = &sys_wait;
+    sys_routines[NR_uname] = &sys_uname;
+    sys_routines[NR_time]  = &sys_time;
 }

@@ -6,6 +6,9 @@ int main(int argc, char **argv) {
     if(fork() == 0) {
         //printf("child\n");
         exec("/sh", NULL);
+        while(1) {
+            ;
+        }
     } else {
         //printf("parent\n");
         while(1) {

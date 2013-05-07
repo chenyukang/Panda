@@ -30,7 +30,7 @@ static void timer_callback(void) {
     }
 
     if(ticks%100 == 0) {
-        task_debug();
+        //task_debug();
     }
 
     if(ticks%30 == 0){

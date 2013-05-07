@@ -110,14 +110,14 @@ void hd_rw(struct buf* bp) {
         p->b_qnext = bp;
     }
     if(ide_queue == bp) {
-        cli();
+        //cli();
         ide_start(bp);
     }
     //NOTE, we need to sti after sleep, since ide_start
     //may cause a interupt before this
     while((bp->b_flag & (B_VALID | B_DIRTY)) != B_VALID) {
         sleep(bp, &hdlock);
-        sti(); 
+        //sti(); 
     }
 }
 
@@ -132,11 +132,6 @@ void init_hd() {
     hd_inf[0].ctl   = *(u8*)(8+bios);
     hd_inf[0].lzone = *(u16*)(12+bios);
     hd_inf[0].sect  = *(u8*)(14+bios);
-
-#if 0
-    u32 hd_size = (hd_inf[0].head * hd_inf[0].sect * hd_inf[0].cyl);
-    printk("hd_size: %d KB\n", hd_size/1024);
-#endif
 
     irq_enable(14);
     irq_install_handler(32+14, (isq_t)(&hd_interupt_handler));

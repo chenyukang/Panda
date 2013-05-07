@@ -1,7 +1,10 @@
 
 #ifndef _SYS_CALL_H
 #define _SYS_CALL_H
+
 #include <system.h>
+#include <uname.h>
+#include <time.h>
 
 // System call numbers
 #define NSYSC       64
@@ -77,11 +80,15 @@ enum {
     NR_read,
     NR_exitc,
     NR_wait,
-    NR_write
+    NR_write,
+    NR_uname,
+    NR_time
 };
     
 static inline _SYS1(int, write, char);
 static inline _SYS1(int, exitc,  int);
+static inline _SYS1(int, uname, struct utsname*);
+static inline _SYS1(int, time, struct tm*);
 static inline _SYS0(int, fork);
 static inline _SYS2(int, wait, int, int*);
 static inline _SYS2(int, exec, char*, char**);

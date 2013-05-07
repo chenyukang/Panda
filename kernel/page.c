@@ -282,6 +282,7 @@ void do_wt_page(void* vaddr) {
     vp = find_vma((u32)vaddr);
     if (vp->v_flag & VMA_RDONLY) {
         //sigsend(cu->p_pid, SIGSEGV, 1);
+        printk("task:%d\n", current_task->pid);
         kassert(0);
         return;
     }

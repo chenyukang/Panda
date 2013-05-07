@@ -51,7 +51,7 @@ void kmain(u32 init_stack) {
 
     struct task* t = spawn(init_user);
     kassert(t);
-    t->stat = RUNNABLE;
+    //t->stat = RUNNABLE;
     sti();
     init = 0;
     while(1) {

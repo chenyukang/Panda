@@ -175,9 +175,9 @@ IRQ  15,    47
 	
 ; In isr.c
 extern hwint_handler
-	
+global stub_ret	
 common_stub:
-    sti
+    cli
     pusha
     push ds
     push es
@@ -196,7 +196,6 @@ common_stub:
     call eax       ; A special call, preserves the 'eip' register
     pop eax
 
-global stub_ret	
 stub_ret:
     pop gs
     pop fs

@@ -47,14 +47,6 @@ char* get_current_name() {
 struct task* alloc_proc() {
     u32 i;
     acquire_lock(&proc_table.lock);
-#if 0
-    for(i=0; i<PROC_NUM; i++) {
-        if(proc_table.procs[i].stat == UNUSED) {
-            release_lock(&proc_table.lock);
-            return &proc_table.procs[i];
-        }
-    }
-#endif
     for(i=0; i<PROC_NUM; i++) {
         if(proc_table.procs[i] == 0) {
             proc_table.procs[i] = (struct task*)alloc_mem();
@@ -134,10 +126,12 @@ struct task* spawn(void* func) {
 static int step = 0;
 #endif
 void swtch_to(struct task *to){
+    acquire_lock(&proc_table.lock);
     struct task *from = current_task;
     tss.esp0 = (u32)to + PAGE_SIZE; 
     to->r_time++;
     current_task = to;
+    release_lock(&proc_table.lock);
     flush_pgd(to->p_vm.vm_pgd);
 #ifdef DEBUG_PROC
     printk("switch %d from: %s to %s\n", step++, from->name, to->name);
@@ -165,6 +159,8 @@ void sched() {
 
     if(next) {
         kassert(next->stat != ZOMBIE);
+        kassert(next->stat != WAIT);
+        //printk("switch:%d\n", next->pid);
         swtch_to(next);
     }
 }
@@ -182,6 +178,7 @@ void sleep(void* change, struct spinlock* lock) {
     current_task->stat = WAIT;
     sti();
     sched();
+    
 }
 
 void wakeup(void* change) {
@@ -216,7 +213,6 @@ s32 do_exit(int ret) {
     current_task->chan = 0;
     current_task->stat = ZOMBIE;
     current_task->exit_code = ret;
-    printk("exit... : %s\n", current_task->name);
     parent = find_task(current_task->ppid);
     wakeup(parent);
     return 0;
@@ -228,23 +224,24 @@ s32 wait_p(s32 pid, s32* stat) {
     if(vm_verify((u32)stat, sizeof(s32)) < 0) {
         return -1;
     }
+    //printk("wait_p:%d \n", current_task->pid);
 try_find:
     for(i=0; i<PROC_NUM; i++) {
         p = proc_table.procs[i];
         if(!p) continue;
+        if(p == current_task) continue;
         if(p->pid != pid && pid != -1) continue;
-        switch(p->stat) {
-        case ZOMBIE:
+        if(p->stat == ZOMBIE) {
             *stat = p->exit_code;
             free_mem(p);
             proc_table.procs[i] = 0;
+            //printk("return :%d %d\n", current_task->pid, p->pid);
             return pid;
-        default:
-            continue;
         }
     }
     sleep(current_task, NULL);
     goto try_find;
+    return 0;
 }
 
 void task_debug() {

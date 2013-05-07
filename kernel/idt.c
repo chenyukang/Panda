@@ -265,14 +265,6 @@ void idt_init() {
 
 // This gets called from our ASM interrupt handler stub.
 void hwint_handler(struct registers_t* regs) {
-#if 0
-    if(regs->int_no != 0x20) {
-        puts("recieved interrupt: ");
-        printk_hex(regs->int_no);
-        puts("\n");
-    }
-#endif
-
     if ((regs->cs & 3) == 3) {
         current_task->p_trap = regs; 
     }

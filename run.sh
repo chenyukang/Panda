@@ -65,7 +65,6 @@ do_compile() {
     for f in $flist;
     do
 	cmd="$GCC $CFLAGS -c $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
-            #echo $cmd;
 	`$cmd`;
 	if [ $? -ne 0 ]
 	then exit;
@@ -74,19 +73,33 @@ do_compile() {
 
     echo "building user"
     mkdir ./objs/usr;
-    $GCC -I./inc -DUSR -fno-builtin -fno-stack-protector -nostdinc -c ./usr/string.c -o $USEROBJDIR/string.o;
-    $GCC -I./inc -DUSR -fno-builtin -fno-stack-protector -nostdinc  -c ./usr/init.c -o $USEROBJDIR/init.o;
-    $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/clib.c -o $USEROBJDIR/clib.o;
-    $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/sh.c -o $USEROBJDIR/sh.o;
-    $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/ls.c -o $USEROBJDIR/ls.o;
-    $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/pwd.c -o $USEROBJDIR/pwd.o;
 
-    $NASM -f elf ./usr/entry.s -o $USEROBJDIR/entry.o;
-    $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/init.o  -e _start -o $USEROBJDIR/init -T $TOOL/user.ld;
-    $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/sh.o  -e _start -o $USEROBJDIR/sh -T $TOOL/user.ld;
-    $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/ls.o  -e _start -o $USEROBJDIR/ls -T $TOOL/user.ld;
-    $LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/pwd.o  -e _start -o $USEROBJDIR/pwd -T $TOOL/user.ld;
+    users=`cd usr; ls *.c;` 
+    `cd ../`;
+    for f in $users;
+    do 
+        cmd="$GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c usr/$f -o $USEROBJDIR/${f/.c/.o}"
+        #echo $cmd
+        `$cmd`;
+        if [ $? -ne 0 ] 
+            then exit;
+        fi
+    done
 
+    users=`cd objs/usr/; ls *.o;` 
+    `cd ../`;
+    $GCC -I./inc -DUSR -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/string.c -o $USEROBJDIR/string.o;
+    $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/clib.c -o $USEROBJDIR/clib.o;
+    $NASM -f elf ./usr/lib/entry.s -o $USEROBJDIR/entry.o;
+    for f in $users;
+    do 
+        cmd="$LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/$f -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld"
+        #echo $cmd
+        `$cmd`;
+        if [ $? -ne 0 ] 
+            then exit;
+        fi
+    done
     do_link;
 }
 
@@ -121,9 +134,12 @@ do_prepare_hd() {
     `$ON_GCC ./tool/mkfs.c -o ./tool/mkfs.exe`
     rm -rf hd.img;
     echo "making hard disk"
-    cp $USEROBJDIR/init $USEROBJDIR/sh $USEROBJDIR/ls $USEROBJDIR/pwd ./;
-    ./tool/mkfs.exe hd.img README init sh ls pwd;
-    rm -rf init sh ls pwd;
+    cp README ./tool/mkfs.exe objs/usr/;
+    cd objs/usr/;
+    rm -rf *.o;
+    ./mkfs.exe hd.img *;
+    cd ../../;
+    cp objs/usr/hd.img ./;
 }
 
 do_all() {
@@ -179,5 +195,5 @@ do
 done
 
 
-do_all "qemu";
+do_all "bochs";
 show_help;
