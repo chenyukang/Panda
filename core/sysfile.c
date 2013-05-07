@@ -6,8 +6,9 @@
 #include <system.h>
 #include <string.h>
 #include <tty.h>
+#include <fcntl.h>
 
-int do_read(u32 fd, char* buf, u32 cnt) {
+s32 do_read(u32 fd, char* buf, u32 cnt) {
     if(fd == 0) {
         while(tty_get_buf(buf) == -1) {
             sleep(&tty_dev, NULL);
@@ -30,7 +31,7 @@ fd_alloc(struct file* f) {
 }
 
 int test_file() {
-    int fd = _open("/README");
+    int fd = _open("/README.md");
     char buf[1024];
     memset(buf, 0, sizeof(buf));
     if(fd > 0) {
@@ -41,6 +42,32 @@ int test_file() {
         printk("failed to open file: README\n");
     }
     return 0;
+}
+
+s32 do_open(char* path, int mode, int flag) {
+    struct file* f;
+    struct inode* ip;
+    s32 fd;
+    if(mode & O_CREATE) {
+        //create file;
+    } else {
+        ip = inode_name(path);
+        kassert(ip);
+        if(ip == 0) return -1;
+        ilock(ip);
+        if(( f = file_alloc()) == 0 ||
+           (fd = fd_alloc(f)) < 0) {
+            if(f) file_close(f);
+        }
+        f->type = FD_INODE;
+        f->ip   = ip;
+        f->offset = 0;
+        f->readable = (mode & O_WRONLY) ? 0 : 1;
+        f->writeable = (mode & O_WRONLY) || (mode & O_RDWR);
+        idrop(ip);
+        return fd;
+    }
+    return -1;
 }
 
 int _open(char* name) {

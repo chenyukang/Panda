@@ -79,7 +79,15 @@ int sys_time(struct registers_t* regs) {
     *p = kern_time;
     return 1;
 }
-    
+
+int sys_open(struct registers_t* regs) {
+    char* path = (char*)regs->ebx;
+    u32   mode = regs->ecx;
+    u32   flag = regs->edx;
+
+    return do_open(path, mode, flag);
+}
+
 int sys_read(struct registers_t* regs) {
     char* buf = (char*)regs->ecx;
     u32 fd    = regs->ebx;
@@ -120,4 +128,5 @@ void syscall_init() {
     sys_routines[NR_wait]  = &sys_wait;
     sys_routines[NR_uname] = &sys_uname;
     sys_routines[NR_time]  = &sys_time;
+    sys_routines[NR_open]  = &sys_open;
 }

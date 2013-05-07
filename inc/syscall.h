@@ -82,6 +82,7 @@ enum {
     NR_wait,
     NR_write,
     NR_uname,
+    NR_open,
     NR_time
 };
     
@@ -92,6 +93,7 @@ static inline _SYS1(int, time, struct tm*);
 static inline _SYS0(int, fork);
 static inline _SYS2(int, wait, int, int*);
 static inline _SYS2(int, exec, char*, char**);
+static inline _SYS3(int, open, char*, int, int);
 static inline _SYS3(int, read, int, char*, int);
 
 #endif
