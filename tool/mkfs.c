@@ -1,11 +1,14 @@
+/* from xv6
+   use this to make disk image
+   usage: mkfs.exe hd.img file1 file2 ...
+*/
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
-
-#define stat xv6_stat  // avoid clash with host struct stat
 
 #define USE_SYS 1
 

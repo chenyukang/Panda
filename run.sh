@@ -1,6 +1,6 @@
 #!/bin/bash
 BOOT="./boot"
-KERNEL="./kernel"
+KERNEL="./core"
 INCLUDE="./inc"
 NASM="nasm -f elf -g"
 CFLAGS="-Wall -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
