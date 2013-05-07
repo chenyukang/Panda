@@ -110,14 +110,14 @@ void hd_rw(struct buf* bp) {
         p->b_qnext = bp;
     }
     if(ide_queue == bp) {
-        //cli();
+        cli();
         ide_start(bp);
     }
     //NOTE, we need to sti after sleep, since ide_start
-    //may cause a interupt before this
+    //may cause a interupt before this, for example Qemu
     while((bp->b_flag & (B_VALID | B_DIRTY)) != B_VALID) {
         sleep(bp, &hdlock);
-        //sti(); 
+        sti(); 
     }
 }
 

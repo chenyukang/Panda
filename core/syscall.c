@@ -21,8 +21,7 @@ int sys_exec(struct registers_t* regs) {
     char **argv = (char**)regs->ecx;
     int r = do_exec(path, argv);
     if(r == -1) {
-        //cli();
-        //do_exit(1);
+        do_exit(1);
         return -1; //remove warnning message
     } else {
         return 0;
@@ -50,7 +49,7 @@ int sys_exit(struct registers_t* regs) {
 int sys_wait(struct registers_t* regs) {
     s32 pid = regs->ebx;
     s32* stat = (s32*)regs->ecx;
-    printk("(%d)begin wait\n", current_task->pid);
+    //printk("(%d)begin wait\n", current_task->pid);
     regs->eax = wait_p(pid, stat);
     return 0;
 }
@@ -107,15 +106,6 @@ void do_syscall(struct registers_t* regs){
         func = &nosys;
     ret = (*func)(regs);
     regs->eax = ret;
-#if 1
-    //
-    if(ret < 0 ) {
-        //regs->eax = -current_task->p_error; //fix me
-        regs->eax = ret;
-    }
-    else
-        regs->eax = ret;
-#endif
 }
 
 void syscall_init() {
