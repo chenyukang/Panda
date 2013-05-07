@@ -18,6 +18,6 @@ Any contribution  is welcome :)
 
 ## snapshot
 
-![snapshot](https://github.com/chenyukang/Panda/blob/master/imgs/snapshot.png)
+    ![snapshot](https://github.com/chenyukang/Panda/blob/master/imgs/snapshot.png?raw=true)
 
 
