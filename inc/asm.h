@@ -96,7 +96,7 @@ static inline void native_halt(void) {
 }
 
 static inline void outb(u16 port, u8 data) {
-  asm volatile("out %0,%1" : : "a" (data), "d" (port));
+    asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
 
 static inline u8 inb(u16 port) {
@@ -106,16 +106,14 @@ static inline u8 inb(u16 port) {
   return data;
 }
 
-static inline void
-outsl(int port, const void *addr, int cnt) {
+static inline void outsl(int port, const void *addr, int cnt) {
   asm volatile("cld; rep outsl" :
                "=S" (addr), "=c" (cnt) :
                "d" (port), "0" (addr), "1" (cnt) :
                "cc");
 }
 
-static inline void
-insl(int port, void *addr, int cnt) {
+static inline void insl(int port, void *addr, int cnt) {
   asm volatile("cld; rep insl" :
                "=D" (addr), "=c" (cnt) :
                "d" (port), "0" (addr), "1" (cnt) :
@@ -161,6 +159,7 @@ xchg(volatile u32 *addr, u32 newval) {
 
 void	port_read(u16 port, void* buf, int n);
 void	port_write(u16 port, void* buf, int n);
+
 
 #endif
 
