@@ -62,7 +62,7 @@ struct ide_desc {
      (lba_high & 0xF ) | 0xA0)))
     
 
-void init_ide(void);
+void ide_init(void);
 void hd_rw(struct buf* bp);
 
 #endif

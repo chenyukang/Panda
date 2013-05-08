@@ -39,7 +39,7 @@ static void timer_callback(void) {
 }
 
 void timer_init() {
-    puts("timer init ...\n");
+    puts("[time] .... ");
     // Firstly, register our timer callback.
     irq_enable(0);
     irq_install_handler(32, (isq_t)(&timer_callback));
@@ -59,6 +59,7 @@ void timer_init() {
     // Send the frequency divisor.
     outb(0x40, l);
     outb(0x40, h);
+    done();
 }
 
 

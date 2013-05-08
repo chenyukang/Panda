@@ -37,6 +37,7 @@
     }                                              \
 
 
+#define done() { puts_color_str("[Done]\n", 0x0E); }
 /* This defines what the stack looks like after an ISR was running */
 struct registers_t {
     s32 gs, fs, es, ds;

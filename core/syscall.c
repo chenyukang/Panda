@@ -116,8 +116,8 @@ void do_syscall(struct registers_t* regs){
     regs->eax = ret;
 }
 
-void syscall_init() {
-    puts("syscall_init ... \n");
+void sysc_init() {
+    puts("[sysc] .... ");
     irq_install_handler(0x80, (isq_t)(&do_syscall));
     sys_routines[NR_setup] = &nosys;
     sys_routines[NR_fork]  = &sys_fork;
@@ -129,4 +129,5 @@ void syscall_init() {
     sys_routines[NR_uname] = &sys_uname;
     sys_routines[NR_time]  = &sys_time;
     sys_routines[NR_open]  = &sys_open;
+    done();
 }

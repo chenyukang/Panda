@@ -99,9 +99,11 @@ static void init_proctable() {
     memset(proc_table.procs, 0, sizeof(proc_table.procs));
 }
 
-void init_tasks() {
+void task_init() {
+    puts("[task] .... ");
     init_proctable();
     init_proc0();
+    done();
 }
 
 struct task* spawn(void* func) {

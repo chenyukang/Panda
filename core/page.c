@@ -247,7 +247,7 @@ void init_page_dir(struct pde* pg_dir) {
    ker_addr is address where kernel code ended ,
    used_addr will be ker_end_addr added kernel stack etc */
 void mm_init() {
-    puts("mm init ...\n");
+    puts("[mm]   .... ");
 
     // we put the end_addr at 0x90002
     // during booting process, so got it
@@ -270,6 +270,7 @@ void mm_init() {
     irq_install_handler(14, (isq_t)(&page_fault_handler));
     flush_pgd(&(pg_dir0[0]));
     enable_page();
+    done();
 }
 
 void do_wt_page(void* vaddr) {

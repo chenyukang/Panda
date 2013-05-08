@@ -23,7 +23,6 @@ void kb_handler(void) {
     else if(code == 0xaa || code == 0xb6 )
         shift_state = 0;
 
-    //printk("code: %x\n", code);
     /* If the top bit of the byte we read from the keyboard is
     *  set, that means that a key has just been released */
     if (code & 0x80) {
@@ -41,9 +40,10 @@ void kb_handler(void) {
 }
 
 void kb_init() {
-    puts("kb init ...\n");
+    puts("[kb]   .... ");
     irq_enable(1);
     irq_install_handler(33, (isq_t)(&kb_handler));
     tty_clear();
+    done();
 }
 

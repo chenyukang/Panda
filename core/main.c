@@ -33,25 +33,22 @@ void kmain(u32 init_stack) {
     init_esp_start = init_stack;
     init_video();
     puts_color_str("Booting Panda OS ...\n", 0x0B);
-    puts_color_str("Welcome ...\n", 0x0E);
 
     cli();
     time_init();
     gdt_init();
     idt_init();
-    syscall_init();
-    timer_init();
     kb_init();
     mm_init();
     buf_init();
     file_init();
-    init_inodes();
-    init_ide();
-    init_tasks();
-
-    struct task* t = spawn(init_user);
-    kassert(t);
-    //t->stat = RUNNABLE;
+    inode_init();
+    ide_init();
+    task_init();
+    timer_init();
+    sysc_init();
+    
+    spawn(init_user);
     sti();
     init = 0;
     while(1) {

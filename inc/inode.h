@@ -36,8 +36,7 @@ struct stat {
 };
 
 
-void            init_inodes();
-void            iinit(void);
+void            inode_init();
 void            ilock(struct inode*);
 void            idrop(struct inode*);
 void            iput(struct inode*);

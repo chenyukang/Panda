@@ -100,7 +100,7 @@ struct task {
 typedef struct task task_t;
 extern struct task* current_task;
 
-void init_tasks();
+void task_init();
 void sched();
 
 s32  do_exit(s32 ret);

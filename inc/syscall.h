@@ -12,7 +12,7 @@
 extern int errno;
 
 void do_syscall(struct registers_t* tf);
-void syscall_init();
+void sysc_init();
 
 #define _SYS0(T0, FN)                           \
     T0 FN(){                                    \

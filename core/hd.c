@@ -154,9 +154,10 @@ void init_hd() {
     
 }
 
-void init_ide() {
-    printk("hd_ide ...\n");
+void ide_init() {
+    printk("[hd]   .... ");
     init_hd();
     waitfor_ready(0);
     ide_queue = 0;
+    done();
 }

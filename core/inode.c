@@ -21,7 +21,7 @@ struct inode icache[NINODE];
 
 static struct inode* iget(u32 dev, u32 num);
 
-void init_inodes() {
+void inode_init() {
     memset(icache, 0, sizeof(icache));
 }
 

@@ -10,6 +10,7 @@
 #define STRING_H
 
 #include <types.h>
+#include <screen.h>
 
 #define abs(x) ((x < 0) ? (-(x)): (x) )
 

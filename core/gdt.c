@@ -61,7 +61,7 @@ void gdt_set_entry(u32 num, u32 base,
 #endif
 
 void gdt_init(void) {
-    puts("gdt_init ...\n");
+    puts("[gdt]  .... ");
     memset(gdt, 0, sizeof(gdt));
     gp.limit = (sizeof(struct gdt_entry) * NR_GDTENTRY) - 1;
     gp.base = (u32)&gdt;
@@ -75,4 +75,5 @@ void gdt_init(void) {
     gdt_flush();
     // load tss
     ltr(5<<3);
+    done();
 }

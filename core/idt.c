@@ -178,7 +178,7 @@ void irq_install_handler(int irq, isq_t handler) {
 
 /* Installs the IDT */
 void idt_init() {
-    puts("idt_init ...\n");
+    puts("[idt]  .... ");
     
     /* Sets the special IDT pointer up, just like in 'gdt.c' */
     idtp.limit = (sizeof (struct idt_entry) * 256) - 1;
@@ -259,6 +259,7 @@ void idt_init() {
         :: "m"(idtp));
 
     asm volatile("sti");
+    done();
 }
 
 
