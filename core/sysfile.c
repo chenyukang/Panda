@@ -70,7 +70,7 @@ s32 do_open(char* path, int mode, int flag) {
     return -1;
 }
 
-int _open(char* name) {
+s32 _open(char* name) {
     struct file* f;
     struct inode* ip;
     int fd;

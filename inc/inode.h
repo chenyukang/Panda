@@ -2,6 +2,7 @@
 #define _INODE_H__
 
 #include <types.h>
+#include <stat.h>
 
 #define NDIRECT 12
 #define NINODE  50  // maximum number of active i-nodes
@@ -23,19 +24,6 @@ struct inode {
     u32 addrs[NDIRECT + 1];
 };
 
-#define T_DIR  1   // Directory
-#define T_FILE 2   // File
-#define T_DEV  3   // Device
-
-struct stat {
-    s16 type;    // Type of file
-    s32 dev;     // File system's disk device
-    u32 inum;    // Inode number
-    s16 nlink;   // Number of links to file
-    u32 size;    // Size of file in bytes
-};
-
-
 void            inode_init();
 void            ilock(struct inode*);
 void            idrop(struct inode*);
@@ -51,7 +39,7 @@ struct inode*   idup(struct inode*);
 struct inode*   namei(char*);
 struct inode*   nameiparent(char*, char*);
 
-void            stati(struct inode*, struct stat*);
+s32            stati(struct inode*, struct stat*);
 s32             readi(struct inode*, char*, u32, u32);
 s32             writei(struct inode*, char*, u32, u32);
 

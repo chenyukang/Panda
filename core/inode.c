@@ -26,12 +26,13 @@ void inode_init() {
 }
 
            
-void stati(struct inode* ip, struct stat* st) {
-    st->dev = ip->dev;
-    st->inum = ip->inum;
-    st->type = ip->type;
-    st->nlink = ip->nlink;
-    st->size = ip->size;
+s32 stati(struct inode* ip, struct stat* st) {
+    st->st_dev = ip->dev;
+    st->st_ino = ip->inum;
+    st->st_mode = ip->type;
+    st->st_nlink = ip->nlink;
+    st->st_size = ip->size;
+    return 0;
 }
 
 struct inode* ialloc(u32 dev, s16 type) {
@@ -213,7 +214,7 @@ int readi(struct inode* ip, char* addr, u32 off, u32 n) {
     u32 total, done;
     struct buf* bp;
     
-    if(ip->type == T_DEV) {
+    if(ip->type == S_IFBLK) {
         return -1;
     }
     if(off > ip->size || off + n < off) {
@@ -236,7 +237,7 @@ int writei(struct inode* ip, char* addr, u32 off, u32 n) {
     u32 total, done;
     struct buf* bp;
 
-    if(ip->type == T_DEV) {
+    if(ip->type == S_IFBLK) {
         return -1;
     }
 
@@ -270,7 +271,7 @@ struct inode*
 dir_lookup(struct inode* dp, char* name, u32* poff) {
     u32 off;
     struct dirent dire;
-    if(dp->type != T_DIR)
+    if(dp->type != S_IFDIR)
         PANIC("dir_lookup: error type of inode ");
     for(off=0; off<dp->size; off+=sizeof(dire)) {
         if(readi(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
@@ -343,7 +344,7 @@ inode_namex(char* path, char* name, u32 parent) {
         return 0;
     while((path = _skip(path, name)) != 0) {
         ilock(ip);
-        if(ip->type != T_DIR) {
+        if(ip->type != S_IFDIR) {
             i_unlock_drop(ip);
             return 0;
         }

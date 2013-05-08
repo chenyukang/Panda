@@ -18,6 +18,7 @@ void file_init(void);
 
 struct file* file_alloc(void);
 struct file* file_dup(struct file* f);
+
 void file_close(struct file* f);
 int file_stat(struct file* f, struct stat* st) ;
 int file_read(struct file* f, char* addr, int n) ;

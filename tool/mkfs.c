@@ -112,7 +112,7 @@ main(int argc, char *argv[])
     memmove(buf, &sb, sizeof(sb));
     wsect(1, buf);
 
-    rootino = ialloc(T_DIR);
+    rootino = ialloc(S_IFDIR);
     assert(rootino == ROOTINO);
 
     bzero(&de, sizeof(de));
@@ -141,7 +141,7 @@ main(int argc, char *argv[])
         if(argv[i][0] == '_')
             ++argv[i];
 
-        inum = ialloc(T_FILE);
+        inum = ialloc(S_IFREG);
 
         bzero(&de, sizeof(de));
         de.inum = xshort(inum);

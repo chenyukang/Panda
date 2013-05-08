@@ -5,6 +5,7 @@
 #include <system.h>
 #include <uname.h>
 #include <time.h>
+#include <stat.h>
 #include <asm.h>
 
 // System call numbers
@@ -25,7 +26,8 @@ enum {
     NR_write,
     NR_uname,
     NR_open,
-    NR_time
+    NR_time,
+    NR_stat
 };
     
 static inline _SYS1(int, write, char);
@@ -35,6 +37,7 @@ static inline _SYS1(int, time, struct tm*);
 static inline _SYS0(int, fork);
 static inline _SYS2(int, wait, int, int*);
 static inline _SYS2(int, exec, char*, char**);
+static inline _SYS2(int, stat, char*, struct stat*);
 static inline _SYS3(int, open, char*, int, int);
 static inline _SYS3(int, read, int, char*, int);
 

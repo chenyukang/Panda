@@ -2,17 +2,34 @@
 #define _STAT_H__
 
 
-#define T_DIR  1   // Directory
-#define T_FILE 2   // File
-#define T_DEV  3   // Device
-#define u32 unsigned int
+/*
+ * st_mode flags
+ */
+#define         S_IFMT  0170000 /* type of file ，文件类型掩码*/
+#define         S_IFREG 0100000 /* regular file*/
+#define         S_IFBLK 0060000 /* block special */
+#define         S_IFDIR 0040000 /* directory */
+#define         S_IFCHR 0020000 /* character special */
+#define         S_IFIFO 0010000 /* fifo */
+#define         S_IFNAM 0050000 /* special named file */
+#define         S_IFLNK 0120000 /* symbolic link */
+
+#define         S_ISREG(m)      (((m) & S_IFMT) == S_IFREG)
+#define         S_ISBLK(m)      (((m) & S_IFMT) == S_IFBLK)
+#define         S_ISDIR(m)      (((m) & S_IFMT) == S_IFDIR)
+#define         S_ISCHR(m)      (((m) & S_IFMT) == S_IFCHR)
+#define         S_ISFIFO(m)     (((m) & S_IFMT) == S_IFIFO)
+#define         S_ISNAM(m)      (((m) & S_IFMT) == S_IFNAM)
+#define         S_ISLNK(m)      (((m) & S_IFMT) == S_IFLNK)
 
 struct stat {
-  short type;  // Type of file
-  u32 dev;     // File system's disk device
-  u32 ino;     // Inode number
-  short nlink; // Number of links to file
-  u32 size;    // Size of file in bytes
+    short st_mode;
+    short st_dev;
+    short st_nlink;
+    short st_uid;
+    short st_ugid;
+    unsigned int st_ino;
+    unsigned int st_size;
 };
 
 #endif

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <screen.h>
 #include <exec.h>
+#include <file.h>
 #include <sysfile.h>
 
 
@@ -71,6 +72,17 @@ int sys_uname(struct registers_t* regs) {
     return 1;
 }
 
+int sys_stat(struct registers_t* regs) {
+    u32 fd = (u32)regs->ebx;
+    struct stat* pstat = (struct stat*)regs->ecx;
+    struct file* fp = (struct file*)(current_task->ofile[fd]);
+    
+    if(vm_verify((u32)pstat, sizeof(struct stat)) < 0) {
+        return -1;
+    }
+    return stati(fp->ip, pstat);
+}
+
 int sys_time(struct registers_t* regs) {
     struct tm* p = (struct tm*)regs->ebx;
     if(vm_verify((u32)p, sizeof(struct tm)) < 0) {
@@ -129,5 +141,6 @@ void sysc_init() {
     sys_routines[NR_uname] = &sys_uname;
     sys_routines[NR_time]  = &sys_time;
     sys_routines[NR_open]  = &sys_open;
+    sys_routines[NR_stat]  = &sys_stat;
     done();
 }
