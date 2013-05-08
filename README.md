@@ -2,7 +2,7 @@
 yPandaOS : An x86 based Hobby OS
 ========
 
-I am doing this for studying the OS internals.
+I am doing this for studying the OS internals. xx
 
 use the code as you like, with Original BSD license.
 
