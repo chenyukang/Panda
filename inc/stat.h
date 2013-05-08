@@ -1,4 +1,4 @@
-#ifndef STAT_H__
+#ifndef _STAT_H__
 #define _STAT_H__
 
 
@@ -10,9 +10,9 @@
 struct stat {
   short type;  // Type of file
   u32 dev;     // File system's disk device
-  u32 ino;    // Inode number
+  u32 ino;     // Inode number
   short nlink; // Number of links to file
-  u32 size;   // Size of file in bytes
+  u32 size;    // Size of file in bytes
 };
 
 #endif

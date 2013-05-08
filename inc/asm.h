@@ -24,18 +24,14 @@ inline void write_nmi(u8 nmi);
 inline void enable_nmi(void);
 inline void disable_nmi(void);
 
-#define local_irq_disable() (native_irq_disable())
-#define local_irq_enable()  (native_irq_enable())
 #define safe_halt()         (native_safe_halt())
 #define halt()              (native_halt())
-
 
 
 #define first_zerobit(x) (first_onebit(~(x)))
 
 #define sti() __asm__ ("sti")
 #define cli() __asm__ ("cli")
-
 
 /* load TSS into tr */
 static inline void ltr(u32 n) {
@@ -53,38 +49,6 @@ static inline int first_onebit(int x) {
         __asm__("bsfl %1, %0; incl %0" : "=r" (ret) : "r" (x));
         return ret;
     }
-}
-
-static inline u32 native_irq_save(void) {
-    u32 flags;
-
-    /*
-     * "=rm" is safe here, because "pop" adjusts the stack before
-     * it evaluates its effective address -- this is part of the
-     * documented behavior of the "pop" instruction.
-     */
-    asm volatile("# __raw_save_flags\n\t"
-                 "pushf ; pop %0"
-                 : "=rm" (flags)
-                 : /* no input */
-                 : "memory");
-
-    return flags;
-}
-
-static inline void native_irq_restore(u32 flags) {
-    asm volatile("push %0 ; popf"
-                 : /* no output */
-                 :"g" (flags)
-                 :"memory", "cc");
-}
-
-static inline void native_irq_disable(void) {
-    asm volatile("cli": : :"memory");
-}
-
-static inline void native_irq_enable(void) {
-    asm volatile("sti": : :"memory");
 }
 
 static inline void native_safe_halt(void) {
@@ -120,8 +84,7 @@ static inline void insl(int port, void *addr, int cnt) {
                "memory", "cc");
 }
 
-static inline u32
-xchg(volatile u32 *addr, u32 newval) {
+static inline u32 xchg(volatile u32 *addr, u32 newval) {
   u32 result;
   
   // The + in "+m" denotes a read-modify-write operand.
@@ -145,20 +108,66 @@ xchg(volatile u32 *addr, u32 newval) {
         1;                                      \
     })
 
-
-#define local_irq_save(flags)                   \
-    do { typecheck(unsigned long, flags);       \
-        flags = native_irq_save();              \
-    } while(0);                                 \
-
-#define local_irq_restore(flags)                \
-    do { typecheck(unsigned long, flags);       \
-        flags = native_irq_restore();           \
-    } while(0);                                 \
-
-
 void	port_read(u16 port, void* buf, int n);
 void	port_write(u16 port, void* buf, int n);
+
+#define _SYS0(T0, FN)                           \
+    T0 FN(){                                    \
+        register int r;                         \
+        asm volatile(                           \
+            "int $0x80"                         \
+            :"=a"(r),                           \
+             "=b"(errno)                        \
+            :"a"(NR_##FN)                       \
+            );                                  \
+        return r;                               \
+    }
+
+#define _SYS1(T0, FN, T1)                       \
+    T0 FN(T1 p1){                               \
+        register int r;                         \
+        asm volatile(                           \
+            "int $0x80"                         \
+            :"=a"(r),                           \
+             "=b"(errno)                        \
+            :"a"(NR_##FN),                      \
+             "b"((int)p1)                       \
+            );                                  \
+        if (r<0){                               \
+            errno = -r;                         \
+            return -1;                          \
+        }                                       \
+        return r;                               \
+    }
+
+#define _SYS2(T0, FN, T1, T2)                   \
+    T0 FN(T1 p1, T2 p2){                        \
+        register int r;                         \
+        asm volatile(                           \
+            "int $0x80"                         \
+            :"=a"(r),                           \
+             "=b"(errno)                        \
+            :"a"(NR_##FN),                      \
+             "b"((int)p1),                      \
+             "c"((int)p2)                       \
+            );                                  \
+        return r;                               \
+    }
+
+#define _SYS3(T0, FN, T1, T2, T3)               \
+    T0 FN(T1 p1, T2 p2, T3 p3){                 \
+        register int r;                         \
+        asm volatile(                           \
+            "int $0x80"                         \
+            :"=a"(r),                           \
+             "=b"(errno)                        \
+            :"a"(NR_##FN),                      \
+             "b"((int)p1),                      \
+             "c"((int)p2),                      \
+             "d"((int)p3)                       \
+            );                                  \
+        return r;                               \
+    }
 
 
 #endif
