@@ -162,7 +162,6 @@ void sched() {
     if(next) {
         kassert(next->stat != ZOMBIE);
         kassert(next->stat != WAIT);
-        //printk("switch:%d\n", next->pid);
         swtch_to(next);
     }
 }
@@ -170,11 +169,6 @@ void sched() {
 void sleep(void* change, struct spinlock* lock) {
     if(current_task == 0)
         PANIC("sleep: no task");
-#if 0
-    if(lock == 0)
-        PANIC("sleep: no lock");
-#endif
-
     cli();
     current_task->chan = change;
     current_task->stat = WAIT;
