@@ -15,22 +15,36 @@
 //< hello >
 //--------
 const char below[512] =
-    "\\ ^__^ \n"
-    "\\ (oo)\\_______ \n"
+    " ^__^ \n"
+    " (oo)\\_______ \n"
     "(__)\\       )\\/\\ \n"
     "     ||----w | \n"
-    "     ||     || \n";
+    "     ||     || \n"
+    "    _^^     ^^ \n";
 
 
-int main(int argc, char* argv) {
+int main(int argc, char* argv[]) {
     char line[1024];
-    memset(line, 0, 1024);
-    line[0] = '|';
     int i;
-    for(i=0; i<argc-1; i++) {
-        strcat(line, argv[i]);
+    memset(line, 0, 1024);
+    if(argc == 1) {
+        strcat(line, "<+ Hello +>");
+    } else {
+        strcat(line, "<+ ");
+        for(i=1; i<argc; i++) {
+            strcat(line, argv[i]);
+            strcat(line, " ");
+        }
+        strcat(line, "+>");
     }
-    printf("%s\n", line);
+    for(i=0; i<strlen(line); i++) {
+        printf("%c", '=');
+    }
+    printf("\n%s\n", line);
+    for(i=0; i<strlen(line); i++) {
+        printf("%c", '=');
+    }
+    printf("\n");
     printf("%s\n", below);
     return 0;
 }
