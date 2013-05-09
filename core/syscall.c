@@ -18,7 +18,7 @@ int nosys(struct registers_t* regs) {
 }
 
 int sys_exec(struct registers_t* regs) {
-    char *path = (char*)regs->ebx;
+    char *path  = (char*)regs->ebx;
     char **argv = (char**)regs->ecx;
     int r = do_exec(path, argv);
     if(r == -1) {
@@ -48,9 +48,8 @@ int sys_exit(struct registers_t* regs) {
 }
 
 int sys_wait(struct registers_t* regs) {
-    s32 pid = regs->ebx;
+    s32 pid   = (s32)regs->ebx;
     s32* stat = (s32*)regs->ecx;
-    //printk("(%d)begin wait\n", current_task->pid);
     regs->eax = wait_p(pid, stat);
     return 0;
 }
@@ -73,14 +72,17 @@ int sys_uname(struct registers_t* regs) {
 }
 
 int sys_stat(struct registers_t* regs) {
-    u32 fd = (u32)regs->ebx;
+    char* path = (char*)regs->ebx;
     struct stat* pstat = (struct stat*)regs->ecx;
-    struct file* fp = (struct file*)(current_task->ofile[fd]);
-    
+
+    struct inode* ip = inode_name(path);
     if(vm_verify((u32)pstat, sizeof(struct stat)) < 0) {
         return -1;
     }
-    return stati(fp->ip, pstat);
+    if(ip == 0) {
+        return -1;
+    }
+    return stati(ip, pstat);
 }
 
 int sys_time(struct registers_t* regs) {

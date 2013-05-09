@@ -109,6 +109,7 @@ int do_exec(char* path, char** argv) {
     free_argv(store);
 
     idrop(ip);
+    
     enter_user(vm->vm_entry, esp);
     kassert(0);
     return 0; //never return for succ
