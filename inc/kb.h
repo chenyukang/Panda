@@ -11,6 +11,9 @@
 
 #include <types.h>
 
+#define SHIFT_L 42
+#define SHIFT_R 54
+
 u8 kbdus[128] = {
     0,  27, '1', '2', '3', '4', '5', '6', '7', '8',	  /* 9 */
     '9', '0', '-', '=', '\b',	                      /* Backspace */

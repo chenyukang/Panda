@@ -28,11 +28,11 @@ void kb_handler(void) {
     if (code & 0x80) {
         /* You can use this one to see if the user released the
         *  shift, alt, or control keys... */
-        
     } else {
         /* Here, a key was just pressed. Please note that if you
         *  hold a key down, you will get repeated key press
         *  interrupts. */
+        if(code == SHIFT_L || code == SHIFT_R) return;
         ch = shift_state? kbdus_upper[code] : kbdus[code];
         tty_ch(ch);
         putch(ch);
