@@ -8,6 +8,7 @@
 
 
 typedef int (*sysc_func) (struct registers_t* r);
+
 extern void stub_ret(void);
 static sysc_func sys_routines[NSYSC];
 
@@ -115,7 +116,7 @@ int sys_read(struct registers_t* regs) {
     return ret;
 }
 
-void do_syscall(struct registers_t* regs){
+void do_syscall(struct registers_t* regs) {
     int ret;
     sysc_func func = 0;
 

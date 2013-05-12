@@ -14,6 +14,7 @@
 #include <blk.h>
 #include <buf.h>
 #include <task.h>
+#include <dirent.h>
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
@@ -263,7 +264,7 @@ int writei(struct inode* ip, char* addr, u32 off, u32 n) {
 
 
 s32 namecmp(const char* s, const char* t) {
-    return strncmp(s, t, DIRSIZ); //DIRSIZE is the max length of name
+    return strncmp(s, t, NAME_MAX); //DIRSIZE is the max length of name
 }
 
 
@@ -276,11 +277,11 @@ dir_lookup(struct inode* dp, char* name, u32* poff) {
     for(off=0; off<dp->size; off+=sizeof(dire)) {
         if(readi(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
             PANIC("dir_lookup: error readi");
-        if(dire.inum == 0) continue;
-        if(namecmp(name, dire.name) == 0) {
+        if(dire.d_ino == 0) continue;
+        if(namecmp(name, dire.d_name) == 0) {
             if(poff)
                 *poff = off;
-            return iget(dp->dev, dire.inum);
+            return iget(dp->dev, dire.d_ino);
         }
     }
     return 0;
@@ -300,11 +301,11 @@ s32 dir_link(struct inode* dp, char* name, u32 inum) {
     for(off=0; off<dp->size; off+=sizeof(dire)) {
         if(readi(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
             PANIC("dir_link: error readi");
-        if(dire->inum == 0)
+        if(dire->d_ino == 0)
             break;
     }
-    strncmp(dire->name, name, DIRSIZ);
-    dire->inum = inum;
+    strncmp(dire->d_name, name, NAME_MAX);
+    dire->d_ino = inum;
     if(writei(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
         PANIC("dir_link: error writei");
     return 0;
@@ -321,7 +322,7 @@ _skip(char* path, char* name) {
     while( *path != '/' && *path != 0 )
         path++;
     len = path - s;
-    len = len > DIRSIZ ? DIRSIZ : len;
+    len = len > NAME_MAX ? NAME_MAX : len;
     memmove(name, s, len);
     name[len] = 0;
     while(*path == '/')
@@ -368,7 +369,7 @@ inode_namex(char* path, char* name, u32 parent) {
 
         
 struct inode* inode_name(char* path) {
-    char name[DIRSIZ];
+    char name[NAME_MAX];
     memset(name, 0, sizeof(name));
     return inode_namex(path, name, 0);
 }

@@ -39,7 +39,7 @@ static inline _SYS2(int, wait, int, int*);
 static inline _SYS2(int, exec, char*, char**);
 static inline _SYS2(int, stat, char*, struct stat*);
 static inline _SYS3(int, open, char*, int, int);
-static inline _SYS3(int, read, int, char*, int);
+static inline _SYS3(int, read, int, void*, int);
 
 
 #if 0

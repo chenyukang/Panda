@@ -25,6 +25,7 @@ static char** store_argv(char* path, char** args) {
         res[i] = (char*)alloc_mem();
         strncpy(res[i], args[i-1], PAGE_SIZE-1);
         res[i][PAGE_SIZE-1] = '\0';
+        printk("res[%d]: %s\n", i, res[i]);
     }
     res[argc] = NULL;
     return res;

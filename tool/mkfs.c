@@ -16,6 +16,7 @@
 #include "../inc/buf.h"
 #include "../inc/blk.h"
 #include "../inc/stat.h"
+#include "../inc/dirent.h"
 
 #define u32 unsigned int
 
@@ -82,6 +83,7 @@ main(int argc, char *argv[])
         exit(1);
     }
 
+    printf("sizeof(struct dirent): %lu\n", sizeof(struct dirent));
     assert((512 % sizeof(struct dinode)) == 0);
     assert((512 % sizeof(struct dirent)) == 0);
 
@@ -116,13 +118,13 @@ main(int argc, char *argv[])
     assert(rootino == ROOTINO);
 
     bzero(&de, sizeof(de));
-    de.inum = xshort(rootino);
-    strcpy(de.name, ".");
+    de.d_ino = xshort(rootino);
+    strcpy(de.d_name, ".");
     iappend(rootino, &de, sizeof(de));
 
     bzero(&de, sizeof(de));
-    de.inum = xshort(rootino);
-    strcpy(de.name, "..");
+    de.d_ino= xshort(rootino);
+    strcpy(de.d_name, "..");
     iappend(rootino, &de, sizeof(de));
 
     for(i = 2; i < argc; i++){
@@ -144,8 +146,8 @@ main(int argc, char *argv[])
         inum = ialloc(S_IFREG);
 
         bzero(&de, sizeof(de));
-        de.inum = xshort(inum);
-        strncpy(de.name, argv[i], DIRSIZ);
+        de.d_ino = xshort(inum);
+        strncpy(de.d_name, argv[i], NAME_MAX);
         iappend(rootino, &de, sizeof(de));
 
         while((cc = read(fd, buf, sizeof(buf))) > 0)

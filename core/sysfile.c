@@ -14,6 +14,8 @@ s32 do_read(u32 fd, char* buf, u32 cnt) {
             sleep(&tty_dev, NULL);
         }
         return 1;
+    } else {
+        return file_read(current_task->ofile[fd], buf, cnt);
     }
     return -1;
 }
@@ -52,7 +54,6 @@ s32 do_open(char* path, int mode, int flag) {
         //create file;
     } else {
         ip = inode_name(path);
-        kassert(ip);
         if(ip == 0) return -1;
         ilock(ip);
         if(( f = file_alloc()) == 0 ||

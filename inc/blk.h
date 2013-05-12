@@ -60,14 +60,5 @@ void blk_zero(u32 dev, u32 bn);
 void blk_free(u32 dev, u32 bn);
 u32  blk_alloc(u32 dev);
 
-// Directory is a file containing a sequence of dirent structures.
-#define DIRSIZ 14
-
-struct dirent {
-  u16  inum;
-  char name[DIRSIZ];
-};
-
-
 #endif
 

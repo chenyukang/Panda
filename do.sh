@@ -135,6 +135,7 @@ do_prepare_hd() {
     echo "making hard disk"
     cp README.md ./tool/mkfs.exe objs/usr/;
     cd objs/usr/;
+    mkdir home;
     rm -rf *.o;
     ./mkfs.exe hd.img *;
     cd ../../;
