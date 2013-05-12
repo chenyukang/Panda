@@ -9,7 +9,6 @@ int main(int argc, char* argv[]) {
     char buf[1024];
     int fd, cnt;
     struct stat s;
-    printf("argc: %d\n", argc);
     if(argc <= 1) {
         printf("cat: need a argument\n");
         return -1;

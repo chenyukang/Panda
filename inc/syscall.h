@@ -27,11 +27,13 @@ enum {
     NR_uname,
     NR_open,
     NR_time,
-    NR_stat
+    NR_stat,
+    NR_getcwd
 };
     
 static inline _SYS1(int, write, char);
 static inline _SYS1(int, exitc,  int);
+static inline _SYS1(int, getcwd, int);
 static inline _SYS1(int, uname, struct utsname*);
 static inline _SYS1(int, time, struct tm*);
 static inline _SYS0(int, fork);

@@ -1,5 +1,5 @@
 
-yPandaOS : An x86 based Hobby OS
+PandaOS : An x86 based Hobby OS
 ========
 
 I am doing this for studying the OS internals. xx

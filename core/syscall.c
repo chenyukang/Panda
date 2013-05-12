@@ -18,6 +18,15 @@ int nosys(struct registers_t* regs) {
     return -1;
 }
 
+int sys_getcwd(struct registers_t* regs) {
+#if 0
+    char* buf = (char*)regs->ebx;
+    int   size = (int)regs->ecx;
+    struct inode* cwd = current_task->cwd;
+#endif
+    return 0;
+}
+
 int sys_exec(struct registers_t* regs) {
     char *path  = (char*)regs->ebx;
     char **argv = (char**)regs->ecx;

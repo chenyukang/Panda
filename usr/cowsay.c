@@ -27,7 +27,6 @@ int main(int argc, char* argv[]) {
     char line[1024];
     int i;
     memset(line, 0, 1024);
-    printf("argc: %d\n", argc);
     if(argc == 1) {
         strcat(line, "<+ Hello +>");
     } else {

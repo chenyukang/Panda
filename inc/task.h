@@ -74,27 +74,26 @@ enum task_status {
 
 struct task {
     struct task* next;
-    u32 privilege;
-    void* kstack_base;
-    
-    u32 pid;        /* process id */
-    u32 ppid;       /* parent id */
-    s32 priority;   /* process priority */
-    u32 r_time;
+    u32          privilege;
 
-    s32 exit_code;  /* exit code process exit */
-    u32 p_error;
-    u32 esp, ebp;   /* stack and base pointers */
-    u32 eip;        /* instruction pointer */
+    u32          pid;        /* process id */
+    u32          ppid;       /* parent id */
+    s32          priority;   /* process priority */
+    u32          r_time;
+
+    s32          exit_code;  /* exit code process exit */
+    u32          p_error;
+    u32          esp, ebp;   /* stack and base pointers */
+    u32          eip;        /* instruction pointer */
 
     enum task_status    stat;
-    struct inode*       cwd;           /* Current directory */
+    struct inode*       cwd;                   /* Current directory */
     void*               ofile[NOFILE];
     void*               chan;
     char                name[64];              /* process name*/
     struct vm           p_vm;
-    struct jmp_buf      p_context;     //switch to here to run process
-    struct registers_t* p_trap;        //trapframe for syscall
+    struct jmp_buf      p_context;            /* switch to here to run process */
+    struct registers_t* p_trap;               /* trapframe for syscall */
 };
 
 typedef struct task task_t;

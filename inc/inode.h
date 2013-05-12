@@ -39,7 +39,7 @@ struct inode*   idup(struct inode*);
 struct inode*   namei(char*);
 struct inode*   nameiparent(char*, char*);
 
-s32            stati(struct inode*, struct stat*);
+s32             stati(struct inode*, struct stat*);
 s32             readi(struct inode*, char*, u32, u32);
 s32             writei(struct inode*, char*, u32, u32);
 
