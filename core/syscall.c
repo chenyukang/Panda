@@ -18,12 +18,14 @@ int nosys(struct registers_t* regs) {
     return -1;
 }
 
+/* FIXME, maybe need dcache as Linux */
 int sys_getcwd(struct registers_t* regs) {
-#if 0
     char* buf = (char*)regs->ebx;
     int   size = (int)regs->ecx;
-    struct inode* cwd = current_task->cwd;
-#endif
+    if(vm_verify((u32)buf, size) < 0) {
+        return -1;
+    }
+    strcpy(buf, "/home/kang/");
     return 0;
 }
 
@@ -154,5 +156,6 @@ void sysc_init() {
     sys_routines[NR_time]  = &sys_time;
     sys_routines[NR_open]  = &sys_open;
     sys_routines[NR_stat]  = &sys_stat;
+    sys_routines[NR_getcwd] = &sys_getcwd;
     done();
 }

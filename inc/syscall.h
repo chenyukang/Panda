@@ -30,15 +30,15 @@ enum {
     NR_stat,
     NR_getcwd
 };
-    
+
+static inline _SYS0(int, fork);
 static inline _SYS1(int, write, char);
 static inline _SYS1(int, exitc,  int);
-static inline _SYS1(int, getcwd, int);
 static inline _SYS1(int, uname, struct utsname*);
 static inline _SYS1(int, time, struct tm*);
-static inline _SYS0(int, fork);
 static inline _SYS2(int, wait, int, int*);
 static inline _SYS2(int, exec, char*, char**);
+static inline _SYS2(int, getcwd, char*, int);
 static inline _SYS2(int, stat, char*, struct stat*);
 static inline _SYS3(int, open, char*, int, int);
 static inline _SYS3(int, read, int, void*, int);

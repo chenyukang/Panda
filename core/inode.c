@@ -25,7 +25,6 @@ static struct inode* iget(u32 dev, u32 num);
 void inode_init() {
     memset(icache, 0, sizeof(icache));
 }
-
            
 s32 stati(struct inode* ip, struct stat* st) {
     st->st_dev = ip->dev;
@@ -184,11 +183,9 @@ bmap(struct inode* ip, u32 bn) {
     u32* extend;
     struct buf* bp;
 
-    //printk("bmap: %d\n", bn);
     if(bn < NDIRECT) {
         if((addr = ip->addrs[bn]) == 0)
             ip->addrs[bn] = addr = blk_alloc(ip->dev);
-        //printk("return: %d\n", addr);
         return addr;
     }
     
@@ -223,9 +220,7 @@ int readi(struct inode* ip, char* addr, u32 off, u32 n) {
     }
     if(off + n > ip->size)
         n = ip->size - off;
-    //printk("ip->size: %x %d need read: %d\n", (u32)addr, ip->size, n);
     for(total=0; total<n; total+=done, off+=done, addr+=done) {
-        //printk("reading ... \n");
         bp = buf_read(ip->dev, bmap(ip, off/BSIZE));
         done = min(n-total, BSIZE - off%BSIZE);
         memmove(addr, bp->b_data + off%BSIZE, done);
@@ -339,7 +334,6 @@ inode_namex(char* path, char* name, u32 parent) {
         ip = iget(ROOTDEV, ROOTINO);
     else
         ip = idup(current_task->cwd);
-
     //kassert(ip); //fix me
     if(ip == 0)
         return 0;

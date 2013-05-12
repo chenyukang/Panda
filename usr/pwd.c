@@ -3,8 +3,9 @@
 
 int main() {
     int k;
-    for(k=0; k<1; k++) {
-        printf(" pwd\n");
-    }
+    char buf[512];
+    memset(buf, 0, sizeof(buf));
+    getcwd(buf, 512);
+    printf("cwd: %s\n", buf);
     return 0;
 }
