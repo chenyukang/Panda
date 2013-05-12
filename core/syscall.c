@@ -86,8 +86,8 @@ int sys_uname(struct registers_t* regs) {
 int sys_stat(struct registers_t* regs) {
     char* path = (char*)regs->ebx;
     struct stat* pstat = (struct stat*)regs->ecx;
-
     struct inode* ip = inode_name(path);
+    
     if(vm_verify((u32)pstat, sizeof(struct stat)) < 0) {
         return -1;
     }
@@ -112,6 +112,11 @@ int sys_open(struct registers_t* regs) {
     u32   flag = regs->edx;
 
     return do_open(path, mode, flag);
+}
+
+int sys_close(struct registers_t* regs) {
+    u32 fd = (u32)regs->ebx;
+    return do_close(fd);
 }
 
 int sys_read(struct registers_t* regs) {
@@ -155,6 +160,7 @@ void sysc_init() {
     sys_routines[NR_uname] = &sys_uname;
     sys_routines[NR_time]  = &sys_time;
     sys_routines[NR_open]  = &sys_open;
+    sys_routines[NR_close] = &sys_close;
     sys_routines[NR_stat]  = &sys_stat;
     sys_routines[NR_getcwd] = &sys_getcwd;
     done();

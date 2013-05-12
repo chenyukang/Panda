@@ -27,11 +27,13 @@ void inode_init() {
 }
            
 s32 stati(struct inode* ip, struct stat* st) {
+    ilock(ip);
     st->st_dev = ip->dev;
     st->st_ino = ip->inum;
     st->st_mode = ip->type;
     st->st_nlink = ip->nlink;
     st->st_size = ip->size;
+    idrop(ip);
     return 0;
 }
 

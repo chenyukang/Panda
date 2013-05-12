@@ -26,6 +26,7 @@ enum {
     NR_write,
     NR_uname,
     NR_open,
+    NR_close,
     NR_time,
     NR_stat,
     NR_getcwd
@@ -34,6 +35,7 @@ enum {
 static inline _SYS0(int, fork);
 static inline _SYS1(int, write, char);
 static inline _SYS1(int, exitc,  int);
+static inline _SYS1(int, close, int);
 static inline _SYS1(int, uname, struct utsname*);
 static inline _SYS1(int, time, struct tm*);
 static inline _SYS2(int, wait, int, int*);

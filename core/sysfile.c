@@ -20,6 +20,12 @@ s32 do_read(u32 fd, char* buf, u32 cnt) {
     return -1;
 }
 
+s32 do_close(int fd) {
+    struct file* f = current_task->ofile[fd];
+    file_close(f);
+    return 0;
+}
+
 static s32
 fd_alloc(struct file* f) {
     u32 fd;
