@@ -13,31 +13,35 @@
 #include <timer.h>
 #include <task.h>
 
-u32 get_sys_ticks(void)
-{
+u32 get_seconds() {
+    acquire_lock(&timer.lock);
+    u32 sec = timer.seconds;
+    release_lock(&timer.lock);
+    return sec;
+}
+
+u32 get_sys_ticks() {
     acquire_lock(&timer.lock);
     u32 ticks = timer.ticks;
     release_lock(&timer.lock);
     return ticks;
 }
 
-static void timer_callback(void)
-{
+static void timer_callback(void) {
     acquire_lock(&timer.lock);
     timer.ticks++;
-    do_wakeup(&timer);
     release_lock(&timer.lock);
-    if (timer.ticks%18 == 0) {
+    if (timer.ticks%100 == 0) {
         cli();
         update_time();
+        timer.seconds++;
+        do_wakeup(&timer);
         sti();
-        //print_time_local();
     }
-#if 1
+
     if(timer.ticks%10 == 0){
         sched();
     }
-#endif
 }
 
 void timer_init() {

@@ -122,8 +122,8 @@ int sys_close(struct registers_t* regs) {
 
 int sys_sleep(struct registers_t* regs) {
     u32 n = (u32)regs->ebx;
-    u32 ticks = get_sys_ticks();
-    while((get_sys_ticks() - ticks) < n) {
+    u32 sec = get_seconds();
+    while((get_seconds() - sec) < n) {
         do_sleep(&timer, &timer.lock);
     }
     return 0;

@@ -3,7 +3,7 @@
 
 int main() {
     printf("begin sleep\n");
-    sleep(200);
+    sleep(10);
     printf("end sleep\n");
     return 0;
 }
