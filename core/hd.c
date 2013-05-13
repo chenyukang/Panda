@@ -88,7 +88,7 @@ void hd_interupt_handler(void) {
 
     bp->b_flag |= B_VALID;
     bp->b_flag &= ~B_DIRTY;
-    wakeup(bp);
+    do_wakeup(bp);
 
     if(ide_queue) {
         ide_start(ide_queue);
@@ -116,7 +116,7 @@ void hd_rw(struct buf* bp) {
     //NOTE, we need to sti after sleep, since ide_start
     //may cause a interupt before this, for example Qemu
     while((bp->b_flag & (B_VALID | B_DIRTY)) != B_VALID) {
-        sleep(bp, &hdlock);
+        do_sleep(bp, &hdlock);
         sti(); 
     }
 }

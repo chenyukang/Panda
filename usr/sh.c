@@ -47,6 +47,9 @@ int main() {
                 exit(1);
             }
             wait(-1, &ret);
+            if(ret != 0) {
+                printf("no such command: %s\n", argv[0]);
+            }
         }
     }
     return 0;

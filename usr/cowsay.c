@@ -17,10 +17,10 @@
 const char below[512] =
     " ^__^ \n"
     " (oo)\\_______ \n"
-    "(__)\\       )\\/\\ \n"
+    "(__)\\        )\\/\\ \n"
     "     ||----w | \n"
     "     ||     || \n"
-    "    _^^     ^^ \n";
+    "     ^^     ^^ \n";
 
 
 int main(int argc, char* argv[]) {
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
         printf("%c", '=');
     }
     printf("\n");
-    printf("%s\n", below);
+    printf("%s", below);
     return 0;
 }
 

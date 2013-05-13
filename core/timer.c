@@ -10,37 +10,41 @@
 #include <string.h>
 #include <asm.h>
 #include <time.h>
+#include <timer.h>
 #include <task.h>
 
-static u32 ticks = 0;
-
-u32 get_sys_ticks(void) {
+u32 get_sys_ticks(void)
+{
+    acquire_lock(&timer.lock);
+    u32 ticks = timer.ticks;
+    release_lock(&timer.lock);
     return ticks;
 }
 
-extern int init;
-
-static void timer_callback(void) {
-    ticks++;
-    if (ticks%18 == 0){
+static void timer_callback(void)
+{
+    acquire_lock(&timer.lock);
+    timer.ticks++;
+    do_wakeup(&timer);
+    release_lock(&timer.lock);
+    if (timer.ticks%18 == 0) {
         cli();
         update_time();
         sti();
         //print_time_local();
     }
-
-    if(ticks%100 == 0) {
-        //task_debug();
+#if 1
+    if(timer.ticks%10 == 0){
+        sched();
     }
-
-    if(ticks%30 == 0){
-        //sched();
-    }
+#endif
 }
 
 void timer_init() {
     puts("[time] .... ");
     // Firstly, register our timer callback.
+    memset(&timer, 0, sizeof(timer));
+    init_lock(&timer.lock, "timer");
     irq_enable(0);
     irq_install_handler(32, (isq_t)(&timer_callback));
 
@@ -68,6 +72,6 @@ void timer_init() {
 void timer_wait(int wait) {
     unsigned long end_tic;
 
-    end_tic = ticks + wait;
-    while(ticks < end_tic);
+    end_tic = timer.ticks + wait;
+    while(timer.ticks < end_tic);
 }

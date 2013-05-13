@@ -4,6 +4,7 @@
 #include <screen.h>
 #include <exec.h>
 #include <file.h>
+#include <timer.h>
 #include <sysfile.h>
 
 
@@ -68,7 +69,7 @@ int sys_wait(struct registers_t* regs) {
 
 int sys_write(struct registers_t* regs) {
     char v = regs->ebx;
-    putch(v);
+    putch(v); //print a char
     return 1;
 }
 
@@ -119,6 +120,15 @@ int sys_close(struct registers_t* regs) {
     return do_close(fd);
 }
 
+int sys_sleep(struct registers_t* regs) {
+    u32 n = (u32)regs->ebx;
+    u32 ticks = get_sys_ticks();
+    while((get_sys_ticks() - ticks) < n) {
+        do_sleep(&timer, &timer.lock);
+    }
+    return 0;
+}
+
 int sys_read(struct registers_t* regs) {
     char* buf = (char*)regs->ecx;
     u32 fd    = regs->ebx;
@@ -163,5 +173,6 @@ void sysc_init() {
     sys_routines[NR_close] = &sys_close;
     sys_routines[NR_stat]  = &sys_stat;
     sys_routines[NR_getcwd] = &sys_getcwd;
+    sys_routines[NR_sleep] = &sys_sleep;
     done();
 }

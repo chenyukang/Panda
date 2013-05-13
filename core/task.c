@@ -166,7 +166,7 @@ void sched() {
     }
 }
 
-void sleep(void* change, struct spinlock* lock) {
+void do_sleep(void* change, struct spinlock* lock) {
     if(current_task == 0)
         PANIC("sleep: no task");
     cli();
@@ -174,10 +174,9 @@ void sleep(void* change, struct spinlock* lock) {
     current_task->stat = WAIT;
     sti();
     sched();
-    
 }
 
-void wakeup(void* change) {
+void do_wakeup(void* change) {
     u32 i;
     struct task* p;
 
@@ -210,7 +209,7 @@ s32 do_exit(int ret) {
     current_task->stat = ZOMBIE;
     current_task->exit_code = ret;
     parent = find_task(current_task->ppid);
-    wakeup(parent);
+    do_wakeup(parent);
     return 0;
 }
 
@@ -235,7 +234,7 @@ try_find:
             return pid;
         }
     }
-    sleep(current_task, NULL);
+    do_sleep(current_task, NULL);
     goto try_find;
     return 0;
 }

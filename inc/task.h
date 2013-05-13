@@ -108,8 +108,8 @@ s32  wait_p(s32 pid, s32* stat);
 struct task* spawn(void* func);
 char* get_current_name();
 
-void sleep(void* change, struct spinlock* lock);
-void wakeup(void* change);
+void do_sleep(void* change, struct spinlock* lock);
+void do_wakeup(void* change);
 
 void task_debug();
 

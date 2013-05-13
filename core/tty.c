@@ -2,8 +2,6 @@
 #include <task.h>
 #include <string.h>
 
-
-
 void tty_clear() {
     memset(tty_dev.buf, 0, TTY_BUF_LEN);
     tty_dev.head  = 0;
@@ -15,7 +13,7 @@ void tty_clear() {
 u32 tty_ch(u8 c) {
     if(c == 0x0A) {
         tty_dev.flush = 1;
-        wakeup(&tty_dev);
+        do_wakeup(&tty_dev);
     }
     else if(c == 0x08) {
         return tty_pop();
@@ -59,7 +57,7 @@ u32 tty_get_buf(char* buf) {
     }
     ret = count;
     tty_clear();
-    wakeup(&tty_dev);
+    do_wakeup(&tty_dev);
     return ret;
 }
 

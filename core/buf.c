@@ -42,7 +42,7 @@ loop:
                 bp->b_flag |= B_BUSY;
                 return bp;
             }
-            sleep(bp, &bcache.lock);
+            do_sleep(bp, &bcache.lock);
             goto loop;
         }
     }
@@ -105,7 +105,7 @@ void buf_release(struct buf* bp) {
     bcache.head.b_next = bp;
     bp->b_flag &= ~B_BUSY;
     cli();
-    wakeup(bp);
+    do_wakeup(bp);
     sti();
     
     //release_lock(&bcache.lock);

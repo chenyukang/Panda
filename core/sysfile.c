@@ -11,7 +11,7 @@
 s32 do_read(u32 fd, char* buf, u32 cnt) {
     if(fd == 0) {
         while(tty_get_buf(buf) == -1) {
-            sleep(&tty_dev, NULL);
+            do_sleep(&tty_dev, NULL);
         }
         return 1;
     } else {
