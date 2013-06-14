@@ -21,6 +21,6 @@ SECTIONS {
         . = ALIGN(0x1000);
     }
     /DISCARD/ : {
-        *(.note .note.* .gnu.* .dynsym .comment .pdr .init .plt .fini .interp .stab .stabstr)
+        *(.note .note.* .gnu.* .dynsym .comment .pdr .init .plt .fini .interp .stab .stabstr .eh_frame)
     }
 }

@@ -3,7 +3,7 @@ BOOT="./boot"
 KERNEL="./core"
 INCLUDE="./inc"
 NASM="nasm -f elf -g"
-CFLAGS="-Wall -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+CFLAGS="-Wall -m32 -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
 BOCHS="bochs "
 DEFAULT="None"
 if [ `uname` = "Linux" ]; then
@@ -11,7 +11,7 @@ if [ `uname` = "Linux" ]; then
     ON_GCC="gcc"
     LD="ld"
     OBJCPY="objcopy"
-    QEMU="qemu "
+    QEMU="qemu-i386 "
     BOCHS_CONF="./.bochs_linux"
     DEFAULT="bochs"
 else #on Mac, I will run Qemu
@@ -78,7 +78,7 @@ do_compile() {
     `cd ../`;
     for f in $users;
     do 
-        cmd="$GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c usr/$f -o $USEROBJDIR/${f/.c/.o}"
+        cmd="$GCC -I./inc -m32 -fno-builtin -fno-stack-protector -nostdinc -c usr/$f -o $USEROBJDIR/${f/.c/.o}"
         `$cmd`;
         if [ $? -ne 0 ] 
             then exit;
@@ -87,13 +87,13 @@ do_compile() {
 
     users=`cd objs/usr/; ls *.o;` 
     `cd ../`;
-    $GCC -I./inc -DUSR -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/string.c -o $USEROBJDIR/string.o;
-    $GCC -I./inc -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/clib.c -o $USEROBJDIR/clib.o;
+    $GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/string.c -o $USEROBJDIR/string.o;
+    $GCC -I./inc -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/clib.c -o $USEROBJDIR/clib.o;
     $NASM -f elf ./usr/lib/entry.s -o $USEROBJDIR/entry.o;
     for f in $users;
     do 
-        cmd="$LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/$f -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld"
-        #echo $cmd
+        cmd="$LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/$f -melf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld"
+        echo $cmd
         `$cmd`;
         if [ $? -ne 0 ] 
             then exit;
@@ -105,8 +105,8 @@ do_compile() {
 do_link() {
     echo "linking ..."
     cd  $OBJDIR;
-    $LD boot.O -o boot.bin -T ../$TOOL/boot.ld;
-    $LD setup.O -o setup.bin -T ../$TOOL/setup.ld;
+    $LD -m elf_i386 boot.O -o boot.bin -T ../$TOOL/boot.ld;
+    $LD -m elf_i386 setup.O -o setup.bin -T ../$TOOL/setup.ld;
 
     #head.O must puted at first
     objs=`ls *.o`

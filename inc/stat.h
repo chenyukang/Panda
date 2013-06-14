@@ -5,6 +5,9 @@
 /*
  * st_mode flags
  */
+/* this is also used in user space, 
+   protect from redefine */
+#ifndef S_IFMT
 #define         S_IFMT  0170000 /* type of file ，文件类型掩码*/
 #define         S_IFREG 0100000 /* regular file*/
 #define         S_IFBLK 0060000 /* block special */
@@ -22,6 +25,7 @@
 #define         S_ISNAM(m)      (((m) & S_IFMT) == S_IFNAM)
 #define         S_ISLNK(m)      (((m) & S_IFMT) == S_IFLNK)
 
+
 struct stat {
     short st_mode;
     short st_dev;
@@ -32,4 +36,5 @@ struct stat {
     unsigned int st_size;
 };
 
+#endif
 #endif

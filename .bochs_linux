@@ -7,6 +7,7 @@ boot: floppy
 ata0-slave: type=disk, mode=flat, path="hd.img", cylinders=1024, heads=1, spt=1
 log: bochsout.txt
 mouse: enabled=0
+display_library: sdl
 clock: sync=slowdown
 #vga_update_interval: 150000
 screenmode: name="Panda"
