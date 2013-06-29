@@ -68,10 +68,22 @@ int sys_wait(struct registers_t* regs) {
 }
 
 int sys_write(struct registers_t* regs) {
+    int fd    = regs->ebx;
+    char* buf = (char*)regs->ecx;
+    int cnt   = regs->edx;
+    if(vm_verify((u32)buf, cnt) < 0) {
+        return -1;
+    }
+    return do_write(fd, buf, cnt);
+}
+
+#if 0
+int sys_write(struct registers_t* regs) {
     char v = regs->ebx;
     putch(v); //print a char
     return 1;
 }
+#endif
 
 int sys_uname(struct registers_t* regs) {
     struct utsname* p = (struct utsname*)regs->ebx;

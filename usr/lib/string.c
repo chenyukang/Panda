@@ -140,7 +140,8 @@ size_t strlen(const char *str) {
 inline void puts(const char* text) {
     u32 i;
     for (i = 0; i < strlen(text); i++) {
-        putch(text[i]);
+        //putch(text[i]);
+        write(0, (char*)&text[i], 1);
     }
 }
 
@@ -247,8 +248,10 @@ int printf(const char* format, ... ) {
     u32  cnt = 0, k = 0;
     va_start(ap, format);
     cnt = sprintk(buf, format, ap);
-    for(k=0; k<cnt; k++)
-        putch(buf[k]);
+    for(k=0; k<cnt; k++){
+        //putch(buf[k]);
+        write(1, (char*)(&buf[k]), 1);
+    }
     va_end(ap);
     return cnt;
 }

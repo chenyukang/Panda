@@ -21,6 +21,11 @@ s32 do_read(u32 fd, char* buf, u32 cnt) {
     return -1;
 }
 
+s32 do_write(u32 fd, char* buf, u32 cnt) {
+    printk("now in do_write: %c\n", *buf);
+    return -1;
+}
+
 s32 do_close(int fd) {
     struct file* f = current_task->ofile[fd];
     file_close(f);
