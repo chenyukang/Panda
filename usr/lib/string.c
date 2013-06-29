@@ -9,6 +9,7 @@
 
 #include <string.h>
 
+/* a bad trick now */
 #ifdef USR
 #include <syscall.h>
 #define putch write
@@ -41,8 +42,8 @@ void strncpy(char* dest, char* src, size_t cnt) {
 
 /* ignore overlap */
 void* memcpy(void *dest, const void *src, size_t cnt) {
-    const unsigned char *sp = (const unsigned char *)src;
-    unsigned char *dp = (unsigned char *)dest;
+    const u8 *sp = (const u8 *)src;
+    u8 *dp = (u8 *)dest;
     while(cnt--){
         *dp++ = *sp++;
     }
@@ -61,7 +62,7 @@ void* strcat(char* dest, const char* src) {
 }
 
 s32 memcmp(const void* v1, const void* v2, u32 n) {
-    const unsigned char *s1, *s2;
+    const u8 *s1, *s2;
     s1 = v1, s2 = v2;
     while( n-- > 0 ) {
         if( *s1 != *s2) {
@@ -72,7 +73,7 @@ s32 memcmp(const void* v1, const void* v2, u32 n) {
     return 0;
 }
 
-void* memset(void* addr, unsigned char v, size_t cnt) {
+void* memset(void* addr, u8 v, size_t cnt) {
     char* t = (char*)addr;
     while(cnt--){
         *t++ = v;
@@ -99,8 +100,8 @@ void* memmove(void* dest, const void* src, size_t cnt) {
     return ret;
 }
 
-unsigned short *memsetw(unsigned short *dest, unsigned short val, size_t count) {
-    unsigned short *temp = (unsigned short *)dest;
+u16 *memsetw(u16 *dest, u16 val, size_t count) {
+    u16 *temp = (u16 *)dest;
     for( ; count != 0; count--) *temp++ = val;
     return dest;
 }
