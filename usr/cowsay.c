@@ -10,6 +10,8 @@
  *
  *******************************************************************************/
 
+#include <syscall.h>
+#include <string.h>
 
 //--------
 //< hello >
@@ -48,5 +50,3 @@ int main(int argc, char* argv[]) {
     printf("%s", below);
     return 0;
 }
-
-

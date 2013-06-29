@@ -93,7 +93,6 @@ do_compile() {
     for f in $users;
     do 
         cmd="$LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/$f -melf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld"
-        echo $cmd
         `$cmd`;
         if [ $? -ne 0 ] 
             then exit;

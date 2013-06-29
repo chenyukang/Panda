@@ -32,5 +32,6 @@ int main(int argc, char* argv[]) {
     while((cnt = read(fd, buf, sizeof(buf))) > 0) {
         printf("%s", buf);
     }
+    close(fd);
     return 0;
 }

@@ -47,7 +47,7 @@ void kmain(u32 init_stack) {
     task_init();
     timer_init();
     sysc_init();
-    
+
     spawn(init_user);
     sti();
     init = 0;
@@ -60,7 +60,6 @@ void kmain(u32 init_stack) {
         sched();
     }
 }
-
 
 void init_user() {
     test_file();

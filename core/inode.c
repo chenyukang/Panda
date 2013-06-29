@@ -5,7 +5,7 @@
  *      @author : Yukang Chen (moorekang@gmail.com)
  *      @date   : 2012-05-28 23:19:23
  *
- *      @brief  : ref xv6
+ *      @brief  : heavily ref from xv6
  *
  *******************************************************************************/
 
@@ -336,7 +336,7 @@ inode_namex(char* path, char* name, u32 parent) {
         ip = iget(ROOTDEV, ROOTINO);
     else
         ip = idup(current_task->cwd);
-    //kassert(ip); //fix me
+    //kassert(ip); //FIXME
     if(ip == 0)
         return 0;
     while((path = _skip(path, name)) != 0) {

@@ -14,7 +14,6 @@
 #include <string.h>
 #include <blk.h>
 
-
 void readsb(u32 dev, struct superblock* sb) {
     struct buf* bp = buf_read(dev, 1); //read the 1 sector, which is super block
     memmove(sb, bp->b_data, sizeof(struct superblock));

@@ -7,6 +7,7 @@
 #include <string.h>
 #include <tty.h>
 #include <fcntl.h>
+#include <dirent.h>
 
 s32 do_read(u32 fd, char* buf, u32 cnt) {
     if(fd == 0) {
@@ -52,29 +53,52 @@ int test_file() {
     return 0;
 }
 
+
+struct inode* create(char* path, int type) {
+    struct inode* ip;
+    struct inode* parent;
+    char name[NAME_MAX];
+    memset(name, 0, sizeof(name));
+    if((parent = inode_name_parent(path, name)) == 0) {
+        return 0;
+    }
+    ilock(parent);
+    if((ip = ialloc(parent->dev, type)) == 0) {
+        PANIC("create: ialloc");
+    }
+    ilock(ip);
+    ip->nlink = 1;
+    idrop(ip);
+    if(type == S_IFDIR) {
+        //add . ..
+    }
+    idrop(parent);
+    return ip;
+}
+
 s32 do_open(char* path, int mode, int flag) {
     struct file* f;
     struct inode* ip;
     s32 fd;
     if(mode & O_CREATE) {
         //create file;
+        ip = create(path, S_IFREG);
     } else {
         ip = inode_name(path);
-        if(ip == 0) return -1;
-        ilock(ip);
-        if(( f = file_alloc()) == 0 ||
-           (fd = fd_alloc(f)) < 0) {
-            if(f) file_close(f);
-        }
-        f->type = FD_INODE;
-        f->ip   = ip;
-        f->offset = 0;
-        f->readable = (mode & O_WRONLY) ? 0 : 1;
-        f->writeable = (mode & O_WRONLY) || (mode & O_RDWR);
-        idrop(ip);
-        return fd;
     }
-    return -1;
+    if(ip == 0) return -1;
+    ilock(ip);
+    if(( f = file_alloc()) == 0 ||
+       (fd = fd_alloc(f)) < 0) {
+        if(f) file_close(f);
+    }
+    f->type = FD_INODE;
+    f->ip   = ip;
+    f->offset = 0;
+    f->readable = (mode & O_WRONLY) ? 0 : 1;
+    f->writeable = (mode & O_WRONLY) || (mode & O_RDWR);
+    idrop(ip);
+    return fd;
 }
 
 s32 _open(char* name) {

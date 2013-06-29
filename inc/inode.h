@@ -36,8 +36,7 @@ s32             dir_link(struct inode*, char*, u32);
 s32             namecmp(const char*, const char*);
 
 struct inode*   idup(struct inode*);
-struct inode*   namei(char*);
-struct inode*   nameiparent(char*, char*);
+struct inode*   ialloc(u32 dev, s16 type);
 
 s32             stati(struct inode*, struct stat*);
 s32             readi(struct inode*, char*, u32, u32);
