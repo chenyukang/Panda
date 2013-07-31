@@ -20,7 +20,7 @@ else #on Mac, I will run Qemu
     LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
     OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
     OBJDUMP="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objdump"
-    QEMU="/usr/local/Cellar/qemu/1.2.1/bin/qemu-system-i386"
+    QEMU="/usr/local/Cellar/qemu/1.5.1/bin/qemu-system-i386"
     BOCHS_CONF="./.bochs_mac"
     DEFAULT="qemu"
 fi
