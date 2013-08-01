@@ -17,8 +17,7 @@ void fmt(char* buf) {
     buf[MAX] = 0;
 }
 
-int ls(char* path)
-{
+int ls(char* path) {
     struct stat s;
     struct dirent dire;
     char buf[512];
@@ -58,15 +57,14 @@ int ls(char* path)
                 return -1;
             }
             fmt(buf);
-            printf("name:%s size:%d\n", buf,  s.st_size);
+            printf("name: %s size: %d\n", buf,  s.st_size);
         }
     }
     close(fd);
     return 0;
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     int k, i;
     char path[1024];
     

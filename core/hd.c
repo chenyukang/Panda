@@ -66,7 +66,7 @@ ide_start(struct buf *b) {
   outb(0x1f4, (b->b_sector >> 8) & 0xff);
   outb(0x1f5, (b->b_sector >> 16) & 0xff);
   outb(0x1f6, 0xe0 | ((b->b_dev&1)<<4) | ((b->b_sector>>24) & 0x0f));
-  if(b->b_flag & B_DIRTY){
+  if(b->b_flag & B_DIRTY) {
       outb(0x1f7, CMD_WRITE);
       outsl(0x1f0, b->b_data, 512/4);
   } else {

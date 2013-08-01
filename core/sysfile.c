@@ -22,7 +22,12 @@ s32 do_read(u32 fd, char* buf, u32 cnt) {
 }
 
 s32 do_write(u32 fd, char* buf, u32 cnt) {
-    printk("now in do_write: %c\n", *buf);
+    if(fd == 0 || fd == 1) {
+        int k;
+        for(k=0; k<cnt; k++) {
+            putch(buf[k]);
+        }
+    }
     return -1;
 }
 
@@ -32,8 +37,7 @@ s32 do_close(int fd) {
     return 0;
 }
 
-static s32
-fd_alloc(struct file* f) {
+static s32 fd_alloc(struct file* f) {
     u32 fd;
     for(fd = 1; fd < NOFILE; fd++) {
         if(current_task->ofile[fd] == 0) {
