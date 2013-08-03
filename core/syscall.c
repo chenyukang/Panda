@@ -123,7 +123,6 @@ int sys_open(struct registers_t* regs) {
     char* path = (char*)regs->ebx;
     u32   mode = regs->ecx;
     u32   flag = regs->edx;
-
     return do_open(path, mode, flag);
 }
 
@@ -170,7 +169,6 @@ void do_syscall(struct registers_t* regs) {
 }
 
 void sysc_init() {
-    puts("[sysc] .... ");
     irq_install_handler(0x80, (isq_t)(&do_syscall));
     sys_routines[NR_setup] = &nosys;
     sys_routines[NR_fork]  = &sys_fork;
@@ -186,5 +184,4 @@ void sysc_init() {
     sys_routines[NR_stat]  = &sys_stat;
     sys_routines[NR_getcwd] = &sys_getcwd;
     sys_routines[NR_sleep] = &sys_sleep;
-    done();
 }

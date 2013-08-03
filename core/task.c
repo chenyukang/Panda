@@ -219,7 +219,6 @@ s32 wait_p(s32 pid, s32* stat) {
     if(vm_verify((u32)stat, sizeof(s32)) < 0) {
         return -1;
     }
-    //printk("wait_p:%d \n", current_task->pid);
 try_find:
     for(i=0; i<PROC_NUM; i++) {
         p = proc_table.procs[i];
@@ -230,7 +229,7 @@ try_find:
             *stat = p->exit_code;
             free_mem(p);
             proc_table.procs[i] = 0;
-            //printk("return :%d %d\n", current_task->pid, p->pid);
+            //printk("return :%d %d %d\n", current_task->pid, p->pid, p->exit_code);
             return pid;
         }
     }

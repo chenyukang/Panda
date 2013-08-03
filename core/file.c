@@ -76,6 +76,7 @@ int file_write(struct file* f, char* addr, int n) {
     int r;
     if(f->writeable == 0)
         return -1;
+    
     if(f->type == FD_INODE) {
         r = writei(f->ip, addr, f->offset, n);
         if( r == n ) {

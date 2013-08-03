@@ -44,13 +44,25 @@ int main() {
                 cmd[0]='/';
                 strcat(cmd, argv[0]);
                 exec(cmd, &argv[1]);
-                exit(1);
             }
             wait(-1, &ret);
-            if(ret != 0) {
+            if(ret == 1) {
                 printf("no such command: %s\n", argv[0]);
+            } else {
+                //executed succ
+                //executed error
             }
         }
     }
     return 0;
 }
+
+
+
+
+
+
+
+
+
+

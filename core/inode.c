@@ -103,11 +103,6 @@ iget(u32 dev, u32 inum) {
     return ip;
 }
 
-void iunlock(struct inode* ip) {
-    if(ip == 0 ||  ip->ref_cnt < 1)
-        PANIC("iunlock: invalid inode");
-    ip->flags &= ~I_BUSY;
-}
 
 void itrunc(struct inode* ip) {
     int i;
@@ -160,6 +155,19 @@ void ilock(struct inode* ip) {
     }
 }
 
+void iunlock(struct inode* ip) {
+    if(ip == 0 ||  ip->ref_cnt < 1)
+        PANIC("iunlock: invalid inode");
+    ip->flags &= ~I_BUSY;
+}
+
+
+
+void i_unlock_drop(struct inode* ip) {
+    iunlock(ip);
+    idrop(ip);
+}
+
 void idrop(struct inode* ip) {
     if(ip->ref_cnt == 1 && (ip->flags & I_VALID) && ip->nlink == 0) {
         if(ip->flags & I_BUSY)
@@ -172,12 +180,6 @@ void idrop(struct inode* ip) {
     }
     ip->ref_cnt--;
 }
-
-void i_unlock_drop(struct inode* ip) {
-    iunlock(ip);
-    idrop(ip);
-}
-
 
 static u32
 bmap(struct inode* ip, u32 bn) {
@@ -286,7 +288,7 @@ dir_lookup(struct inode* dp, char* name, u32* poff) {
 
 s32 dir_link(struct inode* dp, char* name, u32 inum) {
     u32 off;
-    struct dirent* dire;
+    struct dirent dire;
     struct inode*  ip;
 
     if((ip = dir_lookup(dp, name, 0)) != 0) {
@@ -298,11 +300,11 @@ s32 dir_link(struct inode* dp, char* name, u32 inum) {
     for(off=0; off<dp->size; off+=sizeof(dire)) {
         if(readi(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
             PANIC("dir_link: error readi");
-        if(dire->d_ino == 0)
+        if(dire.d_ino == 0)
             break;
     }
-    strncmp(dire->d_name, name, NAME_MAX);
-    dire->d_ino = inum;
+    strncpy(dire.d_name, name, NAME_MAX);
+    dire.d_ino = inum;
     if(writei(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
         PANIC("dir_link: error writei");
     return 0;
