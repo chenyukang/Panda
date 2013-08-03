@@ -90,16 +90,18 @@ struct inode* create(char* path, int type) {
     
     memset(name, 0, sizeof(name));
     if((dp = inode_name_parent(path, name)) == 0) {
+        kassert(0);
         return 0;
     }
-    
+
     ilock(dp);
     //check present
     if((ip = dir_lookup(dp, name, &off)) != 0) {
         i_unlock_drop(dp);
         ilock(ip);
-        if(ip->type == type)
+        if(ip->type == type) {
             return ip;
+        }
         i_unlock_drop(ip);
         return 0;
     }
@@ -118,6 +120,7 @@ struct inode* create(char* path, int type) {
     if(dir_link(dp, name, ip->inum) < 0)
         PANIC("create: dir_link");
     i_unlock_drop(dp);
+    printk("create finish\n");
     return ip;
 }
 

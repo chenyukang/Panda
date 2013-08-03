@@ -172,7 +172,7 @@ void irq_eoi(u32 nr) {
 }
 
 /* This installs a custom IRQ handler for the given IRQ */
-void irq_install_handler(int irq, isq_t handler) {
+void irq_install(int irq, isq_t handler) {
     irq_routines[irq] = handler;
 }
 

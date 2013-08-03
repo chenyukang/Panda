@@ -62,11 +62,21 @@ void kmain(u32 init_stack) {
 }
 
 void init_user() {
-    test_file();
+    //test_file();
     do_exec("/init", NULL);
     while(1) {
         ;
     }
 }
+
+
+
+
+
+
+
+
+
+
 
 

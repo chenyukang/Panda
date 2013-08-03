@@ -87,7 +87,7 @@ int do_exec(char* path, char** argv) {
     }
 
     ilock(ip);
-
+    
     if(readi(ip, (char*)&head, 0, sizeof(head)) < sizeof(head)){
         goto error;
     }
@@ -97,7 +97,7 @@ int do_exec(char* path, char** argv) {
     store = store_argv(path, argv);
     vm = &current_task->p_vm;
     strcpy(current_task->name, path);
-    vm_clear(vm);
+    //vm_clear(vm);
     vm_renew(vm, &head, ip);
 
     esp = VM_STACK;
@@ -109,7 +109,6 @@ int do_exec(char* path, char** argv) {
     free_argv(store);
 
     idrop(ip);
-    
     enter_user(vm->vm_entry, esp);
     kassert(0);
     return 0; //never return for succ

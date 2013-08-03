@@ -240,7 +240,9 @@ int printf(const char* format, ... ) {
     va_end(ap);
     return cnt;
 }
+
 #else
+
 int printk(const char* format, ... ) {
     va_list ap;
     char buf[1024];

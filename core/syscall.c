@@ -69,21 +69,14 @@ int sys_wait(struct registers_t* regs) {
 
 int sys_write(struct registers_t* regs) {
     int fd    = regs->ebx;
-    char* buf = (char*)regs->ecx;
     int cnt   = regs->edx;
+    char* buf = (char*)regs->ecx;
+    
     if(vm_verify((u32)buf, cnt) < 0) {
         return -1;
     }
     return do_write(fd, buf, cnt);
 }
-
-#if 0
-int sys_write(struct registers_t* regs) {
-    char v = regs->ebx;
-    putch(v); //print a char
-    return 1;
-}
-#endif
 
 int sys_uname(struct registers_t* regs) {
     struct utsname* p = (struct utsname*)regs->ebx;
@@ -144,7 +137,7 @@ int sys_read(struct registers_t* regs) {
     char* buf = (char*)regs->ecx;
     u32 fd    = regs->ebx;
     u32 cnt   = regs->edx;
-    u32 ret;
+    s32 ret;
     if(vm_verify((u32)buf, cnt) < 0) {
         return -1;
     }
@@ -154,7 +147,7 @@ int sys_read(struct registers_t* regs) {
 }
 
 void do_syscall(struct registers_t* regs) {
-    int ret;
+    s32 ret;
     sysc_func func = 0;
 
     if (regs->eax > NSYSC) {
@@ -169,7 +162,7 @@ void do_syscall(struct registers_t* regs) {
 }
 
 void sysc_init() {
-    irq_install_handler(0x80, (isq_t)(&do_syscall));
+    irq_install(0x80, (isq_t)(&do_syscall));
     sys_routines[NR_setup] = &nosys;
     sys_routines[NR_fork]  = &sys_fork;
     sys_routines[NR_exec]  = &sys_exec;

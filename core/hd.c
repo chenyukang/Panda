@@ -134,7 +134,7 @@ void init_hd() {
     hd_inf[0].sect  = *(u8*)(14+bios);
 
     irq_enable(14);
-    irq_install_handler(32+14, (isq_t)(&hd_interupt_handler));
+    irq_install(32+14, (isq_t)(&hd_interupt_handler));
     waitfor_ready(0);
 
 #if 1

@@ -267,7 +267,7 @@ void mm_init() {
 #endif
     init_page_dir(&(pg_dir0[0])); //init the kernel pg_dir
     init_pages();
-    irq_install_handler(14, (isq_t)(&page_fault_handler));
+    irq_install(14, (isq_t)(&page_fault_handler));
     flush_pgd(&(pg_dir0[0]));
     enable_page();
     done();
@@ -342,7 +342,8 @@ void do_no_page(void* vaddr) {
     }
     // demand file
     if (vp->v_flag & VMA_MMAP) {
-        pg = alloc_page();   kassert(pg);
+        pg = alloc_page();
+        kassert(pg);
         pte = put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         // fill this new-allocated page
         buf = (char*)PG_ADDR(vaddr);

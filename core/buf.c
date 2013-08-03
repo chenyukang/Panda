@@ -33,10 +33,6 @@ buf_get(u32 dev, u32 sector) {
 
 loop:
     for(bp = bcache.head.b_next; bp != &bcache.head; bp = bp->b_next) {
-#if 0
-        printk("step %d :%x %d %d  -> bp: %d %d\n",step++, (u32)bp, dev, sector,
-               bp->b_dev, bp->b_sector);
-#endif
         if(bp->b_dev == dev && bp->b_sector == sector) {
             if(! (bp->b_flag & B_BUSY) ) {
                 bp->b_flag |= B_BUSY;

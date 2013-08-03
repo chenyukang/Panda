@@ -50,7 +50,7 @@ void timer_init() {
     memset(&timer, 0, sizeof(timer));
     init_lock(&timer.lock, "timer");
     irq_enable(0);
-    irq_install_handler(32, (isq_t)(&timer_callback));
+    irq_install(32, (isq_t)(&timer_callback));
 
     // The value we send to the PIT is the value to divide it's input clock
     // (1193180 Hz) by, to get our required frequency. Important to note is

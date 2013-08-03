@@ -38,6 +38,7 @@
 
 
 #define done() { puts_color_str("[Done]\n", 0x0E); }
+
 /* This defines what the stack looks like after an ISR was running */
 struct registers_t {
     s32 gs, fs, es, ds;
@@ -49,10 +50,11 @@ struct registers_t {
 typedef void (*isq_t) (struct registers_t* r);
 typedef void (*isr_t) (struct registers_t* r);
 
-void irq_install_handler(int irq, isq_t handler);
+void irq_install(int irq, isq_t handler);
 
 void timer_init(void);
 void timer_wait(int ticks);
+
 u32  get_sys_ticks(void);
 
 extern void gdt_init(void);

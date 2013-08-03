@@ -42,7 +42,7 @@ void kb_handler(void) {
 void kb_init() {
     puts("[kb]   .... ");
     irq_enable(1);
-    irq_install_handler(33, (isq_t)(&kb_handler));
+    irq_install(33, (isq_t)(&kb_handler));
     tty_clear();
     done();
 }

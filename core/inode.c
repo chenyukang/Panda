@@ -89,8 +89,10 @@ iget(u32 dev, u32 inum) {
         if(ip->ref_cnt > 0 && (ip->dev == dev) && ip->inum == inum) {
             return idup(ip);
         }
-        if(empty == 0 && ip->ref_cnt == 0)
+        if(empty == 0 && ip->ref_cnt == 0) {
             empty = ip;
+            break;
+        }
     }
 
     if(empty == 0)
@@ -139,6 +141,9 @@ void ilock(struct inode* ip) {
     if(ip->flags & I_BUSY) {
         PANIC("ilock: busy");
     }
+    if(ip->ref_cnt < 1) {
+        //PANIC("ilock: bad inode");
+    }
     if(!(ip->flags & I_VALID)) {
         bp = buf_read(ip->dev, IBLOCK(ip->inum));
         dip = (struct dinode*)bp->b_data + ip->inum%IPB;
@@ -178,7 +183,9 @@ void idrop(struct inode* ip) {
         iupdate(ip);
         ip->flags = 0;
     }
-    ip->ref_cnt--;
+    if(ip->ref_cnt > 0) {
+        ip->ref_cnt--;
+    }
 }
 
 static u32
@@ -334,13 +341,13 @@ inode_namex(char* path, char* name, u32 parent) {
     struct inode* ip;
     struct inode* next;
 
-    if(*path == '/')
+    if(*path == '/') {
         ip = iget(ROOTDEV, ROOTINO);
-    else
+    }
+    else {
         ip = idup(current_task->cwd);
-    //kassert(ip); //FIXME
-    if(ip == 0)
-        return 0;
+    }
+    kassert(ip); //FIXME
     while((path = _skip(path, name)) != 0) {
         ilock(ip);
         if(ip->type != S_IFDIR) {
@@ -348,7 +355,7 @@ inode_namex(char* path, char* name, u32 parent) {
             return 0;
         }
         if(parent && *path == '\0') {
-            i_unlock_drop(ip);
+            iunlock(ip);
             return ip;
         }
         if((next = dir_lookup(ip, name, 0)) == 0) {
