@@ -18,10 +18,12 @@ int main(int argc, char* argv[]) {
     memset(path, 0, sizeof(path));
     memset(buf,  0, sizeof(buf));
     memset(pwd, 0, sizeof(pwd));
-    getcwd(pwd, 1024);
-    pwd[strlen(pwd)] = '/';
-    strcpy(path, pwd);
-    
+    if(argv[1][0] != '/') {
+        getcwd(pwd, 1024);
+        pwd[strlen(pwd)] = '/';
+        strcpy(path, pwd);
+    }
+
     strcat(path, argv[1]);
     if((fd = open(path, O_RDONLY, 0)) < 0) {
         printf("cat: open %s failed\n", path);
