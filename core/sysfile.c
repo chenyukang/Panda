@@ -123,6 +123,13 @@ struct inode* create(char* path, int type) {
     return ip;
 }
 
+s32 do_stat(char* path, struct stat* stat) {
+    struct inode* ip = inode_name(path);
+    if(ip == 0)
+        return -1;
+    return stati(ip, stat);
+}
+
 s32 do_getcwd(char* buf) {
     strcpy(buf, current_task->cwd_path);
     return 0;

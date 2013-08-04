@@ -95,16 +95,12 @@ int sys_uname(struct registers_t* regs) {
 
 int sys_stat(struct registers_t* regs) {
     char* path = (char*)regs->ebx;
-    struct stat* pstat = (struct stat*)regs->ecx;
-    struct inode* ip = inode_name(path);
+    struct stat* stat = (struct stat*)regs->ecx;
     
-    if(vm_verify((u32)pstat, sizeof(struct stat)) < 0) {
+    if(vm_verify((u32)stat, sizeof(struct stat)) < 0) {
         return -1;
     }
-    if(ip == 0) {
-        return -1;
-    }
-    return stati(ip, pstat);
+    return do_stat(path, stat);
 }
 
 int sys_time(struct registers_t* regs) {

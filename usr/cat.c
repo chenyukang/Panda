@@ -7,6 +7,8 @@
 int main(int argc, char* argv[]) {
     char path[1024];
     char buf[1024];
+    char pwd[1024];
+    
     int fd, cnt;
     struct stat s;
     if(argc <= 1) {
@@ -15,7 +17,10 @@ int main(int argc, char* argv[]) {
     }
     memset(path, 0, sizeof(path));
     memset(buf,  0, sizeof(buf));
-    path[0] = '/';
+    memset(pwd, 0, sizeof(pwd));
+    getcwd(pwd, 1024);
+    pwd[strlen(pwd)] = '/';
+    strcpy(path, pwd);
     
     strcat(path, argv[1]);
     if((fd = open(path, O_RDONLY, 0)) < 0) {

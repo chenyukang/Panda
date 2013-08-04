@@ -78,6 +78,7 @@ u32 new_dir(u32 pino, u32 ino, struct dirent* de, char* name) {
 int main(int argc, char *argv[]) {
     s32 i, cc, fd;
     u32 rootino, inum, off;
+    u32 homeino = 0;
     struct dirent de;
     char buf[512];
     struct dinode din;
@@ -109,7 +110,7 @@ int main(int argc, char *argv[]) {
 
 #if 0
     printf("used %d (bit %d ninode %zu) free %u log %u total %d\n", usedblocks,
-           bitblocks, ninodes/IPB + 1, freeblock, nlog, nblocks+usedblocks+nlog);
+           bitblocks, ninodes/IPB + 1, freeblock, nlog, nblocks + usedblocks + nlog);
 #endif
 
     assert(nblocks + usedblocks + nlog == size);
@@ -123,24 +124,25 @@ int main(int argc, char *argv[]) {
 
     rootino = ialloc(S_IFDIR);
     assert(rootino == ROOTINO);
-
     new_dir(rootino, rootino, &de, ".");
+    
+    inum = ialloc(S_IFDIR);
+    new_dir(rootino, xshort(inum), &de, "home");
+    new_dir(inum, xshort(rootino), &de, "..");
+    homeino = inum;
+    
     for(i = 2; i < argc; i++) {
-        assert(index(argv[i], '/') == 0);
-        
         if(lstat(argv[i], &stat) < 0) {
             printf("lstat error: %d\n", errno);
             exit(1);
         }
         if(S_ISDIR(stat.st_mode)) {
-            inum = ialloc(S_IFDIR);
-            new_dir(rootino, inum, &de, argv[i]);
+            continue; //ignore directory now
         } else {
             if((fd = open(argv[i], 0)) < 0) {
                 perror(argv[i]);
                 exit(1);
             }
-
             // Skip leading _ in name when writing to file system.
             // The binaries are named _rm, _cat, etc. to keep the
             // build operating system from trying to execute them
@@ -152,7 +154,10 @@ int main(int argc, char *argv[]) {
             bzero(&de, sizeof(de));
             de.d_ino = xshort(inum);
             strncpy(de.d_name, argv[i], NAME_MAX);
-            iappend(rootino, &de, sizeof(de));
+            if(homeino)
+                iappend(homeino, &de, sizeof(de));
+            else
+                iappend(rootino, &de, sizeof(de));
 
             while((cc = read(fd, buf, sizeof(buf))) > 0)
                 iappend(inum, buf, cc);

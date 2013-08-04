@@ -63,7 +63,7 @@ void kmain(u32 init_stack) {
 
 void init_user() {
     //test_file();
-    do_exec("/init", NULL);
+    do_exec("/home/init", NULL);
     while(1) {
         ;
     }

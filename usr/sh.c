@@ -43,7 +43,7 @@ int main() {
             if(fork() == 0) {
                 char cmd[LEN];
                 memset(cmd, 0, LEN);
-                cmd[0]='/';
+                strcpy(cmd, "/home/");
                 strcat(cmd, argv[0]);
                 exec(cmd, &argv[1]);
             }

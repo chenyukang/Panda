@@ -88,8 +88,8 @@ static void init_proc0() {
     t->stat = RUNNABLE;
     t->next = 0;
     t->r_time = 0;
-    t->cwd = inode_name("/");
-    strcpy(t->cwd_path, "/");
+    t->cwd = inode_name("/home");
+    strcpy(t->cwd_path, "/home");
     tss.ss0  = KERN_DS;
     tss.esp0 = (u32)t + PAGE_SIZE;
     strcpy(t->name, "init");

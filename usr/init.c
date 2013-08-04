@@ -4,7 +4,7 @@
 int main(int argc, char **argv) {
     printf("\n====== ENTER USER SPACE =======\n\n");
     if(fork() == 0) {
-        exec("/sh", NULL);
+        exec("/home/sh", NULL);
         while(1) {
             ;
         }
