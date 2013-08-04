@@ -34,6 +34,9 @@ int main(int argc, char* argv[]) {
         printf("not a dir: %s\n", path);
         return -1;
     }
+    memset(path, 0, sizeof(path));
+    getcwd(path, 1024);
+    strcat(path, argv[1]);
     if(chdir(path) != 0) {
         printf("chdir error: %s\n", path);
         return -1;

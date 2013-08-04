@@ -44,7 +44,8 @@ do_compile() {
     for f in $flist;
     do
 	cmd="$NASM $BOOT/$f -o $OBJDIR/${f/.s/.O}"
-	echo $cmd; `$cmd`
+	#echo $cmd; 
+	`$cmd`
     done
     
     echo "building kernel"
@@ -53,7 +54,8 @@ do_compile() {
     for f in $flist;
     do
 	cmd="$NASM $KERNEL/$f -o $OBJDIR/${f/.s/.o}"
-	echo $cmd ; `$cmd`
+	#echo $cmd ; 
+	`$cmd`
 	if [ $? -ne 0 ]
 	then exit;
 	fi
@@ -111,13 +113,12 @@ do_link() {
 
     #head.O must puted at first
     objs=`ls *.o`
-    #cmd="$LD head.O $objs -b binary initcode -o kernel.bin -T ../$TOOL/kernel.ld"
     $LD -m elf_i386 -T ../$TOOL/kernel.ld -o kernel.elf head.O $objs;
 
     #$OBJDUMP -t kernel.bin | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
     $OBJCPY -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin;
 
-    if [ $? -ne 0 ]
+    if [ $? -ne 0 ] 
     then
 	echo "link error!"
 	exit

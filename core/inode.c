@@ -73,8 +73,7 @@ void iupdate(struct inode* ip) {
     buf_release(bp);
 }
 
-struct inode*
-idup(struct inode* ip) {
+struct inode* idup(struct inode* ip) {
     ip->ref_cnt++;
     return ip;
 }
@@ -166,8 +165,6 @@ void iunlock(struct inode* ip) {
     ip->flags &= ~I_BUSY;
 }
 
-
-
 void i_unlock_drop(struct inode* ip) {
     iunlock(ip);
     idrop(ip);
@@ -188,8 +185,7 @@ void idrop(struct inode* ip) {
     }
 }
 
-static u32
-bmap(struct inode* ip, u32 bn) {
+static u32 bmap(struct inode* ip, u32 bn) {
     u32 addr;
     u32* extend;
     struct buf* bp;
@@ -274,13 +270,12 @@ s32 namecmp(const char* s, const char* t) {
 }
 
 
-struct inode*
-dir_lookup(struct inode* dp, char* name, u32* poff) {
+struct inode* dir_lookup(struct inode* dp, char* name, u32* poff) {
     u32 off;
     struct dirent dire;
     if(dp->type != S_IFDIR)
         PANIC("dir_lookup: error type of inode ");
-    for(off=0; off<dp->size; off+=sizeof(dire)) {
+    for(off = 0; off < dp->size; off += sizeof(dire)) {
         if(readi(dp, (char*)&dire, off, sizeof(dire)) != sizeof(dire))
             PANIC("dir_lookup: error readi");
         if(dire.d_ino == 0) continue;
@@ -318,10 +313,9 @@ s32 dir_link(struct inode* dp, char* name, u32 inum) {
 }
 
             
-static char*
-_skip(char* path, char* name) {
-    const char* s;
+static char* _skip(char* path, char* name) {
     int len;
+    const char* s;
     while( *path == '/') path++;
     if(*path == 0) return 0;
     s = path;
@@ -336,6 +330,7 @@ _skip(char* path, char* name) {
     return path;
 }
 
+/* path map to inode */
 static struct inode*
 inode_namex(char* path, char* name, u32 parent) {
     struct inode* ip;
@@ -382,4 +377,3 @@ struct inode* inode_name(char* path) {
 struct inode* inode_name_parent(char* path, char* name) {
     return inode_namex(path, name, 1);
 }
-

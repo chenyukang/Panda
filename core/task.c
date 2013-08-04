@@ -89,6 +89,7 @@ static void init_proc0() {
     t->next = 0;
     t->r_time = 0;
     t->cwd = inode_name("/");
+    strcpy(t->cwd_path, "/");
     tss.ss0  = KERN_DS;
     tss.esp0 = (u32)t + PAGE_SIZE;
     strcpy(t->name, "init");
@@ -115,6 +116,7 @@ struct task* spawn(void* func) {
     new_task->pid = next_pid();
     new_task->ppid = parent->pid;
     new_task->cwd = idup(parent->cwd);
+    strcpy(new_task->cwd_path, parent->cwd_path);
     vm_clone(&new_task->p_vm);
     new_task->p_context = parent->p_context;
     new_task->p_context.eip = (u32)func;

@@ -124,13 +124,16 @@ struct inode* create(char* path, int type) {
 }
 
 s32 do_getcwd(char* buf) {
-    strcpy(buf, "/home/kang");
+    strcpy(buf, current_task->cwd_path);
     return 0;
 }
 
 s32 do_chdir(char* path) {
-    printk("in do_chdir\n");
-    
+    struct inode* ip = inode_name(path);
+    if(ip == 0)
+        return 0;
+    current_task->cwd = ip;
+    strcpy(current_task->cwd_path, path);
     return 0;
 }
 

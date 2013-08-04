@@ -38,7 +38,6 @@ struct tss_desc {
     u16      trap, iomb;
 } __attribute__((packed));
 
-
 struct jmp_buf {
     s32    eip;
     s32    esp;
@@ -91,6 +90,7 @@ struct task {
     void*               ofile[NOFILE];
     void*               chan;
     char                name[64];              /* process name*/
+    char                cwd_path[64];
     struct vm           p_vm;
     struct jmp_buf      p_context;            /* switch to here to run process */
     struct registers_t* p_trap;               /* trapframe for syscall */
