@@ -7,7 +7,6 @@
 #include <timer.h>
 #include <sysfile.h>
 
-
 typedef int (*sysc_func) (struct registers_t* r);
 
 extern void stub_ret(void);
@@ -19,15 +18,20 @@ int nosys(struct registers_t* regs) {
     return -1;
 }
 
-/* FIXME, maybe need dcache as Linux */
+int sys_chdir(struct registers_t* regs) {
+    char* path = (char*)regs->ebx;
+    do_chdir(path);
+    return 0;
+}
+
+/* maybe need dcache as Linux */
 int sys_getcwd(struct registers_t* regs) {
     char* buf = (char*)regs->ebx;
-    int   size = (int)regs->ecx;
+    int  size = (int)regs->ecx;
     if(vm_verify((u32)buf, size) < 0) {
         return -1;
     }
-    strcpy(buf, "/home/kang/");
-    return 0;
+    return do_getcwd(buf);
 }
 
 int sys_exec(struct registers_t* regs) {
@@ -36,7 +40,7 @@ int sys_exec(struct registers_t* regs) {
     int r = do_exec(path, argv);
     if(r == -1) {
         do_exit(1);
-        return -1; //remove warnning message
+        return -1;   //remove warnning message
     } else {
         return 0;
     }
@@ -175,6 +179,7 @@ void sysc_init() {
     sys_routines[NR_open]  = &sys_open;
     sys_routines[NR_close] = &sys_close;
     sys_routines[NR_stat]  = &sys_stat;
+    sys_routines[NR_chdir] = &sys_chdir;
     sys_routines[NR_getcwd] = &sys_getcwd;
     sys_routines[NR_sleep] = &sys_sleep;
 }

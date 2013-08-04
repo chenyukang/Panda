@@ -35,7 +35,6 @@ void kb_handler(void) {
         if(code == SHIFT_L || code == SHIFT_R) return;
         ch = shift_state? kbdus_upper[code] : kbdus[code];
         tty_ch(ch);
-        putch(ch);
     }
 }
 

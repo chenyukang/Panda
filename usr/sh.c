@@ -3,6 +3,7 @@
 #include <uname.h>
 
 #define LEN 1024
+
 char    buf[LEN];
 char*   argv[LEN];
 int     argc;

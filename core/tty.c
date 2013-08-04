@@ -20,12 +20,13 @@ void tty_clear() {
 }
 
 u32 tty_ch(u8 c) {
+    if( c == 0x08 ) {
+        return tty_pop();
+    }
+    putch(c);
     if(c == 0x0A) {         //tty is line buffered
         tty_push(c);
         do_wakeup(&tty_dev);
-    }
-    else if(c == 0x08) {    //delete a ch in buf
-        return tty_pop();
     }
     else {
         return tty_push(c); //push to buf

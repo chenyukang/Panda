@@ -9,6 +9,10 @@
 #include <string.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
 
 #define USE_SYS 1
 
@@ -18,22 +22,23 @@
 #include "../inc/stat.h"
 #include "../inc/dirent.h"
 
+#define s32 int
 #define u32 unsigned int
 
 #define static_assert(a, b) do { switch (0) case 0: case (a): ; } while (0)
 
 int nblocks = 985;
-int nlog = LOGSIZE;
+int nlog    = LOGSIZE;
 int ninodes = 200;
-int size = 1024;
+int size    = 1024;
 
-int fsfd;
 struct superblock sb;
-char zeroes[512];
+int fsfd;
 u32 freeblock;
 u32 usedblocks;
 u32 bitblocks;
 u32 freeinode = 1;
+char zeroes[512];
 
 void balloc(int);
 void wsect(u32, void*);
@@ -44,38 +49,41 @@ u32 ialloc(ushort type);
 void iappend(u32 inum, void *p, int n);
 
 // convert to intel byte order
-ushort
-xshort(ushort x)
-{
-  ushort y;
-  uchar *a = (uchar*)&y;
-  a[0] = x;
-  a[1] = x >> 8;
-  return y;
+ushort xshort(ushort x) {
+    ushort y;
+    uchar *a = (uchar*)&y;
+    a[0] = x;
+    a[1] = x >> 8;
+    return y;
 }
 
-u32
-xint(u32 x)
-{
-  u32 y;
-  uchar *a = (uchar*)&y;
-  a[0] = x;
-  a[1] = x >> 8;
-  a[2] = x >> 16;
-  a[3] = x >> 24;
-  return y;
+u32 xint(u32 x) {
+    u32 y;
+    uchar *a = (uchar*)&y;
+    a[0] = x;
+    a[1] = x >> 8;
+    a[2] = x >> 16;
+    a[3] = x >> 24;
+    return y;
 }
 
-int
-main(int argc, char *argv[])
-{
-    int i, cc, fd;
+u32 new_dir(u32 rootino, struct dirent* de, char* name) {
+    bzero(de, sizeof(*de));
+    de->d_ino = rootino;
+    strcpy(de->d_name, name);
+    iappend(rootino, de, sizeof(*de));
+    return 0;
+}
+
+int main(int argc, char *argv[]) {
+    s32 i, cc, fd;
     u32 rootino, inum, off;
     struct dirent de;
     char buf[512];
     struct dinode din;
+    struct stat stat;
 
-
+    printf("sizeof(stat): %lu\n", sizeof(struct stat));
     static_assert(sizeof(int) == 4, "Integers must be 4 bytes!");
 
     if(argc < 2){
@@ -117,45 +125,47 @@ main(int argc, char *argv[])
     rootino = ialloc(S_IFDIR);
     assert(rootino == ROOTINO);
 
-    bzero(&de, sizeof(de));
-    de.d_ino = xshort(rootino);
-    strcpy(de.d_name, ".");
-    iappend(rootino, &de, sizeof(de));
-
-    bzero(&de, sizeof(de));
-    de.d_ino= xshort(rootino);
-    strcpy(de.d_name, "..");
-    iappend(rootino, &de, sizeof(de));
-
-    for(i = 2; i < argc; i++){
-        //printf("argv[%d]: %s\n", i, argv[i]);
+    new_dir(rootino, &de, ".");
+    new_dir(rootino, &de, "..");
+    
+    for(i = 2; i < argc; i++) {
         assert(index(argv[i], '/') == 0);
 
-        if((fd = open(argv[i], 0)) < 0){
-            perror(argv[i]);
+
+        if(lstat(argv[i], &stat) < 0) {
+            printf("lstat error: %d\n", errno);
             exit(1);
         }
-    
-        // Skip leading _ in name when writing to file system.
-        // The binaries are named _rm, _cat, etc. to keep the
-        // build operating system from trying to execute them
-        // in place of system binaries like rm and cat.
-        if(argv[i][0] == '_')
-            ++argv[i];
+        if(S_ISDIR(stat.st_mode)) {
+            printf("name: %s is a directory\n", argv[i]);
+            new_dir(rootino, &de, argv[i]);
+        } else {
+            if((fd = open(argv[i], 0)) < 0){
+                perror(argv[i]);
+                exit(1);
+            }
 
-        inum = ialloc(S_IFREG);
+            // Skip leading _ in name when writing to file system.
+            // The binaries are named _rm, _cat, etc. to keep the
+            // build operating system from trying to execute them
+            // in place of system binaries like rm and cat.
+            if(argv[i][0] == '_')
+                ++argv[i];
 
-        bzero(&de, sizeof(de));
-        de.d_ino = xshort(inum);
-        strncpy(de.d_name, argv[i], NAME_MAX);
-        iappend(rootino, &de, sizeof(de));
+            inum = ialloc(S_IFREG);
 
-        while((cc = read(fd, buf, sizeof(buf))) > 0)
-            iappend(inum, buf, cc);
+            bzero(&de, sizeof(de));
+            de.d_ino = xshort(inum);
+            strncpy(de.d_name, argv[i], NAME_MAX);
+            iappend(rootino, &de, sizeof(de));
 
-        close(fd);
+            while((cc = read(fd, buf, sizeof(buf))) > 0)
+                iappend(inum, buf, cc);
+
+            close(fd);
+        }
     }
-
+    
     // fix size of root inode dir
     rinode(rootino, &din);
     off = xint(din.size);
@@ -168,142 +178,124 @@ main(int argc, char *argv[])
     exit(0);
 }
 
-void
-wsect(u32 sec, void *buf)
-{
-  if(lseek(fsfd, sec * 512L, 0) != sec * 512L){
-    perror("lseek");
-    exit(1);
-  }
-  if(write(fsfd, buf, 512) != 512){
-    perror("write");
-    exit(1);
-  }
+void wsect(u32 sec, void *buf) {
+    if(lseek(fsfd, sec * 512L, 0) != sec * 512L){
+        perror("lseek");
+        exit(1);
+    }
+    if(write(fsfd, buf, 512) != 512){
+        perror("write");
+        exit(1);
+    }
 }
 
-u32
-i2b(u32 inum)
-{
-  return (inum / IPB) + 2;
+u32 i2b(u32 inum) {
+    return (inum / IPB) + 2;
 }
 
-void
-winode(u32 inum, struct dinode *ip)
-{
-  char buf[512];
-  u32 bn;
-  struct dinode *dip;
+void winode(u32 inum, struct dinode *ip) {
+    char buf[512];
+    u32 bn;
+    struct dinode *dip;
 
-  bn = i2b(inum);
-  rsect(bn, buf);
-  dip = ((struct dinode*)buf) + (inum % IPB);
-  *dip = *ip;
-  wsect(bn, buf);
+    bn = i2b(inum);
+    rsect(bn, buf);
+    dip = ((struct dinode*)buf) + (inum % IPB);
+    *dip = *ip;
+    wsect(bn, buf);
 }
 
-void
-rinode(u32 inum, struct dinode *ip)
-{
-  char buf[512];
-  u32 bn;
-  struct dinode *dip;
+void rinode(u32 inum, struct dinode *ip) {
+    char buf[512];
+    u32 bn;
+    struct dinode *dip;
 
-  bn = i2b(inum);
-  rsect(bn, buf);
-  dip = ((struct dinode*)buf) + (inum % IPB);
-  *ip = *dip;
+    bn = i2b(inum);
+    rsect(bn, buf);
+    dip = ((struct dinode*)buf) + (inum % IPB);
+    *ip = *dip;
 }
 
-void
-rsect(u32 sec, void *buf)
-{
-  if(lseek(fsfd, sec * 512L, 0) != sec * 512L){
-    perror("lseek");
-    exit(1);
-  }
-  if(read(fsfd, buf, 512) != 512){
-    perror("read");
-    exit(1);
-  }
+void rsect(u32 sec, void *buf) {
+    if(lseek(fsfd, sec * 512L, 0) != sec * 512L){
+        perror("lseek");
+        exit(1);
+    }
+    if(read(fsfd, buf, 512) != 512){
+        perror("read");
+        exit(1);
+    }
 }
 
-u32
-ialloc(ushort type)
-{
-  u32 inum = freeinode++;
-  struct dinode din;
+u32 ialloc(ushort type) {
+    u32 inum = freeinode++;
+    struct dinode din;
 
-  bzero(&din, sizeof(din));
-  din.type = xshort(type);
-  din.nlink = xshort(1);
-  din.size = xint(0);
-  winode(inum, &din);
-  return inum;
+    bzero(&din, sizeof(din));
+    din.type = xshort(type);
+    din.nlink = xshort(1);
+    din.size = xint(0);
+    winode(inum, &din);
+    return inum;
 }
 
-void
-balloc(int used)
-{
-  uchar buf[512];
-  int i;
+void balloc(int used) {
+    uchar buf[512];
+    int i;
 
-  //printf("balloc: first %d blocks have been allocated\n", used);
-  assert(used < 512*8);
-  bzero(buf, 512);
-  for(i = 0; i < used; i++){
-    buf[i/8] = buf[i/8] | (0x1 << (i%8));
-  }
-  //printf("balloc: write bitmap block at sector %zu\n", ninodes/IPB + 3);
-  wsect(ninodes / IPB + 3, buf);
+    //printf("balloc: first %d blocks have been allocated\n", used);
+    assert(used < 512*8);
+    bzero(buf, 512);
+    for(i = 0; i < used; i++){
+        buf[i/8] = buf[i/8] | (0x1 << (i%8));
+    }
+    //printf("balloc: write bitmap block at sector %zu\n", ninodes/IPB + 3);
+    wsect(ninodes / IPB + 3, buf);
 }
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-void
-iappend(u32 inum, void *xp, int n)
-{
-  char *p = (char*)xp;
-  u32 fbn, off, n1;
-  struct dinode din;
-  char buf[512];
-  u32 indirect[NINDIRECT];
-  u32 x;
+void iappend(u32 inum, void *xp, int n) {
+    char *p = (char*)xp;
+    u32 fbn, off, n1;
+    struct dinode din;
+    char buf[512];
+    u32 indirect[NINDIRECT];
+    u32 x;
 
-  rinode(inum, &din);
+    rinode(inum, &din);
 
-  off = xint(din.size);
-  while(n > 0){
-    fbn = off / 512;
-    assert(fbn < MAXFILE);
-    if(fbn < NDIRECT){
-      if(xint(din.addrs[fbn]) == 0){
-        din.addrs[fbn] = xint(freeblock++);
-        usedblocks++;
-      }
-      x = xint(din.addrs[fbn]);
-    } else {
-      if(xint(din.addrs[NDIRECT]) == 0){
-        // printf("allocate indirect block\n");
-        din.addrs[NDIRECT] = xint(freeblock++);
-        usedblocks++;
-      }
-      // printf("read indirect block\n");
-      rsect(xint(din.addrs[NDIRECT]), (char*)indirect);
-      if(indirect[fbn - NDIRECT] == 0){
-        indirect[fbn - NDIRECT] = xint(freeblock++);
-        usedblocks++;
-        wsect(xint(din.addrs[NDIRECT]), (char*)indirect);
-      }
-      x = xint(indirect[fbn-NDIRECT]);
+    off = xint(din.size);
+    while(n > 0){
+        fbn = off / 512;
+        assert(fbn < MAXFILE);
+        if(fbn < NDIRECT){
+            if(xint(din.addrs[fbn]) == 0){
+                din.addrs[fbn] = xint(freeblock++);
+                usedblocks++;
+            }
+            x = xint(din.addrs[fbn]);
+        } else {
+            if(xint(din.addrs[NDIRECT]) == 0){
+                din.addrs[NDIRECT] = xint(freeblock++);
+                usedblocks++;
+            }
+            rsect(xint(din.addrs[NDIRECT]), (char*)indirect);
+            if(indirect[fbn - NDIRECT] == 0){
+                indirect[fbn - NDIRECT] = xint(freeblock++);
+                usedblocks++;
+                wsect(xint(din.addrs[NDIRECT]), (char*)indirect);
+            }
+            x = xint(indirect[fbn-NDIRECT]);
+        }
+        n1 = min(n, (fbn + 1) * 512 - off);
+        rsect(x, buf);
+        bcopy(p, buf + off - (fbn * 512), n1);
+        wsect(x, buf);
+        n -= n1;
+        off += n1;
+        p += n1;
     }
-    n1 = min(n, (fbn + 1) * 512 - off);
-    rsect(x, buf);
-    bcopy(p, buf + off - (fbn * 512), n1);
-    wsect(x, buf);
-    n -= n1;
-    off += n1;
-    p += n1;
-  }
-  din.size = xint(off);
-  winode(inum, &din);
+    din.size = xint(off);
+    winode(inum, &din);
 }

@@ -123,6 +123,16 @@ struct inode* create(char* path, int type) {
     return ip;
 }
 
+s32 do_getcwd(char* buf) {
+    strcpy(buf, "/home/kang");
+    return 0;
+}
+
+s32 do_chdir(char* path) {
+    printk("in do_chdir\n");
+    
+    return 0;
+}
 
 static int test_write() {
     int fd = do_open("/tmp", O_CREATE|O_RDWR, 0);

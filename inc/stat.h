@@ -1,7 +1,6 @@
 #ifndef _STAT_H__
 #define _STAT_H__
 
-
 /*
  * st_mode flags
  */

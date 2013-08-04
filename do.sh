@@ -134,11 +134,11 @@ do_prepare_hd() {
     `$ON_GCC ./tool/mkfs.c -o ./tool/mkfs.exe`
     rm -rf hd.img;
     echo "making hard disk"
-    cp README.md ./tool/mkfs.exe objs/usr/;
+    cp README.md ./tool/mkfs.exe objs/;
     cd objs/usr/;
     mkdir home;
     rm -rf *.o;
-    ./mkfs.exe hd.img *;
+    ../mkfs.exe hd.img *;
     cd ../../;
     cp objs/usr/hd.img ./;
 }

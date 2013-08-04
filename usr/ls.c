@@ -22,7 +22,7 @@ int ls(char* path) {
     struct dirent dire;
     char buf[512];
     int fd;
-    
+
     memset(&dire, 0, sizeof(dire));
     if((fd = open(path, O_RDONLY, 0)) < 0) {
         printf("open failed: %s\n", path);

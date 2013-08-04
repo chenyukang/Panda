@@ -7,8 +7,6 @@
  *
  *      @author   Yukang Chen  @date  2013-08-04 10:50:42
  *
- *      COPYRIGHT (C) 2006~2012, Nextop INC., ALL RIGHTS RESERVED.
- *
  *******************************************************************************/
 
 #include <string.h>

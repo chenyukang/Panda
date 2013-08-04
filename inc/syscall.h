@@ -30,6 +30,7 @@ enum {
     NR_time,
     NR_stat,
     NR_sleep,
+    NR_chdir,
     NR_getcwd
 };
 
@@ -40,6 +41,7 @@ static inline _SYS1(int, close, int);
 static inline _SYS1(int, sleep, int);
 static inline _SYS1(int, uname, struct utsname*);
 static inline _SYS1(int, time, struct tm*);
+static inline _SYS1(int, chdir, char*);
 static inline _SYS2(int, wait, int, int*);
 static inline _SYS2(int, exec, char*, char**);
 static inline _SYS2(int, getcwd, char*, int);
