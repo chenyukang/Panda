@@ -1,4 +1,3 @@
-
 /*******************************************************************************
  *
  *      vi.c
@@ -20,8 +19,7 @@ int main(int argc, char* argv[]) {
     char buf[1024];
     char filename[32];
     char c;
-    int fd;
-    int idx = 0;
+    int fd, idx = 0;
     
     if( argc != 2) {
         printf("usage: vi <filename>\n");
