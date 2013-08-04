@@ -1,4 +1,3 @@
-
 /*******************************************************************************
  *
  *      @name   : hd.c
@@ -25,7 +24,7 @@
 #define CMD_READ  0x20
 #define CMD_WRITE 0x30
 
-struct hd_i_struct {
+struct hd_struct {
     unsigned int head;
     unsigned int sect;
     unsigned int cyl;
@@ -36,7 +35,7 @@ static int havedisk1;
 static struct buf* ide_queue;
 static struct spinlock hdlock;
 
-struct hd_i_struct hd_inf[] = { {0,0,0,0,0,0},
+struct hd_struct hd_inf[] = { {0,0,0,0,0,0},
                                 {0,0,0,0,0,0} };
 
 static int waitfor_ready(int check_error) {

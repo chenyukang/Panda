@@ -8,28 +8,28 @@ char*   argv[LEN];
 int     argc;
 
 int parse() {
-    int i;
-    int len;
+    int i, len;
     argc = 0;
     len = strlen(buf);
-    for(i=0; i<len; ){
-        if(buf[i] == ' ') {
+    for(i=0; i<len; ) {
+        if(buf[i] == ' ' || buf[i] == '\n') {
             buf[i++] = '\0';
             continue;
         }
         else {
             argv[argc++] = &buf[i];
-            while(i < len && buf[i] != ' ') i++;
+            while(i < len &&
+                  (buf[i] != ' ' && buf[i] != '\n'))
+                i++;
         }
     }
     return argc >= 1;
 }
 
 int main() {
-    int child;
-    int ret;
-    int i;
+    int i, ret, child;
     struct utsname name;
+    
     uname(&name);
     printf("%s %s\n", name.sysname, name.version);
     while(1) {
@@ -38,6 +38,7 @@ int main() {
         memset(argv, 0, sizeof(argv));
         if(read(0, buf, LEN) > 0) {
             if(parse() != 1) continue;
+            
             if(fork() == 0) {
                 char cmd[LEN];
                 memset(cmd, 0, LEN);

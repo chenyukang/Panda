@@ -88,11 +88,13 @@ do_compile() {
     users=`cd objs/usr/; ls *.o;` 
     `cd ../`;
     $GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/string.c -o $USEROBJDIR/string.o;
+    $GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/stdio.c -o $USEROBJDIR/stdio.o;
     $GCC -I./inc -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/clib.c -o $USEROBJDIR/clib.o;
     $NASM -f elf ./usr/lib/entry.s -o $USEROBJDIR/entry.o;
     for f in $users;
     do 
-        cmd="$LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/$f -melf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld"
+        cmd="$LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/stdio.o
+             $USEROBJDIR/$f -melf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld"
         `$cmd`;
         if [ $? -ne 0 ] 
             then exit;

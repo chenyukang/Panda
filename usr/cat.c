@@ -16,6 +16,7 @@ int main(int argc, char* argv[]) {
     memset(path, 0, sizeof(path));
     memset(buf,  0, sizeof(buf));
     path[0] = '/';
+    
     strcat(path, argv[1]);
     if((fd = open(path, O_RDONLY, 0)) < 0) {
         printf("cat: open %s failed\n", path);
@@ -32,6 +33,8 @@ int main(int argc, char* argv[]) {
     while((cnt = read(fd, buf, sizeof(buf))) > 0) {
         printf("%s", buf);
     }
+    
+    printf("\n");
     close(fd);
     return 0;
 }

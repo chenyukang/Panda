@@ -14,7 +14,7 @@ static s32 fd_alloc(struct file* f);
 
 s32 do_read(u32 fd, char* buf, u32 cnt) {
     if(fd == 0) {
-        while(tty_get_buf(buf) == -1) {
+        while(tty_get_buf(buf, cnt) == -1) {
             do_sleep(&tty_dev, NULL);
         }
         return 1;
@@ -120,7 +120,6 @@ struct inode* create(char* path, int type) {
     if(dir_link(dp, name, ip->inum) < 0)
         PANIC("create: dir_link");
     i_unlock_drop(dp);
-    printk("create finish\n");
     return ip;
 }
 

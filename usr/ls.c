@@ -57,7 +57,11 @@ int ls(char* path) {
                 return -1;
             }
             fmt(buf);
-            printf("name: %s size: %d\n", buf,  s.st_size);
+            if(S_ISREG(s.st_mode)) {
+                printf("file: %s size: %d\n", buf,  s.st_size);
+            } else {
+                printf("dire: %s size: %d\n", buf,  s.st_size);
+            }
         }
     }
     close(fd);

@@ -18,7 +18,17 @@ void tty_clear();
 u32 tty_ch(u8 c);
 u32 tty_push(u8 c);
 u32 tty_pop();
-u32 tty_get_buf(char* buf);
+u32 tty_get_buf(char* buf, u32 need);
 
 #endif
+
+
+
+
+
+
+
+
+
+
 
