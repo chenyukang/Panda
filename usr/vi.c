@@ -42,20 +42,3 @@ int main(int argc, char* argv[]) {
     printf("exiting vi ...\n");
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
