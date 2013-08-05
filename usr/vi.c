@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     char filename[32];
     char c;
     int fd, idx = 0;
-    
+
     if( argc != 2) {
         printf("usage: vi <filename>\n");
         return -1;
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     }
     write(fd, buf, strlen(buf));
     close(fd);
-    
+
     printf("exiting vi ...\n");
     return 0;
 }

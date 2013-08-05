@@ -44,7 +44,7 @@ int try_sh_cmd() {
     }
 }
 
-    
+
 int main() {
     int i, ret, child;
     struct utsname name;
@@ -60,7 +60,7 @@ int main() {
             if(!parse()) continue;
             if(try_sh_cmd())
                 continue;
-            
+
             if(fork() == 0) {
                 char cmd[LEN];
                 memset(cmd, 0, LEN);
@@ -77,15 +77,6 @@ int main() {
             }
         }
     }
+
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
