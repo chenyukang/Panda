@@ -26,6 +26,7 @@ int ls(char* path, char* name) {
     struct dirent dire;
     char buf[512];
     int fd;
+    int num = 0;
 
     memset(&dire, 0, sizeof(dire));
     if((fd = open(path, O_RDONLY, 0)) < 0) {
@@ -53,6 +54,7 @@ int ls(char* path, char* name) {
             memset(buf, 0, sizeof(buf));
             memset(&s, 0, sizeof(s));
             strcat(buf, dire.d_name);
+            num++;
             if(stat(buf, &s) < 0) {
                 printf("stat error: %s\n", buf);
                 close(fd);
@@ -70,7 +72,7 @@ int ls(char* path, char* name) {
             }
         }
     }
-    if(!detail)
+    if(!detail && num > 1)
         printf("\n");
     close(fd);
     return 0;
