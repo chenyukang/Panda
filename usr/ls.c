@@ -13,7 +13,6 @@ void fmt(char* buf) {
             buf[i] = buf[i+1];
         len = len -1;
     }
-
     for(i=len; i<MAX; i++)
         buf[i] = ' ';
     
@@ -80,9 +79,11 @@ int main(int argc, char* argv[]) {
     if(argc == 1) {
         strcpy(path, cwd);
     } else {
-        path[0] = '/';
+        strcpy(path, cwd);
+        path[strlen(path)] = '/';
         strcat(path, argv[1]);
     }
+    printf("ls path: %s\n", path);
     return ls(path);
 }
 

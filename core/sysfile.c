@@ -8,6 +8,7 @@
 #include <tty.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <asm.h>
 
 struct inode* create(char* path, int type);
 static s32 fd_alloc(struct file* f);
@@ -131,7 +132,10 @@ s32 do_stat(char* path, struct stat* stat) {
 }
 
 s32 do_getcwd(char* buf) {
+    cli();
+    printk("get cwd: %s %s\n", current_task->name, current_task->cwd_path);
     strcpy(buf, current_task->cwd_path);
+    sti();
     return 0;
 }
 
@@ -139,8 +143,11 @@ s32 do_chdir(char* path) {
     struct inode* ip = inode_name(path);
     if(ip == 0)
         return 0;
-    current_task->cwd = ip;
-    strcpy(current_task->cwd_path, path);
+    struct task* cu = current_task;
+    cu->cwd = ip;
+    memset(cu->cwd_path, 0, sizeof(cu->cwd_path));
+    strcpy(cu->cwd_path, "/");
+    printk("%s cwd_path: %s\n", cu->name, cu->cwd_path);
     return 0;
 }
 

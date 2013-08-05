@@ -21,13 +21,12 @@
 #include <exec.h>
 #include <syscall.h>
 
-u32 init_esp_start;
 
-extern char __kimg_end__;
+u32 init_esp_start;
+s32 init = 0;
 
 void init_user();
-
-int init = 0;
+extern char __kimg_end__;
 
 void kmain(u32 init_stack) {
     init_esp_start = init_stack;

@@ -20,6 +20,7 @@ int nosys(struct registers_t* regs) {
 
 int sys_chdir(struct registers_t* regs) {
     char* path = (char*)regs->ebx;
+    printk("chdir path:%s\n", path);
     do_chdir(path);
     return 0;
 }
@@ -146,6 +147,20 @@ int sys_read(struct registers_t* regs) {
     return ret;
 }
 
+#if 0
+int sys_getpid(struct registers_t* regs) {
+    int pid = current_task->pid;
+    regs->eax = pid;
+    return pid;
+}
+
+int sys_getppid(struct registers_t* regs) {
+    int ppid = current_task->ppid;
+    regs->eax = ppid;
+    return ppid;
+}
+#endif
+
 void do_syscall(struct registers_t* regs) {
     s32 ret;
     sysc_func func = 0;
@@ -178,4 +193,6 @@ void sysc_init() {
     sys_routines[NR_chdir] = &sys_chdir;
     sys_routines[NR_getcwd] = &sys_getcwd;
     sys_routines[NR_sleep] = &sys_sleep;
+    //sys_routines[NR_getpid] = &sys_getpid;
+    //sys_routines[NR_getppid] = &sys_getppid;
 }

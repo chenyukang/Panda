@@ -30,7 +30,8 @@ int parse() {
 int main() {
     int i, ret, child;
     struct utsname name;
-    
+    char cd[3];
+    strcpy(cd, "cd");
     uname(&name);
     printf("%s %s\n", name.sysname, name.version);
     while(1) {
@@ -38,7 +39,13 @@ int main() {
         memset(buf, 0, sizeof(buf));
         memset(argv, 0, sizeof(argv));
         if(read(0, buf, LEN) > 0) {
-            if(parse() != 1) continue;
+            if(!parse()) continue;
+            if(argv[0][0] == 'c' && argv[0][1] == 'd') {
+                if(argc == 2) {
+                    chdir(argv[1]);
+                }
+                continue;
+            }
             
             if(fork() == 0) {
                 char cmd[LEN];

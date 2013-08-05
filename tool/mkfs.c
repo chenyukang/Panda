@@ -124,11 +124,12 @@ int main(int argc, char *argv[]) {
 
     rootino = ialloc(S_IFDIR);
     assert(rootino == ROOTINO);
-    new_dir(rootino, rootino, &de, ".");
+    new_dir(rootino, xshort(rootino), &de, ".");
     
     inum = ialloc(S_IFDIR);
     new_dir(rootino, xshort(inum), &de, "home");
     new_dir(inum, xshort(rootino), &de, "..");
+    new_dir(inum, xshort(inum), &de, ".");
     homeino = inum;
     
     for(i = 2; i < argc; i++) {
@@ -241,15 +242,13 @@ u32 ialloc(ushort type) {
 
 void balloc(int used) {
     uchar buf[512];
-    int i;
+    s32 i;
 
-    //printf("balloc: first %d blocks have been allocated\n", used);
     assert(used < 512*8);
     bzero(buf, 512);
     for(i = 0; i < used; i++){
         buf[i/8] = buf[i/8] | (0x1 << (i%8));
     }
-    //printf("balloc: write bitmap block at sector %zu\n", ninodes/IPB + 3);
     wsect(ninodes / IPB + 3, buf);
 }
 
@@ -257,12 +256,11 @@ void balloc(int used) {
 
 void iappend(u32 inum, void *xp, int n) {
     char *p = (char*)xp;
-    u32 fbn, off, n1;
     struct dinode din;
     char buf[512];
     u32 indirect[NINDIRECT];
-    u32 x;
-
+    u32 fbn, off, n1, x;
+    
     rinode(inum, &din);
 
     off = xint(din.size);

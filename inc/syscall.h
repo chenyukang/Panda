@@ -31,13 +31,17 @@ enum {
     NR_stat,
     NR_sleep,
     NR_chdir,
-    NR_getcwd
+    NR_getcwd,
+    NR_getpid,
+    NR_getppid
 };
 
 static inline _SYS0(int, fork);
 //static inline _SYS1(int, write, char);
 static inline _SYS1(int, exitc, int);
 static inline _SYS1(int, close, int);
+//static inline _SYS1(int, getpid, int);
+//static inline _SYS1(int, getppid, int);
 static inline _SYS1(int, sleep, int);
 static inline _SYS1(int, uname, struct utsname*);
 static inline _SYS1(int, time, struct tm*);

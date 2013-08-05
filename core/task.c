@@ -34,11 +34,6 @@ extern u32         init_esp_start;
 
 extern void _do_swtch(struct jmp_buf* from, struct jmp_buf* to);
 
-u32 getpid(void) {
-    kassert(current_task);
-    return current_task->pid;
-}
-
 char* get_current_name() {
     kassert(current_task);
     return (char*)current_task->name;
