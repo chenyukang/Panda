@@ -27,6 +27,24 @@ int parse() {
     return argc >= 1;
 }
 
+int try_sh_cmd() {
+    char buf[LEN];
+    if(strncmp(argv[0], "cd", 2) == 0) {
+        if(argc == 2) {
+            chdir(argv[1]);
+        }
+        return 1;
+    } else if(strncmp(argv[0], "pwd", 3) == 0) {
+        memset(buf, 0, sizeof(buf));
+        getcwd(buf, LEN);
+        printf("current path: %s\n", buf);
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+    
 int main() {
     int i, ret, child;
     struct utsname name;
@@ -40,12 +58,8 @@ int main() {
         memset(argv, 0, sizeof(argv));
         if(read(0, buf, LEN) > 0) {
             if(!parse()) continue;
-            if(argv[0][0] == 'c' && argv[0][1] == 'd') {
-                if(argc == 2) {
-                    chdir(argv[1]);
-                }
+            if(try_sh_cmd())
                 continue;
-            }
             
             if(fork() == 0) {
                 char cmd[LEN];

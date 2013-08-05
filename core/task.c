@@ -111,6 +111,7 @@ struct task* spawn(void* func) {
     new_task->pid = next_pid();
     new_task->ppid = parent->pid;
     new_task->cwd = idup(parent->cwd);
+    memset(new_task->cwd_path, 0, sizeof(new_task->cwd_path));
     strcpy(new_task->cwd_path, parent->cwd_path);
     vm_clone(&new_task->p_vm);
     new_task->p_context = parent->p_context;

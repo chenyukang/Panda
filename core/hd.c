@@ -36,7 +36,7 @@ static struct buf* ide_queue;
 static struct spinlock hdlock;
 
 struct hd_struct hd_inf[] = { {0,0,0,0,0,0},
-                                {0,0,0,0,0,0} };
+                              {0,0,0,0,0,0} };
 
 static int waitfor_ready(int check_error) {
     int retries = 1000;

@@ -26,11 +26,8 @@ void buf_init() {
 
 static struct buf*
 buf_get(u32 dev, u32 sector) {
-    //printk("dev: %d sector: %d\n", dev, sector);
-    //u32 step = 0;
     struct buf* bp;
-    //acquire_lock(&bcache.lock);
-
+    
 loop:
     for(bp = bcache.head.b_next; bp != &bcache.head; bp = bp->b_next) {
         if(bp->b_dev == dev && bp->b_sector == sector) {

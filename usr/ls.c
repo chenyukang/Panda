@@ -5,6 +5,8 @@
 #include <dirent.h>
 #define MAX 10
 
+static int detail = 0;
+
 void fmt(char* buf) {
     int len = strlen(buf);
     int i;
@@ -19,7 +21,7 @@ void fmt(char* buf) {
     buf[MAX] = 0;
 }
 
-int ls(char* path) {
+int ls(char* path, char* name) {
     struct stat s;
     struct dirent dire;
     char buf[512];
@@ -36,7 +38,7 @@ int ls(char* path) {
         return -1;
     }
     if(S_ISREG(s.st_mode)) {
-        strcat(buf, path);
+        strcat(buf, name);
         if(stat(buf, &s) < 0) {
             printf("stat error: %s\n", path);
             close(fd);
@@ -56,14 +58,20 @@ int ls(char* path) {
                 close(fd);
                 return -1;
             }
-            fmt(buf);
-            if(S_ISREG(s.st_mode)) {
-                printf("file: %s size: %d\n", buf,  s.st_size);
+            if(detail == 0) {
+                printf("%s ", buf);
             } else {
-                printf("dire: %s size: %d\n", buf,  s.st_size);
+                fmt(buf);
+                if(S_ISREG(s.st_mode)) {
+                    printf("file: %s size: %d\n", buf,  s.st_size);
+                } else {
+                    printf("dire: %s size: %d\n", buf,  s.st_size);
+                }
             }
         }
     }
+    if(!detail)
+        printf("\n");
     close(fd);
     return 0;
 }
@@ -77,14 +85,28 @@ int main(int argc, char* argv[]) {
     memset(cwd, 0, sizeof(cwd));
     getcwd(cwd, 1024);
     if(argc == 1) {
-        strcpy(path, cwd);
+        return ls(cwd, cwd);
     } else {
-        strcpy(path, cwd);
-        path[strlen(path)] = '/';
-        strcat(path, argv[1]);
+        int k = 1;
+        if(strncmp(argv[1], "-l", 2) == 0) {
+            detail = 1;
+            k = 2;
+        }
+        if( k == argc) {
+            return ls(cwd, cwd);
+        }
+        else {
+            while( k < argc ) {
+                memset(path, 0, sizeof(path));
+                strcpy(path, cwd);
+                path[strlen(path)] = '/';
+                strcat(path, argv[k]);
+                ls(path, argv[k]);
+                k++;
+            }
+            return 0;
+        }
     }
-    printf("ls path: %s\n", path);
-    return ls(path);
 }
 
 

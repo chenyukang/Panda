@@ -132,10 +132,7 @@ s32 do_stat(char* path, struct stat* stat) {
 }
 
 s32 do_getcwd(char* buf) {
-    cli();
-    printk("get cwd: %s %s\n", current_task->name, current_task->cwd_path);
     strcpy(buf, current_task->cwd_path);
-    sti();
     return 0;
 }
 
@@ -145,9 +142,20 @@ s32 do_chdir(char* path) {
         return 0;
     struct task* cu = current_task;
     cu->cwd = ip;
-    memset(cu->cwd_path, 0, sizeof(cu->cwd_path));
-    strcpy(cu->cwd_path, "/");
-    printk("%s cwd_path: %s\n", cu->name, cu->cwd_path);
+    if(strncmp(path, "..", 2) == 0) { //change to parent,
+        u32 i = strlen(cu->cwd_path);
+        do {
+            cu->cwd_path[i--] = 0;
+        } while(cu->cwd_path[i] != '/');
+    }
+    else if(strncmp(path, ".", 1) == 0) {
+        //pass;
+    }
+    else {
+        //memset(cu->cwd_path, 0, sizeof(cu->cwd_path));
+        //strcpy(cu->cwd_path, path);
+        strcat(cu->cwd_path, path);
+    }
     return 0;
 }
 

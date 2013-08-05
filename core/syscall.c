@@ -20,7 +20,6 @@ int nosys(struct registers_t* regs) {
 
 int sys_chdir(struct registers_t* regs) {
     char* path = (char*)regs->ebx;
-    printk("chdir path:%s\n", path);
     do_chdir(path);
     return 0;
 }

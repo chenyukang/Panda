@@ -117,13 +117,23 @@ s32 strncmp(const char* v1, const char* v2, u32 n) {
     return (u8)*p - (u8)*q;
 }
 
+void* strcat(char* v1, const char* v2) {
+    char* p = v1;
+    const char* q = v2;
+    while(*p != 0)
+        p++;
+    while(*q != 0) {
+        *p++ = *q++;
+    }
+    return v1;
+}
+
 size_t strlen(const char *str) {
     size_t retval;
     for(retval = 0; *str != '\0'; str++)
         retval++;
     return retval;
 }
-
 
 /* Uses the above routine to output a string... */
 inline void puts(const char* text) {
