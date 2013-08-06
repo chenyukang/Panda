@@ -140,7 +140,6 @@ void ilock(struct inode* ip) {
     if(ip->flags & I_BUSY) {
         PANIC("ilock: busy");
     }
-    printk("ref_cnt: %d\n", ip->ref_cnt);
     if(ip->ref_cnt < 1) {
         PANIC("ilock: bad inode");
     }
