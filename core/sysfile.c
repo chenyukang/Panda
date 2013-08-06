@@ -142,7 +142,7 @@ s32 do_chdir(char* path) {
     if(ip == 0)
         return 0;
     struct task* cu = current_task;
-    //idrop(cu->cwd);
+    idrop(cu->cwd);
     cu->cwd = ip;
     if(strncmp(path, "..", 2) == 0) { //change to parent,
         u32 i = strlen(cu->cwd_path);
