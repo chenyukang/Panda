@@ -87,6 +87,7 @@ int do_exec(char* path, char** argv) {
     }
 
     ilock(ip);
+
     if(readi(ip, (char*)&head, 0, sizeof(head)) < sizeof(head)){
         goto error;
     }

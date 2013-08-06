@@ -138,9 +138,9 @@ void ilock(struct inode* ip) {
     struct buf* bp;
     struct dinode* dip;
     if(ip->flags & I_BUSY) {
-        PANIC("inode is busy");
+        PANIC("ilock: busy");
     }
-    ip->flags |= I_BUSY;
+    printk("ref_cnt: %d\n", ip->ref_cnt);
     if(ip->ref_cnt < 1) {
         PANIC("ilock: bad inode");
     }

@@ -56,7 +56,7 @@ u32 vm_renew(struct vm* vm, struct header* header, struct inode* ip) {
     text = header->a_entry - sizeof(struct header);
     data = text + header->a_tsize;
     bss  = data + header->a_dsize;
-    heap = bss  + header->a_bsize; 
+    heap = bss  + header->a_bsize;
     //
     init_page_dir(vm->vm_pgd);
     vm->vm_entry = header->a_entry;
@@ -72,11 +72,11 @@ u32 vm_verify(u32 vaddr, u32 size) {
     struct pte *pte;
     u32 page;
     u32 addr = (u32)vaddr;
-    
+
     if (addr<0x8000000 || size<0) {
         return -1;
     }
-    
+
     for (page=PG_ADDR(addr); page<=PG_ADDR(addr+size-1); page+=PAGE_SIZE) {
         pte = find_pte(current_task->p_vm.vm_pgd, page, 1);
         if ((pte->pt_flags & PTE_P)==0) {
@@ -101,5 +101,3 @@ struct vma* find_vma(u32 addr) {
     }
     return NULL;
 }
-
-
