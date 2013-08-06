@@ -39,7 +39,7 @@ struct inode*   idup(struct inode*);
 struct inode*   ialloc(u32 dev, s16 type);
 struct inode*   dir_lookup(struct inode*, char*, u32*);
 
-s32             stati(struct inode*, struct stat*);
+s32             istat(struct inode*, struct stat*);
 s32             readi(struct inode*, char*, u32, u32);
 s32             writei(struct inode*, char*, u32, u32);
 
@@ -48,21 +48,3 @@ struct inode*   inode_name_parent(char* path, char* name);
 void            i_unlock_drop(struct inode* ip);
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

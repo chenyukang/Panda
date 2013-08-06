@@ -17,7 +17,7 @@ void fmt(char* buf) {
     }
     for(i=len; i<MAX; i++)
         buf[i] = ' ';
-    
+
     buf[MAX] = 0;
 }
 
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
     int k, i;
     char path[1024];
     char cwd[1024];
-    
+
     memset(path, 0, sizeof(path));
     memset(cwd, 0, sizeof(cwd));
     getcwd(cwd, 1024);
@@ -110,13 +110,3 @@ int main(int argc, char* argv[]) {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-

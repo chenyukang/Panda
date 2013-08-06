@@ -13,11 +13,11 @@ extern void enter_user(u32, u32);
 static char** store_argv(char* path, char** args) {
     char **res;
     u32 argc , i;
-    
+
     argc = 1;
     if(args != NULL)
         for(; args[argc-1] != 0; argc++);
-    
+
     res = (char**)alloc_mem();
     res[0] = (char*)alloc_mem();
     strncpy(res[0], path, PAGE_SIZE-1);
@@ -87,7 +87,6 @@ int do_exec(char* path, char** argv) {
     }
 
     ilock(ip);
-    
     if(readi(ip, (char*)&head, 0, sizeof(head)) < sizeof(head)){
         goto error;
     }
@@ -117,4 +116,3 @@ error:
     idrop(ip);
     return -1;
 }
-

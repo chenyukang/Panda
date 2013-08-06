@@ -51,7 +51,7 @@ void file_close(struct file* f) {
 
 int file_stat(struct file* f, struct stat* st) {
     if(f->type == FD_INODE) {
-        stati(f->ip, st);
+        istat(f->ip, st);
         return 0;
     }
     return -1;
@@ -76,7 +76,7 @@ int file_write(struct file* f, char* addr, int n) {
     int r;
     if(f->writeable == 0)
         return -1;
-    
+
     if(f->type == FD_INODE) {
         r = writei(f->ip, addr, f->offset, n);
         if( r == n ) {
