@@ -66,7 +66,7 @@ int file_read(struct file* f, char* addr, int n) {
         ilock(f->ip);
         if((r = readi(f->ip, addr, f->offset, n)) > 0)
             f->offset += r;
-        idrop(f->ip);
+        iunlock(f->ip);
         return r;
     }
     return -1;
