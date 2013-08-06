@@ -36,7 +36,7 @@ s32 do_write(u32 fd, char* buf, u32 cnt) {
         //write to file
         return file_write(current_task->ofile[fd], buf, cnt);
     }
-    
+
     return -1;
 }
 
@@ -88,7 +88,7 @@ struct inode* create(char* path, int type) {
     struct inode* ip;
     char name[NAME_MAX];
     u32 off;
-    
+
     memset(name, 0, sizeof(name));
     if((dp = inode_name_parent(path, name)) == 0) {
         kassert(0);
@@ -114,7 +114,7 @@ struct inode* create(char* path, int type) {
     ip->major = 0;
     ip->minor = 0;
     iupdate(ip);
-    
+
     if(type == S_IFDIR) {
         //add . ..
     }
@@ -141,6 +141,7 @@ s32 do_chdir(char* path) {
     if(ip == 0)
         return 0;
     struct task* cu = current_task;
+    idrop(cu->cwd);
     cu->cwd = ip;
     if(strncmp(path, "..", 2) == 0) { //change to parent,
         u32 i = strlen(cu->cwd_path);
@@ -165,7 +166,7 @@ static int test_write() {
     char* text = "hello world";
     memset(buf, 0, sizeof(buf));
     strncpy(buf, text, strlen(text));
-    if(fd > 0) { 
+    if(fd > 0) {
         file_write(current_task->ofile[fd], buf, strlen(text));
     } else {
         printk("failed to create file: tmp\n");
@@ -201,7 +202,7 @@ static in test_remove() {
 int test_file() {
     if(!test_write())
         return 0;
-    
+
     if(!test_read())
         return 0;
     return 1;

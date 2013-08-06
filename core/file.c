@@ -66,7 +66,7 @@ int file_read(struct file* f, char* addr, int n) {
         ilock(f->ip);
         if((r = readi(f->ip, addr, f->offset, n)) > 0)
             f->offset += r;
-        idrop(f->ip);
+        iunlock(f->ip);
         return r;
     }
     return -1;
@@ -76,7 +76,7 @@ int file_write(struct file* f, char* addr, int n) {
     int r;
     if(f->writeable == 0)
         return -1;
-    
+
     if(f->type == FD_INODE) {
         r = writei(f->ip, addr, f->offset, n);
         if( r == n ) {

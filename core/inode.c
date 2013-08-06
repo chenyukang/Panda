@@ -25,7 +25,7 @@ static struct inode* iget(u32 dev, u32 num);
 void inode_init() {
     memset(icache, 0, sizeof(icache));
 }
-           
+
 s32 stati(struct inode* ip, struct stat* st) {
     ilock(ip);
     st->st_dev = ip->dev;
@@ -42,7 +42,7 @@ struct inode* ialloc(u32 dev, s16 type) {
     struct buf* bp;
     struct dinode* dip;
     struct superblock sb;
-    
+
     readsb(dev, &sb);
     for(inum = 1; inum < sb.ninodes; inum++) {
         bp = buf_read(dev, IBLOCK(inum));
@@ -81,8 +81,8 @@ struct inode* idup(struct inode* ip) {
 static struct inode*
 iget(u32 dev, u32 inum) {
     struct inode* ip;
-    struct inode* empty; //first empty slot 
-    
+    struct inode* empty; //first empty slot
+
     empty = 0;
     for(ip = &icache[0]; ip < &icache[NINODE]; ip++) {
         if(ip->ref_cnt > 0 && (ip->dev == dev) && ip->inum == inum) {
@@ -140,8 +140,9 @@ void ilock(struct inode* ip) {
     if(ip->flags & I_BUSY) {
         PANIC("ilock: busy");
     }
+    printk("ref_cnt: %d\n", ip->ref_cnt);
     if(ip->ref_cnt < 1) {
-        //PANIC("ilock: bad inode");
+        PANIC("ilock: bad inode");
     }
     if(!(ip->flags & I_VALID)) {
         bp = buf_read(ip->dev, IBLOCK(ip->inum));
@@ -195,7 +196,7 @@ static u32 bmap(struct inode* ip, u32 bn) {
             ip->addrs[bn] = addr = blk_alloc(ip->dev);
         return addr;
     }
-    
+
     bn -= NDIRECT;
     if(bn < NINDIRECT) {
         //load indirect block, allocating if necessary.
@@ -212,13 +213,13 @@ static u32 bmap(struct inode* ip, u32 bn) {
         PANIC("bmap: out of range");
         return -1;
     }
-    
+
 }
 
 int readi(struct inode* ip, char* addr, u32 off, u32 n) {
     u32 total, done;
     struct buf* bp;
-    
+
     if(ip->type == S_IFBLK) {
         return -1;
     }
@@ -244,7 +245,7 @@ int writei(struct inode* ip, char* addr, u32 off, u32 n) {
         return -1;
     }
 
-    if(off > ip->size || off + n < off) 
+    if(off > ip->size || off + n < off)
         return -1;
 
     /* if size is larger than the biggest file size*/
@@ -312,7 +313,7 @@ s32 dir_link(struct inode* dp, char* name, u32 inum) {
     return 0;
 }
 
-            
+
 static char* _skip(char* path, char* name) {
     int len;
     const char* s;
@@ -367,7 +368,7 @@ inode_namex(char* path, char* name, u32 parent) {
     return ip;
 }
 
-        
+
 struct inode* inode_name(char* path) {
     char name[NAME_MAX];
     memset(name, 0, sizeof(name));
