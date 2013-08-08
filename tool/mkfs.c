@@ -22,8 +22,10 @@
 #include "../inc/stat.h"
 #include "../inc/dirent.h"
 
-#define s32 int
-#define u32 unsigned int
+#define ushort unsigned short
+#define uchar  unsigned char
+#define s32    int
+#define u32    unsigned int
 
 #define static_assert(a, b) do { switch (0) case 0: case (a): ; } while (0)
 
@@ -125,13 +127,13 @@ int main(int argc, char *argv[]) {
     rootino = ialloc(S_IFDIR);
     assert(rootino == ROOTINO);
     new_dir(rootino, xshort(rootino), &de, ".");
-    
+
     inum = ialloc(S_IFDIR);
     new_dir(rootino, xshort(inum), &de, "home");
     new_dir(inum, xshort(rootino), &de, "..");
     new_dir(inum, xshort(inum), &de, ".");
     homeino = inum;
-    
+
     for(i = 2; i < argc; i++) {
         if(lstat(argv[i], &stat) < 0) {
             printf("lstat error: %d\n", errno);
@@ -166,7 +168,7 @@ int main(int argc, char *argv[]) {
             close(fd);
         }
     }
-    
+
     // fix size of root inode dir
     rinode(rootino, &din);
     off = xint(din.size);
@@ -260,7 +262,7 @@ void iappend(u32 inum, void *xp, int n) {
     char buf[512];
     u32 indirect[NINDIRECT];
     u32 fbn, off, n1, x;
-    
+
     rinode(inum, &din);
 
     off = xint(din.size);

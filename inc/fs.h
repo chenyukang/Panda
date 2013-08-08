@@ -1,7 +1,7 @@
 #ifndef _FS_H__
 #define _FS_H__
 
-// On-disk file system format. 
+// On-disk file system format.
 // Both the kernel and user programs use this header file.
 
 // Block 0 is unused.
@@ -21,9 +21,5 @@
 #define ROOTDEV       1  // device number of file system root disk
 #define MAXARG       32  // max exec arguments
 #define LOGSIZE      10  // max data sectors in on-disk log
-
-#define uint   unsigned int
-#define ushort unsigned short
-#define uchar  unsigned char
 
 #endif

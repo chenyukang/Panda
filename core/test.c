@@ -1,5 +1,5 @@
 
-// @Name   : test.c 
+// @Name   : test.c
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-03-09 00:03:46
@@ -15,12 +15,10 @@
 #include <kheap.h>
 
 
-int test_all()
-{
-    //test_print();
-//    test_detect_cpu();
-    //test_page_fault();
-    //test_kmalloc();
+int test_all() {
+    test_print();
+    test_detect_cpu();
+    test_page_fault();
     return 1;
 }
 
