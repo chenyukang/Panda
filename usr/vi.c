@@ -19,6 +19,7 @@ int main(int argc, char* argv[]) {
     char buf[1024];
     char filename[32];
     char c;
+    struct stat s;
     int fd, idx = 0;
 
     if( argc != 2) {
@@ -26,7 +27,12 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     strcpy(filename, argv[1]);
-    fd = open(filename, O_CREATE|O_RDWR, 0);
+    memset(&s, 0, sizeof(s));
+    if(stat(filename, &s) < 0) {
+        fd = open(filename, O_CREATE|O_RDWR, 0);
+    } else {
+        fd = open(filename, O_RDWR, 0);
+    }
     if(fd < 0) {
         printf("create file: %s error\n", filename);
         return -1;

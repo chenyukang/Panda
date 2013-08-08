@@ -1,5 +1,5 @@
 
-// @Name   : page.c 
+// @Name   : page.c
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-09 08:35:30
@@ -55,7 +55,7 @@ static void* _alloc(u32 size ) {
 }
 #endif
 
-//init page list, link free pages with a list 
+//init page list, link free pages with a list
 void init_pages() {
     u32 k;
     page_nr = (end_addr)/(PAGE_SIZE);
@@ -63,13 +63,13 @@ void init_pages() {
     //pages = (struct page*)_alloc(sizeof(struct page) * page_nr);
     used_addr = PAGE_ROUND_UP(used_addr);
     free_page_nr = (used_addr)/0x1000;
-    
+
     for(k=0; k<free_page_nr; k++) { //this is used by kernel
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 1;
         pages[k].pg_next = 0;
     }
-    for(k=free_page_nr; k<NPAGE; k++) { //free pages 
+    for(k=free_page_nr; k<NPAGE; k++) { //free pages
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 0;
         pages[k].pg_next = 0;
@@ -142,7 +142,7 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
     struct pde* pde;
     struct pte* pte;
     struct page* pg;
-    
+
     if( vaddr < 0x8000000 ) {
         printk("vaddr: %x\n", vaddr);
         PANIC("find_pte() error: invalid virtual address");
@@ -194,7 +194,7 @@ void copy_pgd(struct pde* from, struct pde* targ) {
                 tpte[k].pt_base  = fpte[k].pt_base;
                 tpte[k].pt_flags = fpte[k].pt_flags;
                 if(fpte[k].pt_flags & PTE_P) {
-                    //turn off PTE_W 
+                    //turn off PTE_W
                     fpte[k].pt_flags &= ~PTE_W;
                     tpte[k].pt_flags &= ~PTE_W;
                     page = find_page(fpte->pt_base);
@@ -259,8 +259,8 @@ void mm_init() {
     // don't use ker_addr ~ 0x100000
     // free memory begin with 0x100000
     used_addr = 0x100000;
-#if 0    
-    printk("mem_size : %dMB\n", end_addr/(KB*KB));
+#if 1
+    printk("\nmem_size : %dMB\n", end_addr/(KB*KB));
     printk("ker_size : %dKB\n", ker_addr/(KB));
     printk("page_size: %dKB\n", PAGE_SIZE/(KB));
     printk("used_size: %dKB\n", used_addr/(KB));
@@ -307,7 +307,6 @@ void do_wt_page(void* vaddr) {
 }
 
 void do_no_page(void* vaddr) {
-    //printk("do_no_page...:%x\n", (u32)vaddr);
     struct vm *vm;
     struct vma *vp;
     struct pte *pte;
@@ -370,7 +369,8 @@ void page_fault_handler(struct registers_t* regs) {
         return;
     }
     if (regs->err_code & 0x004) {
-        printk("address: %x %d %d\n", (u32)fault_addr, current_task->pid, current_task->stat);
+        printk("address: %x %d %d\n", (u32)fault_addr, current_task->pid,
+               current_task->stat);
         PANIC("user-mode ");
         return;
     }

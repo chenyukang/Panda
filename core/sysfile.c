@@ -62,7 +62,7 @@ s32 do_open(char* path, int mode, int flag) {
     f->offset = 0;
     f->readable = (mode & O_WRONLY) ? 0 : 1;
     f->writeable = (mode & O_WRONLY) || (mode & O_RDWR);
-    idrop(ip);
+    iunlock(ip);
     return fd;
 }
 
