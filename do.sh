@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh
 BOOT="./boot"
 KERNEL="./core"
 INCLUDE="./inc"
@@ -43,19 +43,15 @@ do_compile() {
     flist=`cd $BOOT/; ls *.s;`
     for f in $flist;
     do
-	cmd="$NASM $BOOT/$f -o $OBJDIR/${f/.s/.O}"
-	#echo $cmd; 
-	`$cmd`
+	`$NASM $BOOT/$f -o $OBJDIR/${f/.s/.O}`
     done
-    
+
     echo "building kernel"
     flist=`cd $KERNEL/; ls *.s;`
     `cd ../`
     for f in $flist;
     do
-	cmd="$NASM $KERNEL/$f -o $OBJDIR/${f/.s/.o}"
-	#echo $cmd ; 
-	`$cmd`
+	`$NASM $KERNEL/$f -o $OBJDIR/${f/.s/.o}`
 	if [ $? -ne 0 ]
 	then exit;
 	fi
@@ -66,8 +62,7 @@ do_compile() {
     `cd ../`
     for f in $flist;
     do
-	cmd="$GCC $CFLAGS -c $KERNEL/$f -o $OBJDIR/${f/.c/.o}"
-	`$cmd`;
+	`$GCC $CFLAGS -c $KERNEL/$f -o $OBJDIR/${f/.c/.o}`
 	if [ $? -ne 0 ]
 	then exit;
 	fi
@@ -76,29 +71,27 @@ do_compile() {
     echo "building user"
     mkdir ./objs/usr;
 
-    users=`cd usr; ls *.c;` 
+    users=`cd usr; ls *.c;`
     `cd ../`;
     for f in $users;
-    do 
-        cmd="$GCC -I./inc -m32 -fno-builtin -fno-stack-protector -nostdinc -c usr/$f -o $USEROBJDIR/${f/.c/.o}"
-        `$cmd`;
-        if [ $? -ne 0 ] 
+    do
+        `$GCC -I./inc -m32 -fno-builtin -fno-stack-protector -nostdinc -c usr/$f -o $USEROBJDIR/${f/.c/.o}`
+        if [ $? -ne 0 ]
             then exit;
         fi
     done
 
-    users=`cd objs/usr/; ls *.o;` 
+    users=`cd objs/usr/; ls *.o;`
     `cd ../`;
-    $GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/string.c -o $USEROBJDIR/string.o;
-    $GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/stdio.c -o $USEROBJDIR/stdio.o;
-    $GCC -I./inc -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/clib.c -o $USEROBJDIR/clib.o;
-    $NASM -f elf ./usr/lib/entry.s -o $USEROBJDIR/entry.o;
+    `$GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/string.c -o $USEROBJDIR/string.o;`
+    `$GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/stdio.c -o $USEROBJDIR/stdio.o;`
+    `$GCC -I./inc -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/clib.c -o $USEROBJDIR/clib.o;`
+    `$NASM -f elf ./usr/lib/entry.s -o $USEROBJDIR/entry.o;`
     for f in $users;
-    do 
-        cmd="$LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/stdio.o
-             $USEROBJDIR/$f -m elf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld"
-        `$cmd`;
-        if [ $? -ne 0 ] 
+    do
+        `$LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/stdio.o \
+            $USEROBJDIR/$f -m elf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld`
+        if [ $? -ne 0 ]
             then exit;
         fi
     done
@@ -108,17 +101,17 @@ do_compile() {
 do_link() {
     echo "linking ..."
     cd  $OBJDIR;
-    $LD -m elf_i386 boot.O -o boot.bin -T ../$TOOL/boot.ld;
-    $LD -m elf_i386 setup.O -o setup.bin -T ../$TOOL/setup.ld;
+    `$LD -m elf_i386 boot.O -o boot.bin -T ../$TOOL/boot.ld;`
+    `$LD -m elf_i386 setup.O -o setup.bin -T ../$TOOL/setup.ld;`
 
     #head.O must puted at first
     objs=`ls *.o`
-    $LD -m elf_i386 -T ../$TOOL/kernel.ld -o kernel.elf head.O $objs;
+    `$LD -m elf_i386 -T ../$TOOL/kernel.ld -o kernel.elf head.O $objs;`
 
     #$OBJDUMP -t kernel.bin | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
-    $OBJCPY -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin;
+    `$OBJCPY -R .pdr -R .comment -R .note -S -O binary kernel.elf kernel.bin;`
 
-    if [ $? -ne 0 ] 
+    if [ $? -ne 0 ]
     then
 	echo "link error!"
 	exit
@@ -150,8 +143,8 @@ do_all() {
     do_prepare_hd;
     if [ -f "a.img" ]
     then
-        if [ $1 == "qemu" ] 
-        then 
+        if [ $1 == "qemu" ]
+        then
 	    $QEMU -hdb hd.img -fda a.img -localtime -m 128;
         else
      	    $BOCHS -f $BOCHS_CONF -q;
@@ -169,13 +162,13 @@ do_commit() {
 }
 
 show_help() {
-    echo "-clean|x   : do clean"
-    echo "-compile|c : do compile"
-    echo "-all|a     : do above two, and run simulation"
-    echo "-commit|u  : do git commit"
-    echo "-qemu|q    : do all and run qemu"
-    echo "-bochs|b   : do all and run bochs"
-    echo "-line|l    : do count code line :)"
+    echo "-clean  | x   : do clean"
+    echo "-compile| c   : do compile"
+    echo "-all    | a   : do above two, and run simulation"
+    echo "-commit | u   : do git commit"
+    echo "-qemu   | q   : do all and run qemu"
+    echo "-bochs  | b   : do all and run bochs"
+    echo "-line   | l   : do count code line :)"
 }
 
 do_wc_line() {
@@ -196,7 +189,6 @@ do
     esac
     shift
 done
-
 
 do_all $DEFAULT;
 show_help;
