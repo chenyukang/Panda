@@ -199,7 +199,7 @@ static u32 bmap(struct inode* ip, u32 bn) {
     bn -= NDIRECT;
     if(bn < NINDIRECT) {
         //load indirect block, allocating if necessary.
-        if((addr = ip->addrs[NINDIRECT]) == 0)
+        if((addr = ip->addrs[NDIRECT]) == 0)
             ip->addrs[NDIRECT] = addr = blk_alloc(ip->dev);
         bp = buf_read(ip->dev, addr);
         extend = (u32*)bp->b_data;
