@@ -58,6 +58,7 @@ s32 do_open(char* path, int mode, int flag) {
             file_close(f);
         return 0;
     }
+    f->ref++;
     f->type = FD_INODE;
     f->ip   = ip;
     f->offset = 0;
@@ -75,7 +76,7 @@ s32 do_close(int fd) {
 
 static s32 fd_alloc(struct file* f) {
     u32 fd;
-    for(fd = 2; fd < NOFILE; fd++) {
+    for(fd = 3; fd < NOFILE; fd++) {
         if(current->ofile[fd] == 0) {
             current->ofile[fd] = f;
             return fd;

@@ -16,6 +16,7 @@
 #include <asm.h>
 #include <string.h>
 #include <gdt.h>
+#include <file.h>
 
 #define PROC_NUM 52
 
@@ -196,10 +197,12 @@ s32 do_exit(int ret) {
     u32 i;
     struct file* fp;
     struct task* parent;
-    for(i=0; i<NOFILE; i++) {
+
+    //do NOT close 0,1,2
+    for(i=3; i<NOFILE; i++) {
         fp = current->ofile[i];
         if(fp) {
-            //close_fp
+            file_close(fp);
         }
         current->ofile[i] = 0;
     }
