@@ -7,7 +7,6 @@
 // @Brief  : The kernel main entry point
 
 #include <asm.h>
-#include <cpu.h>
 #include <screen.h>
 #include <string.h>
 #include <page.h>
@@ -20,7 +19,6 @@
 #include <sysfile.h>
 #include <exec.h>
 #include <syscall.h>
-
 
 u32 init_esp_start;
 s32 init = 0;

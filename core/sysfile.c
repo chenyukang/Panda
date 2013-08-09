@@ -56,6 +56,7 @@ s32 do_open(char* path, int mode, int flag) {
        (fd = fd_alloc(f)) < 0 ) {
         if(f)
             file_close(f);
+        return 0;
     }
     f->type = FD_INODE;
     f->ip   = ip;

@@ -11,7 +11,7 @@ setup:
 	mov ss, ax
 	mov sp, 0xffff
 
-	;; puts loading
+	;; loading message 
 	mov si, setup_msg
 	call print_str
 
@@ -25,17 +25,6 @@ read_info:
 	mov ah, 0x88
 	int 0x15
 	mov [2], ax
-
-	;; just get hd0 info data
-	;; save the disk info at 0x90080
-	;; mov ax, 0x0000
-	;; mov ds, ax
-	;; lds si, [4 * 0x41]
-	;; mov ax, 0x9000
-	;; mov es, ax
-	;; mov di, 0x80
-	;; mov cx, 0x10
-	;; rep movsb
 
 	mov ax, setupseg
 	mov ds, ax
@@ -66,12 +55,11 @@ read_info:
 	mov di, systemoffset
 	mov cx, systemsize
 	rep movsd
-
 	;;
 	cli
 	lgdt [gdt_addr]
 
-	;; A20
+	;; enable A20
 	call empty_8042
 	mov al, 0xd1
 	out 0x64, al
@@ -83,10 +71,9 @@ read_info:
 	mov eax, cr0
 	or  eax, 1
 	mov cr0, eax
-
-    ;; jump into head, which puted at 0x00000
+	
+	;; jump into head, which at 0x00000
 	jmp dword 0x8:0x0
-
 
 empty_8042:
 	in al, 0x64
@@ -94,14 +81,14 @@ empty_8042:
 	jnz  empty_8042
 	ret
 
-
+;interupt show message
 print_str:
 	mov ah, 0x0E
 .next:
 	lodsb
 	or al, al
 	jz .done
-	int 0x10 		;interupt to print
+	int 0x10 		
 	jmp .next
 .done:
 	ret
@@ -110,13 +97,12 @@ setupseg 	equ 	0x9000
 setupoffset	equ 	0x0100
 setupsize 	equ 	512
 
-
 systemseg       equ     0x0000
 systemoffset	equ 	0x0000
-systemsize      equ 	1024*36 ; this will bigger than kernel.bin
-
-setup_msg db "Setuping Panda OS"	;
-	db 13, 10, 0  		;
+systemsize      equ 	1024*40 ; this will bigger than kernel.bin
+	
+setup_msg db "Setuping Panda OS"
+	db 13, 10, 0
 
 gdt_addr:
 	dw 0x7fff
@@ -139,7 +125,6 @@ gdt_syste_data:
 	dw 0x0000
 	dw 0x9200
 	dw 0x00c0
-	
-	
+		
 ; Magic number for sector
 times 512-($-$$) db 0

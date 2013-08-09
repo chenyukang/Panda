@@ -8,7 +8,6 @@
 
 #include <test.h>
 #include <asm.h>
-#include <cpu.h>
 #include <screen.h>
 #include <string.h>
 #include <page.h>
@@ -17,7 +16,6 @@
 
 int test_all() {
     test_print();
-    test_detect_cpu();
     test_page_fault();
     return 1;
 }
@@ -52,11 +50,6 @@ int test_page_fault() {
         printk("addr: %x ==> %x\n", addr, *addr);
         //*addr = 0;
     }
-    return 1;
-}
-
-int test_detect_cpu() {
-    detect_cpu();
     return 1;
 }
 

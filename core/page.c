@@ -259,7 +259,7 @@ void mm_init() {
     // don't use ker_addr ~ 0x100000
     // free memory begin with 0x100000
     used_addr = 0x100000;
-#if 1
+#if 0
     printk("\nmem_size : %dMB\n", end_addr/(KB*KB));
     printk("ker_size : %dKB\n", ker_addr/(KB));
     printk("page_size: %dKB\n", PAGE_SIZE/(KB));

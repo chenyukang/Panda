@@ -2,8 +2,8 @@
 BOOT="./boot"
 KERNEL="./core"
 INCLUDE="./inc"
-NASM="nasm -f elf -g"
-CFLAGS="-Wall -m32 -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+NASM="nasm -f elf "
+CFLAGS="-Wall -m32 -O2 -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
 BOCHS="bochs "
 DEFAULT="None"
 if [ `uname` = "Linux" ]; then
@@ -11,7 +11,7 @@ if [ `uname` = "Linux" ]; then
     ON_GCC="gcc"
     LD="ld"
     OBJCPY="objcopy"
-    QEMU="qemu-i386 "
+    QEMU="qemu-system-i386 "
     BOCHS_CONF="./.bochs_linux"
     DEFAULT="bochs"
 else #on Mac, I will run Qemu
@@ -96,7 +96,7 @@ do_compile() {
     for f in $users;
     do 
         cmd="$LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/stdio.o
-             $USEROBJDIR/$f -melf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld"
+             $USEROBJDIR/$f -m elf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld"
         `$cmd`;
         if [ $? -ne 0 ] 
             then exit;
