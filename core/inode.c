@@ -340,7 +340,7 @@ inode_namex(char* path, char* name, u32 parent) {
         ip = iget(ROOTDEV, ROOTINO);
     }
     else {
-        ip = idup(current_task->cwd);
+        ip = idup(current->cwd);
     }
     kassert(ip); //FIXME
     while((path = _skip(path, name)) != 0) {

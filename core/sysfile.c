@@ -21,7 +21,7 @@ s32 do_read(u32 fd, char* buf, u32 cnt) {
         return 1;
     } else {
         //read from file
-        return file_read(current_task->ofile[fd], buf, cnt);
+        return file_read(current->ofile[fd], buf, cnt);
     }
     return -1;
 }
@@ -34,7 +34,7 @@ s32 do_write(u32 fd, char* buf, u32 cnt) {
         }
     } else {
         //write to file
-        return file_write(current_task->ofile[fd], buf, cnt);
+        return file_write(current->ofile[fd], buf, cnt);
     }
 
     return -1;
@@ -68,7 +68,7 @@ s32 do_open(char* path, int mode, int flag) {
 }
 
 s32 do_close(int fd) {
-    struct file* f = current_task->ofile[fd];
+    struct file* f = current->ofile[fd];
     file_close(f);
     return 0;
 }
@@ -76,8 +76,8 @@ s32 do_close(int fd) {
 static s32 fd_alloc(struct file* f) {
     u32 fd;
     for(fd = 2; fd < NOFILE; fd++) {
-        if(current_task->ofile[fd] == 0) {
-            current_task->ofile[fd] = f;
+        if(current->ofile[fd] == 0) {
+            current->ofile[fd] = f;
             return fd;
         }
     }
@@ -133,7 +133,7 @@ s32 do_stat(char* path, struct stat* stat) {
 }
 
 s32 do_getcwd(char* buf) {
-    strcpy(buf, current_task->cwd_path);
+    strcpy(buf, current->cwd_path);
     return 0;
 }
 
@@ -141,7 +141,7 @@ s32 do_chdir(char* path) {
     struct inode* ip = inode_name(path);
     if(ip == 0)
         return 0;
-    struct task* cu = current_task;
+    struct task* cu = current;
     idrop(cu->cwd);
     cu->cwd = ip;
     if(strncmp(path, "..", 2) == 0) { //change to parent,
@@ -168,7 +168,7 @@ static int test_write() {
     memset(buf, 0, sizeof(buf));
     strncpy(buf, text, strlen(text));
     if(fd > 0) {
-        file_write(current_task->ofile[fd], buf, strlen(text));
+        file_write(current->ofile[fd], buf, strlen(text));
     } else {
         printk("failed to create file: tmp\n");
         return 0;
@@ -182,7 +182,7 @@ static int test_read() {
     char buf[1024];
     memset(buf, 0, sizeof(buf));
     if(fd > 0) {
-        file_read(current_task->ofile[fd], buf, 300);
+        file_read(current->ofile[fd], buf, 300);
         printk("contents: %s\n", buf);
     }
     else {

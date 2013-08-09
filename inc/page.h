@@ -1,5 +1,5 @@
 
-// @Name   : PAGE_H 
+// @Name   : PAGE_H
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-09 08:35:39
@@ -14,7 +14,7 @@
 
 #define  PAGE_SIZE             0x1000
 #define  PG_DIR_NR             1024
-#define  MAX_PAGE_NR           (0x8000000/PAGE_SIZE)
+//#define  MAX_PAGE_NR           (0x8000000/PAGE_SIZE)
 #define  PAGE_ROUND_UP(addr)   (((addr + PAGE_SIZE - 1) & (-PAGE_SIZE)))
 #define  PAGE_ROUND_DWON(addr) ((addr) & (-PAGE_SIZE))
 #define  PG_ADDR(addr)         ((u32)(addr) & ~0xFFF)
@@ -33,9 +33,9 @@
 //Accessed
 //Dirty
 //PAGE SIZE
-#define PTE_P  0x001 
+#define PTE_P  0x001
 #define PTE_W  0x002
-#define PTE_U  0x004 
+#define PTE_U  0x004
 #define PTE_A  0x020
 #define PTE_D  0x040
 #define PTE_PS 0x080
@@ -47,11 +47,11 @@
 
 flags details:
 8 ---------------------------------------- 0
-| Ignored | Page Size |  0  | Accessed | Cache Disable | Write through | User/Super | Read/Write | Present | 
+| Ignored | Page Size |  0  | Accessed | Cache Disable | Write through | User/Super | Read/Write | Present |
 |   1     |      1    |  1  |     1    |       1       |       1       |     1      |     1      |    1    |
  */
 struct pde {
-    u32 pt_flags  : 9; 
+    u32 pt_flags  : 9;
     u32 pt_avial  : 3;  //for system programmer
     u32 pt_base   : 20; //base addr
 };
@@ -91,4 +91,3 @@ void do_no_page(void* addr);
 void do_wt_page(void* addr);
 
 #endif
-

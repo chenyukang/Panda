@@ -97,7 +97,7 @@ struct task {
 };
 
 typedef struct task task_t;
-extern struct task* current_task;
+extern struct task* current;
 
 void task_init();
 void sched();
@@ -106,6 +106,8 @@ s32  do_exit(s32 ret);
 s32  wait_p(s32 pid, s32* stat);
 struct task* spawn(void* func);
 char* get_current_name();
+
+s32 growtask(u32 size);
 
 void do_sleep(void* change, struct spinlock* lock);
 void do_wakeup(void* change);

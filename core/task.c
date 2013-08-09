@@ -1,4 +1,3 @@
-
 /*******************************************************************************
  *
  *      @name   : task.c
@@ -6,7 +5,7 @@
  *      @author : Yukang Chen (moorekang@gmail.com)
  *      @date   : 2012-06-02 01:20:55
  *
- *      @brief  : multi-tasking implement 
+ *      @brief  : multi-tasking implement
  *
  *******************************************************************************/
 
@@ -29,14 +28,14 @@ struct tss_desc tss;
 
 extern struct pde  pg_dir0;
 extern struct pde* cu_pg_dir;
-struct task*       current_task = 0;
+struct task*       current = 0;
 extern u32         init_esp_start;
 
 extern void _do_swtch(struct jmp_buf* from, struct jmp_buf* to);
 
 char* get_current_name() {
-    kassert(current_task);
-    return (char*)current_task->name;
+    kassert(current);
+    return (char*)current->name;
 }
 
 struct task* alloc_proc() {
@@ -63,7 +62,7 @@ static struct task* find_task(u32 pid ) {
     return 0;
 }
 
-static u32 next_pid() {
+static u32 nextpid() {
     u32 i, id = 0;
 repeat:
     id++;
@@ -76,8 +75,9 @@ repeat:
 }
 
 static void init_proc0() {
-    struct task* t = current_task = alloc_proc();
-    t->pid = next_pid();
+    struct task* t ;
+    t = current = alloc_proc();
+    t->pid = nextpid();
     t->ppid = 0;
     t->p_vm.vm_pgd = &pg_dir0;
     t->stat = RUNNABLE;
@@ -105,10 +105,10 @@ void task_init() {
 struct task* spawn(void* func) {
     cli();
     struct task *parent, *new_task;
-    parent = current_task;
+    parent = current;
     new_task = alloc_proc();
     new_task->stat = NEW;
-    new_task->pid = next_pid();
+    new_task->pid = nextpid();
     new_task->ppid = parent->pid;
     new_task->cwd = idup(parent->cwd);
     memset(new_task->cwd_path, 0, sizeof(new_task->cwd_path));
@@ -126,12 +126,13 @@ struct task* spawn(void* func) {
 #ifdef DEBUG_PROC
 static int step = 0;
 #endif
+
 void swtch_to(struct task *to){
     acquire_lock(&proc_table.lock);
-    struct task *from = current_task;
-    tss.esp0 = (u32)to + PAGE_SIZE; 
+    struct task *from = current;
+    tss.esp0 = (u32)to + PAGE_SIZE;
     to->r_time++;
-    current_task = to;
+    current = to;
     release_lock(&proc_table.lock);
     flush_pgd(to->p_vm.vm_pgd);
 #ifdef DEBUG_PROC
@@ -145,12 +146,12 @@ void sched() {
     struct task* next = 0;
     struct task* t;
 
-    kassert(current_task);
+    kassert(current);
     min = -1;
     for(i=PROC_NUM-1; i>=0; i--) {
         t = proc_table.procs[i];
         if(t == 0) continue;
-        if(t == current_task) continue;
+        if(t == current) continue;
         if(t->stat == ZOMBIE || t->stat == WAIT) continue;
         if(min == -1 || t->r_time <= min) {
             min = t->r_time;
@@ -166,11 +167,11 @@ void sched() {
 }
 
 void do_sleep(void* change, struct spinlock* lock) {
-    if(current_task == 0)
+    if(current == 0)
         PANIC("sleep: no task");
     cli();
-    current_task->chan = change;
-    current_task->stat = WAIT;
+    current->chan = change;
+    current->stat = WAIT;
     sti();
     sched();
 }
@@ -196,20 +197,29 @@ s32 do_exit(int ret) {
     struct file* fp;
     struct task* parent;
     for(i=0; i<NOFILE; i++) {
-        fp = current_task->ofile[i];
+        fp = current->ofile[i];
         if(fp) {
             //close_fp
         }
-        current_task->ofile[i] = 0;
+        current->ofile[i] = 0;
     }
-    vm_clear(&current_task->p_vm);
-    free_mem(current_task->p_vm.vm_pgd);
-    current_task->chan = 0;
-    current_task->stat = ZOMBIE;
-    current_task->exit_code = ret;
-    parent = find_task(current_task->ppid);
+    vm_clear(&current->p_vm);
+    free_mem(current->p_vm.vm_pgd);
+    current->chan = 0;
+    current->stat = ZOMBIE;
+    current->exit_code = ret;
+    parent = find_task(current->ppid);
     do_wakeup(parent);
     return 0;
+}
+
+s32 growtask(u32 size) {
+    u32 used = current->p_vm.vm_used_heap;
+    kassert(used + size < PAGE_SIZE);
+    u32 start = (current->p_vm.vm_heap.v_base);
+    u32 addr = start + used;
+    current->p_vm.vm_used_heap = SZ_ROUND_UP(used + size);
+    return addr;
 }
 
 s32 wait_p(s32 pid, s32* stat) {
@@ -222,17 +232,16 @@ try_find:
     for(i=0; i<PROC_NUM; i++) {
         p = proc_table.procs[i];
         if(!p) continue;
-        if(p == current_task) continue;
+        if(p == current) continue;
         if(p->pid != pid && pid != -1) continue;
         if(p->stat == ZOMBIE) {
             *stat = p->exit_code;
             free_mem(p);
             proc_table.procs[i] = 0;
-            //printk("return :%d %d %d\n", current_task->pid, p->pid, p->exit_code);
             return pid;
         }
     }
-    do_sleep(current_task, NULL);
+    do_sleep(current, NULL);
     goto try_find;
     return 0;
 }
@@ -255,4 +264,3 @@ void task_debug() {
         }
     }
 }
-

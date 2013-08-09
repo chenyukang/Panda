@@ -1,5 +1,5 @@
 
-// @Name   : idt.c 
+// @Name   : idt.c
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-03 22:48:21
@@ -17,11 +17,11 @@
 /*
 Interrupt Gate Descriptor
 
-63                       48|47           40|39               32  
+63                       48|47           40|39               32
 +------------------------------------------------------------
-|                         | |D|D| | | | | | | | |           
-|   BASE OFFSET (16-31)   |P|P|P|0|1|1|1|0|0|0|0| RESERVED  
-|                         | |L|L| | | | | | | | |           
+|                         | |D|D| | | | | | | | |
+|   BASE OFFSET (16-31)   |P|P|P|0|1|1|1|0|0|0|0| RESERVED
+|                         | |L|L| | | | | | | | |
 =============================================================
                            |                                |
    SEGMENT SELECTOR        |   BASE  OFFSET (0-15)          |
@@ -33,9 +33,9 @@ Interrupt Gate Descriptor
          - bits 16 to 31  : segment selector
          - bits 32 to 37  : reserved
          - bits 37 to 39  : 0
-         - bits 40 to 47  : flags/type 
+         - bits 40 to 47  : flags/type
          - bits 48 to 63  : base offset high
-*/    
+*/
 
 /* Defines an IDT entry */
 struct idt_entry {
@@ -54,7 +54,7 @@ struct idt_ptr {
 /* The IDT table , used for interrupt */
 struct idt_entry idt[256];
 struct idt_ptr   idtp;
-isq_t irq_routines[256]; 
+isq_t irq_routines[256];
 
 // These extern directives let us access the addresses of our ASM ISR handlers.
 extern void isr0 ();
@@ -179,7 +179,7 @@ void irq_install(int irq, isq_t handler) {
 /* Installs the IDT */
 void idt_init() {
     puts("[idt]  .... ");
-    
+
     /* Sets the special IDT pointer up, just like in 'gdt.c' */
     idtp.limit = (sizeof (struct idt_entry) * 256) - 1;
     idtp.base = (u32)&idt;
@@ -233,7 +233,7 @@ void idt_init() {
     idt_set(29, (u32)isr29, 1<<3, 0x8F);
     idt_set(30, (u32)isr30, 1<<3, 0x8F);
     idt_set(31, (u32)isr31, 1<<3, 0x8F);
-    
+
     idt_set(32, (u32)irq0, 1<<3, 0x8E);
     idt_set(33, (u32)irq1, 1<<3, 0x8E);
     idt_set(34, (u32)irq2, 1<<3, 0x8E);
@@ -250,7 +250,7 @@ void idt_init() {
     idt_set(45, (u32)irq13, 1<<3, 0x8E);
     idt_set(46, (u32)irq14, 1<<3, 0x8E);
     idt_set(47, (u32)irq15, 1<<3, 0x8E);
-    
+
     idt_set(0x80, (u32)sys_call, 1<<3, 0xEF);
 
     /* just flush this */
@@ -267,7 +267,7 @@ void idt_init() {
 // This gets called from our ASM interrupt handler stub.
 void hwint_handler(struct registers_t* regs) {
     if ((regs->cs & 3) == 3) {
-        current_task->p_trap = regs; 
+        current->p_trap = regs;
     }
 
     /* Find out if we have a custom handler to run for this
@@ -283,7 +283,7 @@ void hwint_handler(struct registers_t* regs) {
         if(handler) {
             handler(regs);
         }
-    }   
+    }
 
     if((regs->cs & 3) == 3) {
         sched();
@@ -293,5 +293,3 @@ void hwint_handler(struct registers_t* regs) {
 void test_idt(){
     asm volatile ("int $0x80");
 }
-
-

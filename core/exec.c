@@ -95,8 +95,8 @@ int do_exec(char* path, char** argv) {
         goto error;
     }
     store = store_argv(path, argv);
-    vm = &current_task->p_vm;
-    strcpy(current_task->name, path);
+    vm = &current->p_vm;
+    strcpy(current->name, path);
     //vm_clear(vm);
     vm_renew(vm, &head, ip);
 

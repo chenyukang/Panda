@@ -46,40 +46,32 @@ void enable_page() {
 }
 
 /* ========================== begin pyhsical page =========================== */
-#if 0
-static void* _alloc(u32 size ) {
-    used_addr = PAGE_ROUND_UP(used_addr);
-    u32 addr = used_addr;
-    used_addr += size;
-    return (void*)addr;
-}
-#endif
 
 //init page list, link free pages with a list
 void init_pages() {
     u32 k;
     page_nr = (end_addr)/(PAGE_SIZE);
-    //printk("page_nr: %d\n", page_nr);
-    //pages = (struct page*)_alloc(sizeof(struct page) * page_nr);
     used_addr = PAGE_ROUND_UP(used_addr);
     free_page_nr = (used_addr)/0x1000;
 
-    for(k=0; k<free_page_nr; k++) { //this is used by kernel
+    //this is used by kernel
+    for(k=0; k<free_page_nr; k++) {
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 1;
         pages[k].pg_next = 0;
     }
-    for(k=free_page_nr; k<NPAGE; k++) { //free pages
+
+    //free pages
+    for(k=free_page_nr; k<NPAGE; k++) {
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 0;
         pages[k].pg_next = 0;
     }
-    struct page* pg = &freepg_list; //usr freepg_list link all free pages
+    struct page* pg = &freepg_list;
     for(k=free_page_nr; k<NPAGE; k++) {
         pg->pg_next = &pages[k];
         pg = pg->pg_next;
     }
-    //printk("free pages: %d\n", page_nr - free_page_nr);
 }
 
 struct page* find_page(u32 nr) {
@@ -100,7 +92,6 @@ void free_page(struct page* pg) {
     sti();
 }
 
-//int page_alloc_cn = 0;
 struct page* alloc_page() {
     struct page* pg = &freepg_list;
     if(pg->pg_next) {
@@ -108,7 +99,6 @@ struct page* alloc_page() {
         pg = pg->pg_next;
         freepg_list.pg_next = pg->pg_next;
         pg->pg_refcnt = 1;
-        //printk("page_alloc_cn: %d\n", page_alloc_cn++);
         sti();
         return pg;
     }
@@ -160,7 +150,7 @@ find_pte(struct pde* pg_dir, u32 vaddr , u32 new) {
         pde->pt_base = (pg->pg_idx);
         pte = (struct pte*)(pde->pt_base * PAGE_SIZE );
         memset(pte, 0, PAGE_SIZE);
-        flush_pgd(current_task->p_vm.vm_pgd);
+        flush_pgd(current->p_vm.vm_pgd);
     } else {
     }
     pte = (struct pte*)(pde->pt_base * PAGE_SIZE);
@@ -256,6 +246,7 @@ void mm_init() {
     end_addr = 0x8000000;
     ker_addr = (u32)(&(__kimg_end__));
     ker_addr = PAGE_ROUND_UP(ker_addr);
+
     // don't use ker_addr ~ 0x100000
     // free memory begin with 0x100000
     used_addr = 0x100000;
@@ -274,7 +265,6 @@ void mm_init() {
 }
 
 void do_wt_page(void* vaddr) {
-    //printk("do_wt_page...:%x\n", (u32)vaddr);
     struct vma *vp;
     struct pte *pte;
     struct page *pg;
@@ -283,12 +273,12 @@ void do_wt_page(void* vaddr) {
     vp = find_vma((u32)vaddr);
     if (vp->v_flag & VMA_RDONLY) {
         //sigsend(cu->p_pid, SIGSEGV, 1);
-        printk("task:%d %x\n", current_task->pid, (u32)vaddr);
+        printk("task:%d %x\n", current->pid, (u32)vaddr);
         kassert(0);
         return;
     }
     if (vp->v_flag & VMA_PRIVATE) {
-        pte = find_pte(current_task->p_vm.vm_pgd, (u32)vaddr, 1);
+        pte = find_pte(current->p_vm.vm_pgd, (u32)vaddr, 1);
         pg = find_page(pte->pt_base);
         if (pg->pg_refcnt > 1) {
             pg->pg_refcnt--; //decrease the reference count of the old page.
@@ -297,11 +287,11 @@ void do_wt_page(void* vaddr) {
             memcpy(new_page, old_page, PAGE_SIZE);
             pte->pt_base = PPN(new_page);
             pte->pt_flags |= PTE_W;
-            flush_pgd(current_task->p_vm.vm_pgd);
+            flush_pgd(current->p_vm.vm_pgd);
         }
         else if (pg->pg_refcnt==1) {
             pte->pt_flags |= PTE_W;
-            flush_pgd(current_task->p_vm.vm_pgd);
+            flush_pgd(current->p_vm.vm_pgd);
         }
     }
 }
@@ -314,8 +304,10 @@ void do_no_page(void* vaddr) {
     char *buf;
     u32 off;
 
-    vm = &current_task->p_vm;
-    // if this page lies on the edge of user stack, grows the stack.
+    vm = &current->p_vm;
+
+    // if this page lies on the edge of user stack,
+    // grows the stack.
     if (vm->vm_stack.v_base - (u32)vaddr <= PAGE_SIZE) {
         vm->vm_stack.v_base -= PAGE_SIZE;
         vm->vm_stack.v_size += PAGE_SIZE;
@@ -323,13 +315,12 @@ void do_no_page(void* vaddr) {
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         return;
     }
-    // else
     vp = find_vma((u32)vaddr);
     if (vp == NULL) {
         printk("vaddr: %x\n", (u32)vaddr);
-        printk("pid: %d name: %s\n", current_task->pid, current_task->name);
+        printk("pid: %d name: %s\n", current->pid, current->name);
         kassert(0);
-        //sigsend(current_task->p_pid, SIGSEGV, 1);
+        //sigsend(current->p_pid, SIGSEGV, 1);
         return;
     }
     // demand zero
@@ -339,6 +330,7 @@ void do_no_page(void* vaddr) {
         memset((void*)PG_ADDR(vaddr), 0, PAGE_SIZE);
         return;
     }
+
     // demand file
     if (vp->v_flag & VMA_MMAP) {
         pg = alloc_page();
@@ -351,26 +343,28 @@ void do_no_page(void* vaddr) {
         readi(vp->v_ino, buf, off, PAGE_SIZE);
         idrop(vp->v_ino);
         pte->pt_flags &= ~(vp->v_flag & VMA_RDONLY? 0:PTE_W);
-        flush_pgd(current_task->p_vm.vm_pgd);
+        flush_pgd(current->p_vm.vm_pgd);
     }
 }
 
 void page_fault_handler(struct registers_t* regs) {
-    // The faulting address is stored in the CR2 register.
     u32 fault_addr;
+    //fetch falting address
     asm volatile("mov %%cr2, %0" : "=r" (fault_addr));
 
-    if((regs->err_code & 0x001) == 0) { //present error
+    //present error
+    if((regs->err_code & 0x001) == 0) {
         do_no_page((void*)fault_addr);
         return;
     }
+    //write error
     if(regs->err_code & 0x002) {  //write
         do_wt_page((void*)fault_addr);
         return;
     }
     if (regs->err_code & 0x004) {
-        printk("address: %x %d %d\n", (u32)fault_addr, current_task->pid,
-               current_task->stat);
+        printk("address: %x %d %d\n", (u32)fault_addr, current->pid,
+               current->stat);
         PANIC("user-mode ");
         return;
     }

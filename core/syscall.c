@@ -75,7 +75,7 @@ int sys_write(struct registers_t* regs) {
     int fd    = regs->ebx;
     int cnt   = regs->edx;
     char* buf = (char*)regs->ecx;
-    
+
     if(vm_verify((u32)buf, cnt) < 0) {
         return -1;
     }
@@ -96,7 +96,7 @@ int sys_uname(struct registers_t* regs) {
 int sys_stat(struct registers_t* regs) {
     char* path = (char*)regs->ebx;
     struct stat* stat = (struct stat*)regs->ecx;
-    
+
     if(vm_verify((u32)stat, sizeof(struct stat)) < 0) {
         return -1;
     }
@@ -146,19 +146,17 @@ int sys_read(struct registers_t* regs) {
     return ret;
 }
 
-#if 0
 int sys_getpid(struct registers_t* regs) {
-    int pid = current_task->pid;
+    int pid = current->pid;
     regs->eax = pid;
     return pid;
 }
 
 int sys_getppid(struct registers_t* regs) {
-    int ppid = current_task->ppid;
+    int ppid = current->ppid;
     regs->eax = ppid;
     return ppid;
 }
-#endif
 
 void do_syscall(struct registers_t* regs) {
     s32 ret;
@@ -167,7 +165,7 @@ void do_syscall(struct registers_t* regs) {
     if (regs->eax > NSYSC) {
         PANIC("bad syscall");
     }
-    current_task->p_error = 0;
+    current->p_error = 0;
     func = sys_routines[regs->eax];
     if (func == NULL)
         func = &nosys;
@@ -179,10 +177,12 @@ void sysc_init() {
     irq_install(0x80, (isq_t)(&do_syscall));
     sys_routines[NR_setup] = &nosys;
     sys_routines[NR_fork]  = &sys_fork;
+    sys_routines[NR_getpid] = &sys_getpid;
+    sys_routines[NR_getppid] = &sys_getppid;
     sys_routines[NR_exec]  = &sys_exec;
     sys_routines[NR_write] = &sys_write;
     sys_routines[NR_read]  = &sys_read;
-    sys_routines[NR_exitc] = &sys_exit;
+    sys_routines[NR_kexit]  = &sys_exit;
     sys_routines[NR_wait]  = &sys_wait;
     sys_routines[NR_uname] = &sys_uname;
     sys_routines[NR_time]  = &sys_time;
@@ -192,6 +192,4 @@ void sysc_init() {
     sys_routines[NR_chdir] = &sys_chdir;
     sys_routines[NR_getcwd] = &sys_getcwd;
     sys_routines[NR_sleep] = &sys_sleep;
-    //sys_routines[NR_getpid] = &sys_getpid;
-    //sys_routines[NR_getppid] = &sys_getppid;
 }
