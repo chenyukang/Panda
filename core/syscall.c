@@ -158,6 +158,11 @@ int sys_getppid(struct registers_t* regs) {
     return ppid;
 }
 
+int sys_sbrk(struct registers_t* regs) {
+    u32 size = (u32)regs->ebx;
+    return growtask(size);
+}
+
 void do_syscall(struct registers_t* regs) {
     s32 ret;
     sysc_func func = 0;
@@ -192,4 +197,5 @@ void sysc_init() {
     sys_routines[NR_chdir] = &sys_chdir;
     sys_routines[NR_getcwd] = &sys_getcwd;
     sys_routines[NR_sleep] = &sys_sleep;
+    sys_routines[NR_sbrk] = &sys_sbrk;
 }

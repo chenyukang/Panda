@@ -27,7 +27,7 @@ enum {
     NR_uname,
     NR_time,
     NR_chdir,
-    NR_brk,
+    NR_sbrk,
     NR_wait,
     NR_exec,
     NR_getcwd,
@@ -46,7 +46,7 @@ static inline _SYS1(int, sleep,  int);
 static inline _SYS1(int, uname,  struct utsname*);
 static inline _SYS1(int, time,   struct tm*);
 static inline _SYS1(int, chdir,  char*);
-static inline _SYS1(int, brk,    void*);
+static inline _SYS1(int, sbrk,   u32);
 static inline _SYS2(int, wait,   int,   int*);
 static inline _SYS2(int, exec ,  char*, char**);
 static inline _SYS2(int, getcwd, char*, int);
