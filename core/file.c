@@ -8,7 +8,6 @@ struct devsw devsw[NDEV];
 
 struct file file_buf[NFILE];
 
-
 void file_init(void) {
     memset(file_buf, 0, sizeof(file_buf));
 }

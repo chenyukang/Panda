@@ -341,7 +341,7 @@ void do_no_page(void* vaddr) {
         off = (u32)buf - vp->v_base + vp->v_ioff;
         ilock(vp->v_ino);
         readi(vp->v_ino, buf, off, PAGE_SIZE);
-        idrop(vp->v_ino);
+        iunlock(vp->v_ino);
         pte->pt_flags &= ~(vp->v_flag & VMA_RDONLY? 0:PTE_W);
         flush_pgd(current->p_vm.vm_pgd);
     }

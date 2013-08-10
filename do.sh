@@ -70,6 +70,7 @@ do_compile() {
 
     echo "building user"
     mkdir ./objs/usr;
+    mkdir ./objs/usr/lib;
     users=`cd usr; ls *.c;`
     `cd ../`;
     for f in $users;
@@ -81,16 +82,18 @@ do_compile() {
     done
 
     users=`cd objs/usr/; ls *.o;`
-    `$GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/string.c -o $USEROBJDIR/string.o;`
-    `$GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/stdlib.c -o $USEROBJDIR/stdlib.o;`
-    `$GCC -I./inc -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/clib.c -o $USEROBJDIR/clib.o;`
-    `$NASM -f elf ./usr/lib/entry.s -o $USEROBJDIR/entry.o;`
+    usrc=`cd ./usr/lib; ls *.c`
+    for f in $usrc;
+    do
+	`$GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/$f -o $USEROBJDIR/lib/${f/.c/.o}`
+    done
+    `$NASM -f elf ./usr/lib/entry.s -o $USEROBJDIR/entry.O`
     for f in $users;
     do
-        `$LD $USEROBJDIR/entry.o $USEROBJDIR/clib.o  $USEROBJDIR/string.o $USEROBJDIR/stdlib.o $USEROBJDIR/$f -m elf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld`
-            if [ $? -ne 0 ]
-            then exit;
-            fi
+        `$LD $USEROBJDIR/entry.O $USEROBJDIR/lib/*.o $USEROBJDIR/$f -m elf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld`
+        if [ $? -ne 0 ]
+           then exit;
+        fi
     done
     do_link;
 }
