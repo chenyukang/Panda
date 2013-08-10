@@ -1,5 +1,5 @@
 
-// @Name   : string.c 
+// @Name   : string.c
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-08 21:51:43
@@ -9,13 +9,7 @@
 
 
 #include <string.h>
-
-#ifdef USR
-#include <syscall.h>
-#define putch write
-#else
 #include <screen.h>
-#endif
 
 const char* digits = "0123456789";
 typedef char* va_list;
@@ -237,22 +231,6 @@ int sprintk(char* buf, const char* format, va_list args) {
     return len = strlen(prev);
 }
 
-
-#ifdef USR
-int printf(const char* format, ... ) {
-    va_list ap;
-    char buf[1024];
-    u32  cnt = 0, k = 0;
-    va_start(ap, format);
-    cnt = sprintk(buf, format, ap);
-    for(k=0; k<cnt; k++)
-        putch(buf[k]);
-    va_end(ap);
-    return cnt;
-}
-
-#else
-
 int printk(const char* format, ... ) {
     va_list ap;
     char buf[1024];
@@ -264,4 +242,3 @@ int printk(const char* format, ... ) {
     va_end(ap);
     return cnt;
 }
-#endif

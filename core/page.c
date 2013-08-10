@@ -281,7 +281,7 @@ void do_wt_page(void* vaddr) {
         pte = find_pte(current->p_vm.vm_pgd, (u32)vaddr, 1);
         pg = find_page(pte->pt_base);
         if (pg->pg_refcnt > 1) {
-            pg->pg_refcnt--; //decrease the reference count of the old page.
+            pg->pg_refcnt--;
             old_page = (char*)(pte->pt_base * PAGE_SIZE);
             new_page = (char*)alloc_mem();
             memcpy(new_page, old_page, PAGE_SIZE);
@@ -315,6 +315,7 @@ void do_no_page(void* vaddr) {
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         return;
     }
+
     vp = find_vma((u32)vaddr);
     if (vp == NULL) {
         printk("vaddr: %x\n", (u32)vaddr);
@@ -323,7 +324,7 @@ void do_no_page(void* vaddr) {
         //sigsend(current->p_pid, SIGSEGV, 1);
         return;
     }
-    // demand zero
+    // demand bss/heap
     if (vp->v_flag & VMA_ZERO) {
         pg = alloc_page();
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);

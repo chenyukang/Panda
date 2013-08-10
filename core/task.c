@@ -217,6 +217,7 @@ s32 do_exit(int ret) {
 }
 
 s32 growtask(u32 size) {
+    cli();
     u32 used = current->p_vm.vm_used_heap;
     printk("size: %d\n", size);
     printk("used + size: %d\n", used+ size);
@@ -224,6 +225,7 @@ s32 growtask(u32 size) {
     u32 start = (current->p_vm.vm_heap.v_base);
     u32 addr = start + used;
     current->p_vm.vm_used_heap = SZ_ROUND_UP(used + size);
+    sti();
     return addr;
 }
 
@@ -233,6 +235,7 @@ s32 wait_p(s32 pid, s32* stat) {
     if(vm_verify((u32)stat, sizeof(s32)) < 0) {
         return -1;
     }
+
 try_find:
     for(i=0; i<PROC_NUM; i++) {
         p = proc_table.procs[i];

@@ -1,5 +1,5 @@
 
-// @Name   : screen.c 
+// @Name   : screen.c
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-03 18:04:10
@@ -16,10 +16,8 @@
 static u16 *textmemptr;
 static s32 attrib = 0x0E, csr_x = 10, csr_y = 0;
 
-/* Scrolls the screen */
 static void scroll(void) {
     unsigned blank, temp;
-
     /* A blank is defined as a space... we need to give it
     *  backcolor too */
     blank = 0x20 | (attrib << 8);
@@ -127,7 +125,6 @@ void putch(char c) {
         csr_y++;
     }
 
-    /* Scroll the screen if needed, and finally move the cursor */
     scroll();
     move_csr();
 }
@@ -154,16 +151,3 @@ void puts_color_str(char* str, unsigned color) {
     }
     attrib = 0x0A;
 }
-
-void puts_mid_str(char* str) {
-    int len = strlen(str);
-    int offset = (80-len)/2;
-    int k;
-    for(k=0;k<offset;k++)
-        putch(' ');
-    for(k=0;k<len;k++)
-        putch(str[k]);
-    putch('\n');
-}
-
-    

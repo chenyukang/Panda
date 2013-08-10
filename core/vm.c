@@ -2,8 +2,8 @@
 #include <task.h>
 #include <string.h>
 
-u32 vma_init(struct vma* vp, u32 base, u32 size, u32 flag,
-             struct inode* ip, u32 ioff) {
+u32 vma_init(struct vma* vp, u32 base, u32 size,
+             u32 flag, struct inode* ip, u32 ioff) {
     vp->v_flag = flag;
     vp->v_base = base;
     vp->v_size = size;
@@ -73,13 +73,11 @@ u32 vm_renew(struct vm* vm, struct header* header, struct inode* ip) {
 u32 vm_verify(u32 vaddr, u32 size) {
     struct pte *pte;
     u32 page;
-    u32 addr = (u32)vaddr;
-
-    if (addr<0x8000000 || size<0) {
+    if (vaddr<0x8000000 || size<0) {
         return -1;
     }
 
-    for (page=PG_ADDR(addr); page<=PG_ADDR(addr+size-1); page+=PAGE_SIZE) {
+    for (page=PG_ADDR(vaddr); page<=PG_ADDR(vaddr+size-1); page+=PAGE_SIZE) {
         pte = find_pte(current->p_vm.vm_pgd, page, 1);
         if ((pte->pt_flags & PTE_P)==0) {
             do_no_page((void*)page);
@@ -91,13 +89,13 @@ u32 vm_verify(u32 vaddr, u32 size) {
     return 0;
 }
 
-struct vma* find_vma(u32 addr) {
+struct vma* find_vma(u32 vaddr) {
     struct vma* vma;
     struct vma* vp;
 
     vma = current->p_vm.vm_area;
     for (vp=&vma[0]; vp<&vma[NVMA]; vp++) {
-        if (addr >= vp->v_base && addr < vp->v_base+vp->v_size) {
+        if (vaddr >= vp->v_base && vaddr < vp->v_base+vp->v_size) {
             return vp;
         }
     }
