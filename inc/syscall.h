@@ -55,9 +55,4 @@ static inline _SYS3(int, open,   char*, int, int);
 static inline _SYS3(int, write,  int,   char*, int);
 static inline _SYS3(int, read,   int,   void*, int);
 
-
-#if 0
-int          brk(void *);
-#endif
-
 #endif

@@ -5,7 +5,7 @@ SECTIONS {
     . = 0x8000020;
     .text : {
         __text__ = .;
-        ./objs/usr/entry.O(.text) *(.text)
+        ./objs/usr/lib/entry.O(.text) *(.text)
         *(.rodata .gnu.linkonce.*)
         . = ALIGN(0x1000);
         __text_end__ = .;

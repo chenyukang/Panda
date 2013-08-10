@@ -87,10 +87,10 @@ do_compile() {
     do
 	`$GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/$f -o $USEROBJDIR/lib/${f/.c/.o}`
     done
-    `$NASM -f elf ./usr/lib/entry.s -o $USEROBJDIR/entry.O`
+    `$NASM -f elf ./usr/lib/entry.s -o $USEROBJDIR/lib/entry.O`
     for f in $users;
     do
-        `$LD $USEROBJDIR/entry.O $USEROBJDIR/lib/*.o $USEROBJDIR/$f -m elf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld`
+        `$LD $USEROBJDIR/lib/entry.O $USEROBJDIR/lib/*.o $USEROBJDIR/$f -m elf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld`
         if [ $? -ne 0 ]
            then exit;
         fi
@@ -117,8 +117,7 @@ do_link() {
 	exit
     else
 	echo "making a.img"
-	cmd="cat boot.bin setup.bin kernel.bin > ../a.img"
-	echo $cmd; cat boot.bin setup.bin kernel.bin > ../a.img;
+	`cat boot.bin setup.bin kernel.bin > ../a.img`
 	ls -lh kernel.bin;
 	cd ../;
     fi

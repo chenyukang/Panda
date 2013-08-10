@@ -218,6 +218,8 @@ s32 do_exit(int ret) {
 
 s32 growtask(u32 size) {
     u32 used = current->p_vm.vm_used_heap;
+    printk("size: %d\n", size);
+    printk("used + size: %d\n", used+ size);
     kassert(used + size < PAGE_SIZE);
     u32 start = (current->p_vm.vm_heap.v_base);
     u32 addr = start + used;
