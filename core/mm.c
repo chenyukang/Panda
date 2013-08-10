@@ -1,5 +1,5 @@
 
-// @Name   : page.c
+// @Name   : mm.c
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-09 08:35:30
@@ -8,7 +8,7 @@
 
 #include <asm.h>
 #include <system.h>
-#include <page.h>
+#include <mm.h>
 #include <kheap.h>
 #include <string.h>
 #include <task.h>
@@ -28,7 +28,6 @@ u32 free_page_nr; //free page number
 u32 k_dir_nr;     //this is number of page mapped by kernel
 
 void page_fault_handler(struct registers_t* regs);
-
 
 void flush_pgd(struct pde* pgdir) {
     asm volatile("mov %%eax, %%cr3":: "a"(pgdir));    // put page table addr

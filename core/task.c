@@ -12,7 +12,7 @@
 #include <types.h>
 #include <task.h>
 #include <kheap.h>
-#include <page.h>
+#include <mm.h>
 #include <asm.h>
 #include <string.h>
 #include <gdt.h>
@@ -271,4 +271,9 @@ void task_debug() {
             printk("\n");
         }
     }
+}
+
+int  task_debug_s(char* buf, u32 size) {
+    strcpy(buf, "hello from task_debug_s\n");
+    return 0;
 }

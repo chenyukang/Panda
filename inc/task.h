@@ -12,7 +12,7 @@
 #if !defined(TASK_H)
 #define TASK_H
 
-#include <page.h>
+#include <mm.h>
 #include <spinlock.h>
 #include <inode.h>
 #include <vm.h>
@@ -113,5 +113,6 @@ void do_sleep(void* change, struct spinlock* lock);
 void do_wakeup(void* change);
 
 void task_debug();
+int  task_debug_s(char* buf, u32 size);
 
 #endif

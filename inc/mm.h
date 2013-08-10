@@ -1,13 +1,13 @@
 
-// @Name   : PAGE_H
+// @Name   : MM.H
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-09 08:35:39
 //
 // @Brief  :
 
-#if !defined(PAGE_H)
-#define PAGE_H
+#ifndef _MM_H_
+#define _MM_H_
 
 #include <system.h>
 

@@ -3,7 +3,7 @@
 
 #include <aout.h>
 #include <inode.h>
-#include <page.h>
+#include <mm.h>
 
 /* each vma asscociated with a file descripter, on page fault raised
  * do what it deserves. */

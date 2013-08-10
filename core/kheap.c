@@ -7,7 +7,7 @@
 //           align is malloc memory align to 0x1000
 
 #include <kheap.h>
-#include <page.h>
+#include <mm.h>
 #include <string.h>
 
 #if 0
@@ -42,7 +42,7 @@ void kfree(void* ap) {
                 break;
             }
         }
-    
+
     /*now p hold the postion for insert */
     if( bp + bp->s.size == p->s.next) { /* join upper */
         bp->s.size += p->s.next->s.size;
@@ -61,7 +61,7 @@ void kfree(void* ap) {
 
 
 static void* __real_get_mem(u32 size) {
-    asm volatile("cli");    
+    asm volatile("cli");
     if(kheap_start_addr + size < kheap_end_addr) {
         void* addr = (void*)kheap_start_addr;
         kheap_start_addr += size;
@@ -92,12 +92,12 @@ static Header* get_more(u32 size) {
 /* notes: align is default return addr align 0x1000,
    this may cost more time for search a free slot,
    and do not call this align=1 requently */
-void* kmalloc_align(u32 nbytes, u32 align) 
+void* kmalloc_align(u32 nbytes, u32 align)
 {
     Header *p, *prev;
     u32 nunits;
     nunits = (nbytes+sizeof(Header)-1) / sizeof(Header) + 1;
-    
+
     if( (prev = freep ) == NULL ) {
         prev = freep = base.s.next = &base;
         base.s.size = 0;

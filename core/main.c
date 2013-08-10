@@ -9,7 +9,7 @@
 #include <asm.h>
 #include <screen.h>
 #include <string.h>
-#include <page.h>
+#include <mm.h>
 #include <kheap.h>
 #include <hd.h>
 #include <test.h>
