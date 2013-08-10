@@ -1,5 +1,5 @@
 
-// @Name   : ASM_H 
+// @Name   : ASM_H
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-05 22:27:56
@@ -18,14 +18,7 @@
 
 #define ASM	 __asm__ __volatile__
 
-u16 inw (u16 _port);
-
-inline void write_nmi(u8 nmi);
-inline void enable_nmi(void);
-inline void disable_nmi(void);
-
-#define safe_halt()         (native_safe_halt())
-#define halt()              (native_halt())
+#define xhalt()             (native_halt())
 
 
 #define first_zerobit(x) (first_onebit(~(x)))
@@ -51,10 +44,6 @@ static inline int first_onebit(int x) {
     }
 }
 
-static inline void native_safe_halt(void) {
-    asm volatile("sti; hlt": : :"memory");
-}
-
 static inline void native_halt(void) {
     asm volatile("hlt": : :"memory");
 }
@@ -65,7 +54,6 @@ static inline void outb(u16 port, u8 data) {
 
 static inline u8 inb(u16 port) {
   u8 data;
-
   asm volatile("in %1,%0" : "=a" (data) : "d" (port));
   return data;
 }
@@ -86,7 +74,7 @@ static inline void insl(int port, void *addr, int cnt) {
 
 static inline u32 xchg(volatile u32 *addr, u32 newval) {
   u32 result;
-  
+
   // The + in "+m" denotes a read-modify-write operand.
   asm volatile("lock; xchgl %0, %1" :
                "+m" (*addr), "=a" (result) :
@@ -107,9 +95,6 @@ static inline u32 xchg(volatile u32 *addr, u32 newval) {
         (void)(&__dummy == &__dummy2);          \
         1;                                      \
     })
-
-void	port_read(u16 port, void* buf, int n);
-void	port_write(u16 port, void* buf, int n);
 
 #define _SYS0(T0, FN)                           \
     T0 FN(){                                    \
@@ -171,4 +156,3 @@ void	port_write(u16 port, void* buf, int n);
 
 
 #endif
-

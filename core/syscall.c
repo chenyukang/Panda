@@ -163,6 +163,13 @@ int sys_sbrk(struct registers_t* regs) {
     return growtask(size);
 }
 
+int sys_halt(struct registers_t* regs) {
+    xhalt();
+    regs->eax = 0;
+    return 0;
+}
+
+
 void do_syscall(struct registers_t* regs) {
     s32 ret;
     sysc_func func = 0;
@@ -198,4 +205,5 @@ void sysc_init() {
     sys_routines[NR_getcwd] = &sys_getcwd;
     sys_routines[NR_sleep] = &sys_sleep;
     sys_routines[NR_sbrk] = &sys_sbrk;
+    sys_routines[NR_halt] = &sys_halt;
 }

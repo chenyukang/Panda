@@ -1,5 +1,5 @@
 
-// @Name   : main.c 
+// @Name   : main.c
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-03 17:33:50
@@ -65,15 +65,3 @@ void init_user() {
         ;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

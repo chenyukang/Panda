@@ -1,4 +1,3 @@
-
 #ifndef _SYS_CALL_H
 #define _SYS_CALL_H
 
@@ -34,9 +33,11 @@ enum {
     NR_stat,
     NR_open,
     NR_write,
-    NR_read
+    NR_read,
+    NR_halt
 };
 
+static inline _SYS0(int, halt);
 static inline _SYS0(int, fork);
 static inline _SYS0(int, getpid);
 static inline _SYS0(int, getppid);
