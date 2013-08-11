@@ -21,9 +21,12 @@ s32  strncmp(const char* v1, const char* v2, u32 n);
 s32  strcmp(const char* v1, const char* v2);
 
 void puts(const char* text);
-void printk_hex(u32 val);
-void printk_int(u32 val);
 size_t strlen(const char* str);
+
+int atoi(const char* s);
+int isspace(char c);
+int isalpha(char c);
+int isdigit(char c);
 
 void* memset(void* addr, unsigned char v, size_t cnt);
 void* memcpy(void *dest, const void *src, size_t cnt);
@@ -34,6 +37,7 @@ s32   memcmp(const void* v1, const void* v2, u32 n);
 #ifdef USR
 #include <syscall.h>
 int printf(const char* format, ... );
+int sprintf(char* buf, const char* format, ...);
 #else
 int printk(const char* format, ... );
 int sprintk(char* buf, const char* format, ...);

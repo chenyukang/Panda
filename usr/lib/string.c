@@ -20,13 +20,29 @@ typedef char* va_list;
 #define va_end(ap) ( ap=(va_list)0 )
 #define va_arg(ap, type) ( *(type*) ((ap += INTSIZEOF(type)) - INTSIZEOF(type)))
 
+
+int atoi(const char* s) {
+    return 0;
+}
+
+int isspace(char c) {
+    return 0;
+}
+
+int isalpha(char c) {
+    return 0;
+}
+
+int isdigit(char c) {
+    return 0;
+}
+
 void strcpy(char* dest, char* src) {
     char* p = src;
     while(*p) {
         *dest++ = *p++;
     }
 }
-
 
 void strncpy(char* dest, char* src, size_t cnt) {
     while(cnt && (*dest++ = *src++))
@@ -195,7 +211,7 @@ u32_to_str(char* str, const u32 val) {
 }
 
 /* print according format */
-int sprintk(char* buf, const char* format, va_list args) {
+int _sprintf(char* buf, const char* format, va_list args) {
     int len = 0 ;
     char* prev = buf;
     while(*format){
@@ -235,16 +251,29 @@ int sprintk(char* buf, const char* format, va_list args) {
     return len = strlen(prev);
 }
 
-
 int printf(const char* format, ... ) {
     va_list ap;
     char buf[1024];
     u32  cnt = 0, k = 0;
     va_start(ap, format);
-    cnt = sprintk(buf, format, ap);
+    cnt = _sprintf(buf, format, ap);
     for(k=0; k<cnt; k++){
         write(1, (char*)(&buf[k]), 1);
     }
     va_end(ap);
+    return cnt;
+}
+
+int sprintf(char* res, const char* format, ... ) {
+    va_list ap;
+    char buf[1024];
+    u32  cnt = 0, k = 0;
+    va_start(ap, format);
+    cnt = _sprintf(buf, format, ap);
+    for(k=0; k<cnt; k++) {
+        res[k] = buf[k];
+    }
+    va_end(ap);
+    res[cnt] = 0;
     return cnt;
 }
