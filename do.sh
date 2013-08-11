@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 BOOT="./boot"
 KERNEL="./core"
 INCLUDE="./inc"
@@ -13,7 +13,7 @@ if [ `uname` = "Linux" ]; then
     OBJCPY="objcopy"
     QEMU="qemu-system-i386 "
     BOCHS_CONF="./.bochs_linux"
-    DEFAULT="bochs"
+    DEFAULT="qemu"
 else #on Mac, I will run Qemu
     GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc "
     ON_GCC="clang "
