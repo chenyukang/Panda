@@ -9,7 +9,6 @@
 #include <asm.h>
 #include <system.h>
 #include <mm.h>
-#include <kheap.h>
 #include <string.h>
 #include <task.h>
 

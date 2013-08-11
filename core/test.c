@@ -11,7 +11,6 @@
 #include <screen.h>
 #include <string.h>
 #include <mm.h>
-#include <kheap.h>
 
 
 int test_all() {
@@ -52,25 +51,3 @@ int test_page_fault() {
     }
     return 1;
 }
-
-#if 0
-int test_kmalloc() {
-    int k;
-    for(k=0; k<10; k++) {
-        u32 *ptr = (u32*)kmalloc(sizeof(u32)*100);
-        *ptr = 0xA;
-        kfree(ptr);
-        char* cp = (char*)kmalloc(sizeof(char)*100);
-        *cp = 'c';
-        printk("ptr1:%x ptr2:%x \n",ptr,  cp);
-        kfree(cp);
-    }
-    for(k=0; k<10; k++){
-        u32* ptr2 = (u32*)kmalloc_align(sizeof(u32)*100, 1);
-        printk("align ptr: %x => %x\n", ptr2, ((u32)ptr2) & 0xFFFFF000);
-    }
-
-    return 1;
-}
-
-#endif

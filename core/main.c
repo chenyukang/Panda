@@ -10,7 +10,6 @@
 #include <screen.h>
 #include <string.h>
 #include <mm.h>
-#include <kheap.h>
 #include <hd.h>
 #include <test.h>
 #include <task.h>

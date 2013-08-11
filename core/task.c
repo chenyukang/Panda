@@ -11,7 +11,6 @@
 
 #include <types.h>
 #include <task.h>
-#include <kheap.h>
 #include <mm.h>
 #include <asm.h>
 #include <string.h>
