@@ -27,25 +27,27 @@ void buf_init() {
 static struct buf*
 buf_get(u32 dev, u32 sector) {
     struct buf* bp;
-    
+
+    acquire_lock(&bcache.lock);
 loop:
     for(bp = bcache.head.b_next; bp != &bcache.head; bp = bp->b_next) {
         if(bp->b_dev == dev && bp->b_sector == sector) {
             if(! (bp->b_flag & B_BUSY) ) {
                 bp->b_flag |= B_BUSY;
+                release_lock(&bcache.lock);
                 return bp;
             }
             do_sleep(bp, &bcache.lock);
             goto loop;
         }
     }
-    
+
     for(bp = bcache.head.b_prev; bp != &bcache.head; bp = bp->b_prev) {
         if((bp->b_flag & B_BUSY) == 0 && (bp->b_flag & B_DIRTY) == 0) {
             bp->b_dev = dev;
             bp->b_sector = sector;
             bp->b_flag = B_BUSY;
-            //release_lock(&bcache.lock);
+            release_lock(&bcache.lock);
             return bp;
         }
     }
@@ -56,14 +58,12 @@ loop:
 
 struct buf*
 buf_read(u32 dev, u32 sector) {
-    //printk("reading: dev->%d sector:%d\n", dev, sector);
     struct buf* bp;
     bp = buf_get(dev, sector);
     kassert(bp);
     if(!(bp->b_flag & B_VALID)) {
         hd_rw(bp);
     }
-    //printk("return buf_read:%x\n", (u32)bp);
     return bp;
 }
 
@@ -84,11 +84,11 @@ void buf_write(struct buf* bp) {
    this is visited most recently */
 
 void buf_release(struct buf* bp) {
-    
+
     if((bp->b_flag & B_BUSY) == 0)
         PANIC("buf_release: error buf");
-    
-    //acquire_lock(&bcache.lock);
+
+    acquire_lock(&bcache.lock);
 
     bp->b_next->b_prev = bp->b_prev;
     bp->b_prev->b_next = bp->b_next;
@@ -100,7 +100,5 @@ void buf_release(struct buf* bp) {
     cli();
     do_wakeup(bp);
     sti();
-    
-    //release_lock(&bcache.lock);
+    release_lock(&bcache.lock);
 }
-
