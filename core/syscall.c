@@ -89,7 +89,7 @@ int sys_uname(struct registers_t* regs) {
     }
     strcpy(p->sysname, "Panda OS");
     strcpy(p->release, "debug");
-    strcpy(p->version, "0.11");
+    strcpy(p->version, "0.1");
     return 1;
 }
 
