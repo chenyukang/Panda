@@ -16,6 +16,7 @@
 
 int main() {
     char buf[1024];
+#if 0
     printf("size: %d\n", sizeof(int));
     int* p = (int*)malloc(sizeof(int));
     printf("pointer: %x\n",(unsigned int)p);
@@ -30,9 +31,10 @@ int main() {
         printf("pointer: %x value: %d\n", (u32)p, (u32)(*p));
         free(p);
     }
-
+#endif
     memset(buf, 0, sizeof(buf));
     procs(buf, 1024);
-    printf("buf: %s\n", buf);
+    printf("current task list:\n");
+    printf("%s", buf);
     return 0;
 }

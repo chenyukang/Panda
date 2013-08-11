@@ -1,5 +1,5 @@
 
-// @Name   : STRING_H 
+// @Name   : STRING_H
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-08 21:55:28
@@ -36,7 +36,7 @@ s32   memcmp(const void* v1, const void* v2, u32 n);
 int printf(const char* format, ... );
 #else
 int printk(const char* format, ... );
+int sprintk(char* buf, const char* format, ...);
 #endif
 
 #endif
-

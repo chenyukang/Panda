@@ -88,7 +88,7 @@ static void init_proc0() {
     strcpy(t->cwd_path, "/home");
     tss.ss0  = KERN_DS;
     tss.esp0 = (u32)t + PAGE_SIZE;
-    strcpy(t->name, "init");
+    strcpy(t->name, "kernel");
 }
 
 static void init_proctable() {
@@ -123,36 +123,30 @@ struct task* spawn(void* func) {
     return new_task;
 }
 
-//#define DEBUG_PROC 1
-#ifdef DEBUG_PROC
-static int step = 0;
-#endif
-
 void swtch_to(struct task *to){
+    cli();
     acquire_lock(&proc_table.lock);
     struct task *from = current;
     tss.esp0 = (u32)to + PAGE_SIZE;
     to->r_time++;
     current = to;
-    release_lock(&proc_table.lock);
     flush_pgd(to->p_vm.vm_pgd);
-#ifdef DEBUG_PROC
-    printk("switch %d from: %s to %s\n", step++, from->name, to->name);
-#endif
+    to->stat = RUNNING;
+    release_lock(&proc_table.lock);
+    sti();
     _do_swtch(&(from->p_context), &(to->p_context));
 }
 
 void sched() {
     int i, min;
-    struct task* next = 0;
+    struct task* next;
     struct task* t;
 
-    kassert(current);
+    next = t = 0;
     min = -1;
     for(i=PROC_NUM-1; i>=0; i--) {
         t = proc_table.procs[i];
-        if(t == 0) continue;
-        if(t == current) continue;
+        if(t == 0 || t == current) continue;
         if(t->stat == ZOMBIE || t->stat == WAIT) continue;
         if(min == -1 || t->r_time <= min) {
             min = t->r_time;
@@ -161,15 +155,12 @@ void sched() {
     }
 
     if(next) {
-        kassert(next->stat != ZOMBIE);
-        kassert(next->stat != WAIT);
         swtch_to(next);
     }
 }
 
 void do_sleep(void* change, struct spinlock* lock) {
-    if(current == 0)
-        PANIC("sleep: no task");
+    kassert(current);
     cli();
     current->chan = change;
     current->stat = WAIT;
@@ -239,8 +230,7 @@ s32 wait_p(s32 pid, s32* stat) {
 try_find:
     for(i=0; i<PROC_NUM; i++) {
         p = proc_table.procs[i];
-        if(!p) continue;
-        if(p == current) continue;
+        if(p == 0 || p == current) continue;
         if(p->pid != pid && pid != -1) continue;
         if(p->stat == ZOMBIE) {
             *stat = p->exit_code;
@@ -255,25 +245,39 @@ try_find:
 }
 
 void task_debug() {
-    u32 i;
-    struct task* p;
-    for(i=0; i<PROC_NUM; i++) {
-        p = proc_table.procs[i];
-        if(p) {
-            printk("task[%d]: %s ", p->pid, p->name);
-            switch(p->stat) {
-            case NEW: printk(" NEW\n"); break;
-            case WAIT: printk(" WAIT\n"); break;
-            case RUNNING: printk(" RUNNING\n"); break;
-            case ZOMBIE: printk(" ZOMBIE\n"); break;
-            default: break;
-            }
-            printk("\n");
-        }
-    }
+    char buf[1024];
+    task_debug_s(buf, 1024);
+    printk("%s\n", buf);
 }
 
 int  task_debug_s(char* buf, u32 size) {
-    strcpy(buf, "hello from task_debug_s\n");
+    struct task* p;
+    char t[1024];
+    u32 i, k, max;
+    max = 25;
+    memset(t, 0, sizeof(t));
+    memset(buf, 0, sizeof(buf));
+    for(i=0; i<PROC_NUM; i++) {
+        p = proc_table.procs[i];
+        if(p) {
+            sprintk(t, "task[%d]: %s ", p->pid, p->name);
+            if(strlen(t) < 25) {
+                for(k=strlen(t); k < 25; k++) {
+                    t[k] = ' ';
+                }
+            }
+            t[25] = 0;
+            strcat(buf, t);
+            switch(p->stat) {
+            case NEW: sprintk(t, "NEW\n"); break;
+            case WAIT: sprintk(t, "WAIT\n"); break;
+            case RUNNING: sprintk(t, "RUN\n"); break;
+            case ZOMBIE: sprintk(t, "ZOMBIE\n"); break;
+            case RUNNABLE: sprintk(t, "RUNNABLE\n"); break;
+            default: break;
+            }
+            strcat(buf, t);
+        }
+    }
     return 0;
 }

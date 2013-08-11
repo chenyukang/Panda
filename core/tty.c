@@ -24,13 +24,10 @@ u32 tty_ch(u8 c) {
         return tty_pop();
     }
     putch(c);
-    if(c == 0x0A) {         //tty is line buffered
-        tty_push(c);
+
+    tty_push(c);
+    if(c == 0x0A)
         do_wakeup(&tty_dev);
-    }
-    else {
-        return tty_push(c); //push to buf
-    }
     return -1;
 }
 
@@ -56,11 +53,11 @@ u32 tty_pop() {
     }
     return 0;
 }
-            
+
 u32 tty_get_buf(char* buf, u32 need) {
     u32 i, h, head, count;
     char* p = buf;
-    
+
     count = tty_dev.count;
     head  = tty_dev.head;
     if(count == 0) {

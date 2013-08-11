@@ -14,7 +14,8 @@
 #include <blk.h>
 
 void readsb(u32 dev, struct superblock* sb) {
-    struct buf* bp = buf_read(dev, 1); //read the 1 sector, which is super block
+    //read the 1 sector, which is super block
+    struct buf* bp = buf_read(dev, 1);
     memmove(sb, bp->b_data, sizeof(struct superblock));
     buf_release(bp);
 }
@@ -61,4 +62,3 @@ u32  blk_alloc(u32 dev) {
     PANIC("alloc_block: out of blocks");
     return -1;
 }
-

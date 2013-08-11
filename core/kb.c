@@ -1,5 +1,5 @@
 
-// @Name   : kd.c 
+// @Name   : kd.c
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-07 16:14:09
@@ -45,4 +45,3 @@ void kb_init() {
     tty_clear();
     done();
 }
-

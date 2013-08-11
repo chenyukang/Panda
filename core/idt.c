@@ -263,7 +263,6 @@ void idt_init() {
 }
 
 
-
 // This gets called from our ASM interrupt handler stub.
 void hwint_handler(struct registers_t* regs) {
     if ((regs->cs & 3) == 3) {
@@ -271,9 +270,8 @@ void hwint_handler(struct registers_t* regs) {
     }
 
     /* Find out if we have a custom handler to run for this
-    *  IRQ, and then finally, run it */
+    *  IRQ and then run it */
     isq_t handler = irq_routines[regs->int_no];
-    /* Is this a fault whose number is from 0 to 31? */
     if (regs->int_no < 32) {
         if(handler){
             handler(regs);

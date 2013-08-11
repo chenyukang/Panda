@@ -1,5 +1,5 @@
 
-// @Name   : timer.c 
+// @Name   : timer.c
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-05 22:46:52
@@ -39,14 +39,13 @@ static void timer_callback(void) {
         sti();
     }
 
-    if(timer.ticks%10 == 0){
+    if(timer.ticks%2 == 0){
         sched();
     }
 }
 
 void timer_init() {
     puts("[time] .... ");
-    // Firstly, register our timer callback.
     memset(&timer, 0, sizeof(timer));
     init_lock(&timer.lock, "timer");
     irq_enable(0);

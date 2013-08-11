@@ -276,6 +276,7 @@ void do_wt_page(void* vaddr) {
         kassert(0);
         return;
     }
+
     if (vp->v_flag & VMA_PRIVATE) {
         pte = find_pte(current->p_vm.vm_pgd, (u32)vaddr, 1);
         pg = find_page(pte->pt_base);

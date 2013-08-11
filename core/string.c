@@ -11,13 +11,14 @@
 #include <string.h>
 #include <screen.h>
 
-const char* digits = "0123456789";
-typedef char* va_list;
-
 #define INTSIZEOF(n)          ((sizeof(n)+sizeof(int)-1) & ~(sizeof(int)-1))
 #define va_start(ap, format)  ( ap = (va_list)(&format) + INTSIZEOF(format))
 #define va_arg(ap, type)      (*(type*) ((ap += INTSIZEOF(type)) - INTSIZEOF(type)))
 #define va_end(ap)            ( ap=(va_list)0 )
+
+typedef char* va_list;
+
+const static char* digits = "0123456789";
 
 void strcpy(char* dest, char* src) {
     char* p = src;
@@ -191,7 +192,7 @@ u32_to_str(char* str, const u32 val) {
 }
 
 /* print according format */
-int sprintk(char* buf, const char* format, va_list args) {
+static int _printk(char* buf, const char* format, va_list args) {
     int len = 0 ;
     char* prev = buf;
     while(*format){
@@ -236,9 +237,23 @@ int printk(const char* format, ... ) {
     char buf[1024];
     u32  cnt = 0, k = 0;
     va_start(ap, format);
-    cnt = sprintk(buf, format, ap);
+    cnt = _printk(buf, format, ap);
     for(k=0; k<cnt; k++)
         putch(buf[k]);
     va_end(ap);
+    return cnt;
+}
+
+int sprintk(char* res, const char* format, ... ) {
+    va_list ap;
+    char buf[1024];
+    u32  cnt = 0, k = 0;
+    va_start(ap, format);
+    cnt = _printk(buf, format, ap);
+    for(k=0; k<cnt; k++) {
+        res[k] = buf[k];
+    }
+    va_end(ap);
+    res[cnt] = 0;
     return cnt;
 }
