@@ -1,5 +1,5 @@
 
-// @Name   : gdt.c 
+// @Name   : gdt.c
 //
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-03 21:36:57
@@ -25,7 +25,7 @@ void set_seg(struct gdt_entry* seg, u32 base, u32 limit, u32 dpl, u32 type){
     seg->type     = type;
     seg->s        = 1;
     seg->dpl      = dpl;
-    seg->present  = 1; 
+    seg->present  = 1;
     seg->limit_hi = (u32) (limit) >> 28;
     seg->avl      = 0;
     seg->r        = 0;
@@ -45,20 +45,6 @@ void set_tss(struct gdt_entry* seg, u32 base){
     seg->limit_lo = 0x68;
     seg->s = 0;
 }
-
-#if 0
-/* Setup a descriptor in the Global Descriptor Table */
-void gdt_set_entry(u32 num, u32 base,
-                   u32 limit, u8 access, u8 gran) {
-    gdt[num].base_low = (base & 0xFFFF);
-    gdt[num].base_middle = (base >> 16) & 0xFF;
-    gdt[num].base_high = (base >> 24) & 0xFF;
-    gdt[num].limit = (limit & 0xFFFF);
-    gdt[num].granularity = ((limit >> 16) & 0x0F);
-    gdt[num].granularity |= (gran & 0xF0);
-    gdt[num].access = access;
-}
-#endif
 
 void gdt_init(void) {
     puts("[gdt]  .... ");
