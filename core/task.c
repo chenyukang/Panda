@@ -262,8 +262,8 @@ int  task_debug_s(char* buf, u32 size) {
         p = proc_table.procs[i];
         if(p) {
             sprintk(t, "task[%d]: %s ", p->pid, p->name);
-            if(strlen(t) < 25) {
-                for(k=strlen(t); k < 25; k++) {
+            if(strlen(t) < max) {
+                for(k=strlen(t); k < max; k++) {
                     t[k] = ' ';
                 }
             }
