@@ -1,4 +1,6 @@
 #!/bin/bash
+## NOTE: I tested on Mac/Qemu and Linux/Qemu,
+## Bochs have some problem in loading and this haven't been solved.
 BOOT="./boot"
 KERNEL="./core"
 INCLUDE="./inc"
@@ -6,6 +8,7 @@ NASM="nasm -f elf "
 CFLAGS="-Wall -m32 -O2 -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
 BOCHS="bochs "
 DEFAULT="None"
+
 if [ `uname` = "Linux" ]; then
     GCC="gcc "
     ON_GCC="gcc"
@@ -14,7 +17,8 @@ if [ `uname` = "Linux" ]; then
     QEMU="qemu-system-i386 "
     BOCHS_CONF="./.bochs_linux"
     DEFAULT="qemu"
-else #on Mac, I will run Qemu
+else
+    #on Mac, I will run Qemu
     GCC="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-gcc "
     ON_GCC="clang "
     LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
@@ -56,7 +60,6 @@ do_compile() {
 	then exit;
 	fi
     done
-
 
     flist=`cd $KERNEL/; ls *.c;`
     `cd ../`
@@ -178,12 +181,12 @@ while [ $# -gt 0 ]
 do
     case $1 in
         -help|-h)    show_help;      exit 0;;
-        -all|-a)     do_all "qemu";  exit 0;;
         -clean|-x)   do_clean;       exit 0;;
         -compile|-c) do_clean;       do_compile; exit 0;;
         -line |-l)   do_wc_line;     exit 0;;
         -qemu|-q)    do_all "qemu";  exit 0;;
         -bochs|-b)   do_all "bochs"; exit 0;;
+        -all|-a)     do_all "qemu";  exit 0;;
         -commit |-u) shift; log=$1;  do_commit;  exit 0;
     esac
     shift
