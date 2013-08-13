@@ -22,7 +22,7 @@ typedef struct _iobuf {
 
 extern FILE _iob[OPEN_MAX];
 
-#define stdin (&_iob[0])
+#define stdin  (&_iob[0])
 #define stdout (&_iob[1])
 #define stderr (&_iob[2])
 
@@ -38,8 +38,8 @@ enum _flags {
 #define ferror(p) ((p)->flag & _ERR) != 0)
 #define fileno(p) ((p)->fd)
 
-int _fillbuf(FILE* stream);
-int _flushbuf(int, FILE* stream);
+int _fillbuf(FILE* fp);
+int _flushbuf(int, FILE* fp);
 
 #define getc(p) (--(p)->cnt >= 0 \
                  ? (unsigned char) *(p)->ptr++ : _fillbuf(p))
@@ -56,12 +56,11 @@ int scanf(const char* format, ...);
 int sscanf(const char* buf, const char* format, ...);
 
 FILE* fopen(char* filename, const char* mode);
-int fclose(FILE* stream);
-int fflush(FILE* stream);
-int ungetc(int ch, FILE* stream);
+int fclose(FILE* fp);
+int fflush(FILE* fp);
+int ungetc(int ch, FILE* fp);
 
 
-
-int fprintf(FILE* stream, const char* format, ...);
+int fprintf(FILE* fp, const char* format, ...);
 
 #endif
