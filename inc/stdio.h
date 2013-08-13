@@ -44,22 +44,22 @@ int _flushbuf(int, FILE* fp);
 #define getc(p) (--(p)->cnt >= 0 \
                  ? (unsigned char) *(p)->ptr++ : _fillbuf(p))
 
-#define putc(x,p) (--(p)->cnt >= 0 \
+#define putc(x, p) (--(p)->cnt >= 0 \
                    ? *(p)->ptr++ = (x) : _flushbuf((x),p))
 
-//#define getchar() getc(stdin)
+#define ungetc(x, p)  ++(p)->cnt; \
+                      *(((p)->ptr - 1)) = x;
+
 #define putchar(x) putc((x), stdout)
 
-char getchar();
-
+#if 0
 int scanf(const char* format, ...);
 int sscanf(const char* buf, const char* format, ...);
+#endif
 
 FILE* fopen(char* filename, const char* mode);
 int fclose(FILE* fp);
 int fflush(FILE* fp);
-int ungetc(int ch, FILE* fp);
-
 
 int fprintf(FILE* fp, const char* format, ...);
 

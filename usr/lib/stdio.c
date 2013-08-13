@@ -45,9 +45,6 @@ int _fillbuf(FILE* fp) {
     return *(fp->ptr++);
 }
 
-int _flushbuf(int fd, FILE* stream) {
-    return 0;
-}
 
 FILE* fopen(char* filename, const char* mode) {
     FILE* fp = NULL;
@@ -80,8 +77,40 @@ FILE* fopen(char* filename, const char* mode) {
 }
 
 
+int _flushbuf(int c, FILE* fp) {
+    char v = (char)c;
+    int r, bufsize;
+
+    if(( fp->flag & (_WRITE | _ERR | _EOF)) != _WRITE)
+        return EOF;
+    if(fp->base == NULL && ((fp->flag & _UNBUF) == 0)) {
+        fp->base = (char*)malloc(sizeof(char) * BUFSIZE);
+        if(fp->base == NULL)
+            fp->flag |= _UNBUF;
+        else {
+            fp->ptr = fp->base;
+            fp->cnt = BUFSIZE - 1;
+        }
+    }
+    if( fp->flag & _UNBUF) {
+        if(c == EOF)
+            return EOF;
+        return write(fp->fd, &v, 1);
+    } else {
+        if( c != EOF )
+            *(fp->ptr++) = v;
+        bufsize = fp->ptr - fp->base;
+        r = write(fp->fd, fp->base, bufsize);
+        fp->ptr = fp->base;
+        fp->cnt = BUFSIZE - 1;
+        return r == bufsize;
+    }
+    return 0;
+}
+
 int fclose(FILE* fp) {
     if(--(fp->cnt) == 0) {
+        fflush(fp);
         fp->flag = 0;
         close(fp->fd);
         if(fp->base) {
@@ -89,20 +118,24 @@ int fclose(FILE* fp) {
             fp->base = NULL;
         }
         fp->ptr = NULL;
+        return close(fp->fd);
     }
     return 0;
 }
 
-
 int fprintf(FILE* fp, const char* format, ...) {
-
     return 0;
 }
 
 int fflush(FILE* fp) {
-    return 0;
-}
-
-int ungetc(int ch, FILE* fp) {
+    int ret = 0;
+    int i;
+    if(fp == NULL)
+        return 0;
+    if((fp->flag & _WRITE) == 0)
+        return -1;
+    _flushbuf(EOF, fp);
+    if(fp->flag & _ERR)
+        return -1;
     return 0;
 }
