@@ -23,7 +23,7 @@ s32  strcmp(const char* v1, const char* v2);
 void puts(const char* text);
 size_t strlen(const char* str);
 
-int atoi(const char* s);
+int atoi(char* s);
 int isspace(char c);
 int isalpha(char c);
 int isdigit(char c);

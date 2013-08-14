@@ -21,7 +21,7 @@ typedef char* va_list;
 #define va_arg(ap, type) ( *(type*) ((ap += INTSIZEOF(type)) - INTSIZEOF(type)))
 
 
-int atoi(const char* s) {
+int atoi(char* s) {
     int k = 0;
     char* p = s;
     while(!isdigit(*p))
@@ -51,7 +51,7 @@ int isalpha(char c) {
 
 int isdigit(char c) {
     if( c >= '0' && c <= '9')
-        return 1
+        return 1;
     return 0;
 }
 

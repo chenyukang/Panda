@@ -956,7 +956,6 @@ void eat_whitespace(FILE *in) {
     int c;
 
     while ((c = getc(in)) != EOF) {
-        printf("eat got: %c\n", c);
         if (isspace(c)) {
             continue;
         }
@@ -1030,13 +1029,11 @@ object *read_pair(FILE *in) {
     ungetc(c, in);
 
 
-    printf("in read_pair: %c\n", c);
     car_obj = read(in);
     printf("read first\n");
     eat_whitespace(in);
 
     c = getc(in);
-    printf("in read_pair: %c\n", c);
     if (c == '.') { /* read improper list */
         c = peek(in);
         if (!is_delimiter(c)) {
