@@ -159,7 +159,6 @@ void sched() {
 }
 
 void do_sleep(void* change, struct spinlock* lock) {
-    kassert(current);
     cli();
     current->chan = change;
     current->stat = WAIT;

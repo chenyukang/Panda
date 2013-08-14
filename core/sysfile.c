@@ -14,11 +14,12 @@ struct inode* create(char* path, int type);
 static s32 fd_alloc(struct file* f);
 
 s32 do_read(u32 fd, char* buf, u32 cnt) {
+    u32 r;
     if(fd == 0) {
-        while(tty_get_buf(buf, cnt) == -1) {
+        while((r = tty_get_buf(buf, cnt)) == -1) {
             do_sleep(&tty_dev, NULL);
         }
-        return 1;
+        return r;
     } else {
         //read from file
         return file_read(current->ofile[fd], buf, cnt);

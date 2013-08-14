@@ -1,11 +1,6 @@
 #ifndef STDIO_H
 #define STDIO_H
 
-#if 0
-#define stdin  0
-#define stdout 1
-#define stderr 2
-#endif
 
 #define NULL 0
 #define EOF  (-1)
@@ -48,7 +43,7 @@ int _flushbuf(int, FILE* fp);
                    ? *(p)->ptr++ = (x) : _flushbuf((x),p))
 
 #define ungetc(x, p)  ++(p)->cnt; \
-                      *(((p)->ptr - 1)) = x;
+                     (*(--(p)->ptr) = x);
 
 #define putchar(x) putc((x), stdout)
 

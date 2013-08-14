@@ -15,6 +15,7 @@
 #include <syscall.h>
 #include <fcntl.h>
 
+static char buf[BUFSIZE];
 
 FILE _iob[OPEN_MAX] = {
     /* stdin, stdout, stderr */
@@ -31,9 +32,11 @@ int _fillbuf(FILE* fp) {
     bufsize = (fp->flag & _UNBUF) ? 1 : BUFSIZE;
     if( fp->base == NULL ) {
         fp->base = (char*)malloc(sizeof(char) * bufsize);
+        memset(fp->base, 0, sizeof(char) * bufsize);
     }
     fp->ptr = fp->base;
     fp->cnt = read(fp->fd, fp->ptr, bufsize);
+    //printf("got cnt: %d buf: %s\n", fp->cnt, fp->ptr);
     if(--fp->cnt < 0) {
         if(fp->cnt == -1)
             fp->flag |= _EOF;

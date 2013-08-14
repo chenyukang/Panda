@@ -57,6 +57,7 @@ int main() {
         memset(buf, 0, sizeof(buf));
         memset(argv, 0, sizeof(argv));
         if(read(0, buf, LEN) > 0) {
+            printf("buf: %s ptr: %x\n", buf, (int)buf);
             if(!parse()) continue;
             if(try_sh_cmd())
                 continue;

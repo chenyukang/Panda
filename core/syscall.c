@@ -142,6 +142,7 @@ int sys_read(struct registers_t* regs) {
         return -1;
     }
     ret = do_read(fd, buf, cnt);
+    printk("sys_read buf: %s buf: %x\n", buf, (int)buf);
     regs->eax = ret;
     return ret;
 }

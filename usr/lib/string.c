@@ -22,18 +22,36 @@ typedef char* va_list;
 
 
 int atoi(const char* s) {
-    return 0;
+    int k = 0;
+    char* p = s;
+    while(!isdigit(*p))
+        p++;
+    while(isdigit(*p)) {
+        k = k * 10 + *p - '0';
+        p++;
+    }
+    return k;
 }
 
 int isspace(char c) {
+    u32 v = (u32)c;
+    if( v == 0x20 || v == 0x09 ||
+        v == 0x0a || v == 0x0b ||
+        v == 0x0c || v == 0x0d )
+        return 1;
     return 0;
 }
 
 int isalpha(char c) {
+    if (( c >= 'a' && c <= 'z' ) ||
+        ( c >= 'A' && c <= 'Z' ))
+        return 1;
     return 0;
 }
 
 int isdigit(char c) {
+    if( c >= '0' && c <= '9')
+        return 1
     return 0;
 }
 
@@ -111,7 +129,7 @@ void* memmove(void* dest, const void* src, size_t cnt) {
     return ret;
 }
 
-u16 *memsetw(u16 *dest, u16 val, size_t count) {
+u16* memsetw(u16 *dest, u16 val, size_t count) {
     u16 *temp = (u16 *)dest;
     for( ; count != 0; count--) *temp++ = val;
     return dest;

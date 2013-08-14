@@ -23,7 +23,6 @@ char getchar() {
 }
 
 
-#if 1
 typedef long Align ;
 
 union header {
@@ -89,7 +88,7 @@ static Header* morecore(u32 nu) {
 void* malloc(u32 nbytes) {
     Header *p, *prev;
     u32 nunits;
-    nunits = (nbytes+sizeof(Header)-1) / sizeof(Header) + 1;
+    nunits = (nbytes + sizeof(Header)-1) / sizeof(Header) + 1;
 
     if( (prev = freep ) == NULL ) {
         prev = freep = base.s.ptr = &base;
@@ -114,4 +113,3 @@ void* malloc(u32 nbytes) {
         }
     }
 }
-#endif
