@@ -11,13 +11,6 @@
 #include <string.h>
 #include <screen.h>
 
-#define INTSIZEOF(n)          ((sizeof(n)+sizeof(int)-1) & ~(sizeof(int)-1))
-#define va_start(ap, format)  ( ap = (va_list)(&format) + INTSIZEOF(format))
-#define va_arg(ap, type)      (*(type*) ((ap += INTSIZEOF(type)) - INTSIZEOF(type)))
-#define va_end(ap)            ( ap=(va_list)0 )
-
-typedef char* va_list;
-
 const static char* digits = "0123456789";
 
 void strcpy(char* dest, char* src) {

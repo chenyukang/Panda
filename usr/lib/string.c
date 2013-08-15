@@ -13,13 +13,6 @@
 #define putch write
 
 const char* digits = "0123456789";
-typedef char* va_list;
-
-#define INTSIZEOF(n) ((sizeof(n)+sizeof(int)-1) & ~(sizeof(int)-1))
-#define va_start(ap, format) ( ap = (va_list)(&format) + INTSIZEOF(format))
-#define va_end(ap) ( ap=(va_list)0 )
-#define va_arg(ap, type) ( *(type*) ((ap += INTSIZEOF(type)) - INTSIZEOF(type)))
-
 
 int atoi(char* s) {
     int k = 0;
@@ -169,7 +162,6 @@ size_t strlen(const char *str) {
 inline void puts(const char* text) {
     u32 i;
     for (i = 0; i < strlen(text); i++) {
-        //putch(text[i]);
         write(0, (char*)&text[i], 1);
     }
 }

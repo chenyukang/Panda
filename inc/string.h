@@ -14,6 +14,13 @@
 
 #define abs(x) ((x < 0) ? (-(x)): (x) )
 
+typedef char* va_list;
+
+#define INTSIZEOF(n) ((sizeof(n)+sizeof(int)-1) & ~(sizeof(int)-1))
+#define va_start(ap, format) ( ap = (va_list)(&format) + INTSIZEOF(format))
+#define va_end(ap) ( ap=(va_list)0 )
+#define va_arg(ap, type) ( *(type*) ((ap += INTSIZEOF(type)) - INTSIZEOF(type)))
+
 void strcpy(char* dest, char* src);
 void strncpy(char* dest, char* src, size_t cnt);
 void* strcat(char* dest, const char* src);
@@ -36,6 +43,7 @@ s32   memcmp(const void* v1, const void* v2, u32 n);
 
 #ifdef USR
 #include <syscall.h>
+int _sprintf(char* buf, const char* format, va_list args);
 int printf(const char* format, ... );
 int sprintf(char* buf, const char* format, ...);
 #else

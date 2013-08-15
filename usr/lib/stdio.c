@@ -127,7 +127,17 @@ int fclose(FILE* fp) {
 }
 
 int fprintf(FILE* fp, const char* format, ...) {
-    return 0;
+    va_list ap;
+    char buf[1024];
+    u32  cnt = 0, k = 0;
+    va_start(ap, format);
+    memset(buf, 0, sizeof(buf));
+    cnt = _sprintf(buf, format, ap);
+    va_end(ap);
+    for(k=0; k<cnt; k++)
+        putc(buf[k], fp);
+    fflush(fp);
+    return cnt;
 }
 
 int fflush(FILE* fp) {

@@ -316,7 +316,7 @@ object *integer_to_char_proc(object *arguments) {
 object *number_to_string_proc(object *arguments) {
     char buffer[100];
 
-    sprintf(buffer, "%ld", (car(arguments))->data.fixnum.value);
+    sprintf(buffer, "%d", (car(arguments))->data.fixnum.value);
     return make_string(buffer);
 }
 
@@ -1030,7 +1030,6 @@ object *read_pair(FILE *in) {
 
 
     car_obj = read(in);
-    printf("read first\n");
     eat_whitespace(in);
 
     c = getc(in);
@@ -1051,7 +1050,6 @@ object *read_pair(FILE *in) {
         return cons(car_obj, cdr_obj);
     }
     else { /* read list */
-        printf("fuck now\n");
         ungetc(c, in);
         cdr_obj = read_pair(in);
         return cons(car_obj, cdr_obj);
@@ -1070,7 +1068,6 @@ object *read(FILE *in) {
 
     c = getc(in);
 
-    printf("got: %c\n", c);
     if (c == '#') { /* read a boolean or character */
         c = getc(in);
         switch (c) {
@@ -1669,6 +1666,7 @@ void write(FILE *out, object *obj) {
     char c;
     char *str;
 
+    fprintf(out, "ans:");
     switch (obj->type) {
     case THE_EMPTY_LIST:
         fprintf(out, "()");
@@ -1680,7 +1678,7 @@ void write(FILE *out, object *obj) {
         fprintf(out, "%s", obj->data.symbol.value);
         break;
     case FIXNUM:
-        fprintf(out, "%ld", obj->data.fixnum.value);
+        fprintf(out, "%d", obj->data.fixnum.value);
         break;
     case CHARACTER:
         c = obj->data.character.value;
@@ -1745,14 +1743,13 @@ void write(FILE *out, object *obj) {
 
 /***************************** REPL ******************************/
 
-int main(void) {
+int main(int argc, char* argv[]) {
     object *exp;
 
     printf("Welcome to Bootstrap Scheme. "
            "Use ctrl-c to exit.\n");
 
     init();
-
     while (1) {
         printf("> ");
         exp = read(stdin);

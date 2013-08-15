@@ -40,7 +40,7 @@ int _flushbuf(int, FILE* fp);
                  ? (unsigned char) *(p)->ptr++ : _fillbuf(p))
 
 #define putc(x, p) (--(p)->cnt >= 0 \
-                   ? *(p)->ptr++ = (x) : _flushbuf((x),p))
+                   ? *(p)->ptr++ = (x) : _flushbuf((x), p))
 
 #define ungetc(x, p)  ++(p)->cnt; \
                      (*(--(p)->ptr) = x);
