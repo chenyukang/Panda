@@ -20,14 +20,17 @@ void tty_clear() {
 }
 
 u32 tty_ch(u8 c) {
+    putch(c);
     if( c == 0x08 ) {
+        //delete
         return tty_pop();
     }
-    putch(c);
 
     tty_push(c);
-    if(c == 0x0A)
+    if(c == 0x0A) {
+        //newline
         do_wakeup(&tty_dev);
+    }
     return -1;
 }
 
