@@ -110,8 +110,8 @@ int do_exec(char* path, char** argv) {
 
     idrop(ip);
     enter_user(vm->vm_entry, esp);
-    kassert(0);
-    return 0; //never return for succ
+    //never return for succ
+    return 0;
 
 error:
     idrop(ip);

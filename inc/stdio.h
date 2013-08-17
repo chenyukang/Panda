@@ -47,11 +47,6 @@ int _flushbuf(int, FILE* fp);
 
 #define putchar(x) putc((x), stdout)
 
-#if 0
-int scanf(const char* format, ...);
-int sscanf(const char* buf, const char* format, ...);
-#endif
-
 FILE* fopen(char* filename, const char* mode);
 int fclose(FILE* fp);
 int fflush(FILE* fp);

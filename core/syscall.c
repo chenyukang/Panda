@@ -39,7 +39,7 @@ int sys_exec(struct registers_t* regs) {
     char **argv = (char**)regs->ecx;
     int r = do_exec(path, argv);
     if(r == -1) {
-        do_exit(1);
+        do_exit(OPENERR);
         return -1;   //remove warnning message
     } else {
         return 0;

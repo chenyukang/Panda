@@ -28,7 +28,7 @@ s32 do_read(u32 fd, char* buf, u32 cnt) {
 }
 
 s32 do_write(u32 fd, char* buf, u32 cnt) {
-    if(fd == 0 || fd == 1) {
+    if(fd == 1 || fd == 2) {
         int k;
         for(k=0; k<cnt; k++) {
             putch(buf[k]);

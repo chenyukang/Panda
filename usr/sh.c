@@ -69,7 +69,7 @@ int main() {
                 exec(cmd, &argv[1]);
             }
             wait(-1, &ret);
-            if(ret == 1) {
+            if(ret == OPENERR) {
                 printf("no such command: %s\n", argv[0]);
             } else {
                 //executed succ

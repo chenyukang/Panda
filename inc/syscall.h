@@ -9,6 +9,7 @@
 
 // System call numbers
 #define NSYSC 64
+#define OPENERR 0x8ffffff
 
 extern int errno;
 
