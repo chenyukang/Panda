@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
     write(fd, buf, strlen(buf));
     close(fd);
 
+    getchar();//eat the \n
     printf("exiting vi ...\n");
     return 0;
 }
