@@ -1666,7 +1666,6 @@ void write(FILE *out, object *obj) {
     char c;
     char *str;
 
-    fprintf(out, "ans:");
     switch (obj->type) {
     case THE_EMPTY_LIST:
         fprintf(out, "()");
@@ -1746,22 +1745,34 @@ void write(FILE *out, object *obj) {
 int main(int argc, char* argv[]) {
     object *exp;
 
-    printf("Welcome to Bootstrap Scheme. "
-           "Use ctrl-c to exit.\n");
-
     init();
-    while (1) {
-        printf("> ");
-        exp = read(stdin);
-        if (exp == NULL) {
-            break;
+    if(argc == 1) {
+        printf("Welcome to Bootstrap Scheme. "
+               "Use ctrl-c to exit.\n");
+        while (1) {
+            printf("> ");
+            exp = read(stdin);
+            if (exp == NULL) {
+                break;
+            }
+            printf("ans: ");
+            write(stdout, eval(exp, the_global_environment));
+            printf("\n");
         }
-        write(stdout, eval(exp, the_global_environment));
-        printf("\n");
+
+        printf("Goodbye\n");
+    } else {
+        /* exec a file */
+        FILE* fp = fopen(argv[1], "r");
+        if(fp == 0) {
+            printf("no such file: %s\n", argv[1]);
+            return -1;
+        }
+        while((exp = read(fp)) != NULL) {
+            write(stdout, eval(exp, the_global_environment));
+            printf("\n");
+        }
     }
-
-    printf("Goodbye\n");
-
     return 0;
 }
 
