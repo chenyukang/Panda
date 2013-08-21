@@ -271,7 +271,8 @@ void do_wt_page(void* vaddr) {
     vp = find_vma((u32)vaddr);
     if (vp->v_flag & VMA_RDONLY) {
         //sigsend(cu->p_pid, SIGSEGV, 1);
-        printk("task:%d %x\n", current->pid, (u32)vaddr);
+        printk("task:%d name:%s address:%x\n",
+               current->pid, current->name, (u32)vaddr);
         kassert(0);
         return;
     }
@@ -304,7 +305,6 @@ void do_no_page(void* vaddr) {
     u32 off;
 
     vm = &current->p_vm;
-
     // if this page lies on the edge of user stack,
     // grows the stack.
     if (vm->vm_stack.v_base - (u32)vaddr <= PAGE_SIZE) {
@@ -334,7 +334,6 @@ void do_no_page(void* vaddr) {
     // demand file
     if (vp->v_flag & VMA_MMAP) {
         pg = alloc_page();
-        kassert(pg);
         pte = put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         // fill this new-allocated page
         buf = (char*)PG_ADDR(vaddr);

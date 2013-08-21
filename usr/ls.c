@@ -24,7 +24,7 @@ void fmt(char* buf) {
 int ls(char* path, char* name) {
     struct stat s;
     struct dirent dire;
-    char buf[512];
+    char buf[1024 * 4];
     int fd;
     int num = 0;
 
@@ -49,11 +49,13 @@ int ls(char* path, char* name) {
         printf("name: %s size: %d\n", buf, s.st_size);
     }
     else if(S_ISDIR(s.st_mode)) {
+        memset(&dire, 0, sizeof(dire));
         while(read(fd, &dire, sizeof(struct dirent)) == sizeof(struct dirent)) {
             if(dire.d_ino == 0) continue;
             memset(buf, 0, sizeof(buf));
             memset(&s, 0, sizeof(s));
-            strcat(buf, dire.d_name);
+            strcpy(buf, dire.d_name);
+            memset(&dire, 0, sizeof(dire));
             num++;
             if(stat(buf, &s) < 0) {
                 printf("stat error: %s\n", buf);

@@ -4,7 +4,7 @@
 // @Author : Yukang Chen (moorekang@gmail.com)
 // @Date   : 2012-01-05 22:46:52
 //
-// @Brief  :
+// @Brief  : timer driver
 
 #include <system.h>
 #include <string.h>
@@ -37,10 +37,6 @@ static void timer_callback(void) {
         timer.seconds++;
         do_wakeup(&timer);
         sti();
-    }
-
-    if(timer.ticks%2 == 0){
-        sched();
     }
 }
 

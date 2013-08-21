@@ -72,6 +72,7 @@ u32 xint(u32 x) {
 u32 new_dir(u32 pino, u32 ino, struct dirent* de, char* name) {
     bzero(de, sizeof(*de));
     de->d_ino = ino;
+    memset(&(de->d_name), 0, sizeof(de->d_name));
     strcpy(de->d_name, name);
     iappend(pino, de, sizeof(*de));
     return 0;
