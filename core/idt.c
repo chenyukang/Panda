@@ -273,16 +273,13 @@ void hwint_handler(struct registers_t* regs) {
     *  IRQ and then run it */
     isq_t handler = irq_routines[regs->int_no];
     if (regs->int_no < 32) {
-        if(handler){
+        if(handler)
             handler(regs);
-        }
     } else {
         irq_eoi(regs->int_no);
-        if(handler) {
+        if(handler)
             handler(regs);
-        }
     }
-
     if((regs->cs & 3) == 3) {
         sched();
     }

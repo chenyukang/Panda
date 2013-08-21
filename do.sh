@@ -5,7 +5,7 @@ BOOT="./boot"
 KERNEL="./core"
 INCLUDE="./inc"
 NASM="nasm -f elf "
-CFLAGS="-Wall -m32 -O2 -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+CFLAGS="-Wall -m32 -O -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
 BOCHS="bochs "
 DEFAULT="None"
 

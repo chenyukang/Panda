@@ -99,7 +99,8 @@ setupsize 	equ 	512
 
 systemseg       equ     0x0000
 systemoffset	equ 	0x0000
-systemsize      equ 	1024*40 ; this will bigger than kernel.bin
+systemsize      equ 	1024*36 ; this will bigger than kernel.bin
+				;;; bochs seems has error when read more than 1024*36
 	
 setup_msg db "Setuping Panda OS"
 	db 13, 10, 0
