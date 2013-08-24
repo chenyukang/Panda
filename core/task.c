@@ -25,9 +25,7 @@ struct {
 } proc_table;
 
 struct tss_desc tss;
-
 extern struct pde  pg_dir0;
-extern struct pde* cu_pg_dir;
 struct task*       current = 0;
 extern u32         init_esp_start;
 

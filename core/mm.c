@@ -15,16 +15,15 @@
 //4kb
 extern char  __kimg_end__;
 struct pde   pg_dir0[1024] __attribute__((aligned(4096)));
-struct pde*  cu_pg_dir;
 
 struct page  pages[NPAGE] __attribute__((aligned(4096)));;
 struct page  freepg_list;
 
-u32 end_addr, ker_addr, used_addr;
+static u32 end_addr, ker_addr, used_addr;
 
-u32 page_nr;      //all page number
-u32 free_page_nr; //free page number
-u32 k_dir_nr;     //this is number of page mapped by kernel
+static u32 page_nr;      //all page number
+static u32 free_nr; //free page number
+static u32 kern_nr;     //this is number of page mapped by kernel
 
 void page_fault_handler(struct registers_t* regs);
 
@@ -50,23 +49,23 @@ void init_pages() {
     u32 k;
     page_nr = (end_addr)/(PAGE_SIZE);
     used_addr = PAGE_ROUND_UP(used_addr);
-    free_page_nr = (used_addr)/0x1000;
+    free_nr = (used_addr)/0x1000;
 
     //this is used by kernel
-    for(k=0; k<free_page_nr; k++) {
+    for(k=0; k<free_nr; k++) {
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 1;
         pages[k].pg_next = 0;
     }
 
     //free pages
-    for(k=free_page_nr; k<NPAGE; k++) {
+    for(k=free_nr; k<NPAGE; k++) {
         pages[k].pg_idx = k;
         pages[k].pg_refcnt = 0;
         pages[k].pg_next = 0;
     }
     struct page* pg = &freepg_list;
-    for(k=free_page_nr; k<NPAGE; k++) {
+    for(k=free_nr; k<NPAGE; k++) {
         pg->pg_next = &pages[k];
         pg = pg->pg_next;
     }
@@ -169,7 +168,7 @@ void copy_pgd(struct pde* from, struct pde* targ) {
     struct pte *fpte, *tpte;
     struct page *page;
     u32 idx, k;
-    for(idx=k_dir_nr; idx<1024; idx++) {
+    for(idx=kern_nr; idx<1024; idx++) {
         fpde = &(from[idx]);
         tpde = &(targ[idx]);
         tpde->pt_flags = fpde->pt_flags;
@@ -218,13 +217,13 @@ s32 free_pgd(struct pde* pgd) {
 
 void init_page_dir(struct pde* pg_dir) {
     u32 k;
-    k_dir_nr = (PMEM)/(PAGE_SIZE*1024);
-    for(k=0; k<k_dir_nr; k++) {
+    kern_nr = (PMEM)/(PAGE_SIZE*1024);
+    for(k=0; k<kern_nr; k++) {
         pg_dir[k].pt_base  = k<<10;
         pg_dir[k].pt_flags = PTE_P | PTE_W | PTE_PS;
     }
 
-    for(k=k_dir_nr; k<1024; k++) {
+    for(k=kern_nr; k<1024; k++) {
         pg_dir[k].pt_base  = 0;
         pg_dir[k].pt_flags = PTE_U;
     }
