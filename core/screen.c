@@ -111,7 +111,7 @@ void putch(char c) {
     /* Any character greater than and including a space, is a
     *  printable character. The equation for finding the index
     *  in a linear chunk of memory can be represented by:
-    *  Index = [(y * width) + x] */
+    *  index = [(y * width) + x] */
     else if(c >= ' ') {
         where = textmemptr + (csr_y * 80 + csr_x);
         *where = c | att;	/* Character AND attributes: color */
@@ -142,6 +142,7 @@ void init_video(void) {
     cls();
 }
 
+/* add some color property */
 void puts_color_str(char* str, unsigned color) {
     char* ptr = str;
     attrib = color & 0xFF;

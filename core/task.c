@@ -33,11 +33,6 @@ extern u32         init_esp_start;
 
 extern void _do_swtch(struct jmp_buf* from, struct jmp_buf* to);
 
-char* get_current_name() {
-    kassert(current);
-    return (char*)current->name;
-}
-
 struct task* alloc_proc() {
     u32 i;
     acquire_lock(&proc_table.lock);
@@ -122,18 +117,23 @@ struct task* spawn(void* func) {
     return new_task;
 }
 
-void swtch_to(struct task *to){
+void swtch_to(struct task *to) {
     cli();
-    acquire_lock(&proc_table.lock);
     struct task *from = current;
     tss.esp0 = (u32)to + PAGE_SIZE;
     to->r_time++;
     current = to;
     flush_pgd(to->p_vm.vm_pgd);
     to->stat = RUNNING;
-    release_lock(&proc_table.lock);
     sti();
     _do_swtch(&(from->p_context), &(to->p_context));
+}
+
+void yield() {
+    acquire_lock(&proc_table.lock);
+    current->stat = RUNNABLE;
+    release_lock(&proc_table.lock);
+    sched();
 }
 
 void sched() {
@@ -141,11 +141,11 @@ void sched() {
     struct task* next;
     struct task* t;
 
-    next = t = 0;
+    t = next = 0;
     min = -1;
-    for(i=PROC_NUM-1; i>=0; i--) {
+    for(i=0; i<PROC_NUM; i++)  {
         t = proc_table.procs[i];
-        if(t == 0 || t == current) continue;
+        if(t == 0 || t == current ) continue;
         if(t->stat == ZOMBIE || t->stat == WAIT) continue;
         if(min == -1 || t->r_time <= min) {
             min = t->r_time;
@@ -269,12 +269,12 @@ int  task_debug_s(char* buf, u32 size) {
             t[25] = 0;
             strcat(buf, t);
             switch(p->stat) {
-            case NEW: sprintk(t, "NEW\n"); break;
-            case WAIT: sprintk(t, "WAIT\n"); break;
-            case RUNNING: sprintk(t, "RUN\n"); break;
-            case ZOMBIE: sprintk(t, "ZOMBIE\n"); break;
+            case NEW:      sprintk(t, "NEW\n");      break;
+            case WAIT:     sprintk(t, "WAIT\n");     break;
+            case RUNNING:  sprintk(t, "RUN\n");      break;
+            case ZOMBIE:   sprintk(t, "ZOMBIE\n");   break;
             case RUNNABLE: sprintk(t, "RUNNABLE\n"); break;
-            default: break;
+            default:                                 break;
             }
             strcat(buf, t);
         }

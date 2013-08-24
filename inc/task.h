@@ -99,11 +99,11 @@ extern struct task* current;
 
 void task_init();
 void sched();
+void yield();
 
 s32  do_exit(s32 ret);
 s32  wait_p(s32 pid, s32* stat);
 struct task* spawn(void* func);
-char* get_current_name();
 
 s32 growtask(u32 size);
 

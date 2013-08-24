@@ -20,7 +20,6 @@ void strcpy(char* dest, char* src) {
     }
 }
 
-
 void strncpy(char* dest, char* src, size_t cnt) {
     while(cnt && (*dest++ = *src++))
         cnt--;

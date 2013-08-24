@@ -145,7 +145,8 @@ void irq_install(int irq, isq_t handler) {
     irq_routines[irq] = handler;
 }
 
-#define isr_set(idx)                            \
+/* 1000 1110 */
+#define isr_set(idx) \
     idt_set(idx, (u32)(isr##idx), 1<<3, 0x8F);
 
 #define irq_set(idx) \
@@ -176,7 +177,7 @@ void idt_init() {
 
     /* Add any new ISRs to the IDT here using idt_set_gate */
     /* Points the processor's internal register to the new IDT */
-    /* 1000 1110 */
+
     isr_set(0);  isr_set(1);  isr_set(2);  isr_set(3);
     isr_set(4);  isr_set(5);  isr_set(6);  isr_set(7);
     isr_set(8);  isr_set(9);  isr_set(10); isr_set(11);
@@ -204,7 +205,6 @@ void idt_init() {
 
 
 /* This gets called from our ASM interrupt handler stub. */
-/* use [ asm volatile("int $0x80"); ] etc to have test */
 void hwint_handler(struct registers_t* regs) {
     if ((regs->cs & 3) == 3) {
         current->p_trap = regs;
@@ -221,7 +221,9 @@ void hwint_handler(struct registers_t* regs) {
         if(handler)
             handler(regs);
     }
-    if((regs->cs & 3) == 3) {
+    /* user-mode */
+    if((regs->cs & 3) == 3 && current!= 0 ) {
         sched();
+        //yield();
     }
 }
