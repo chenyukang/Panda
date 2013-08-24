@@ -273,7 +273,7 @@ int  task_debug_s(char* buf, u32 size) {
                     t[k] = ' ';
                 }
             }
-            t[25] = 0;
+            t[max] = 0;
             strcat(buf, t);
             switch(p->stat) {
             case NEW:      sprintk(t, "NEW\n");      break;
