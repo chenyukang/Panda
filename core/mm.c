@@ -272,8 +272,7 @@ void do_wt_page(void* vaddr) {
         //sigsend(cu->p_pid, SIGSEGV, 1);
         printk("task:%d name:%s address:%x\n",
                current->pid, current->name, (u32)vaddr);
-        kassert(0);
-        return;
+        PANIC("memory error");
     }
 
     if (vp->v_flag & VMA_PRIVATE) {
