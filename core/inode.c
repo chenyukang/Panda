@@ -198,7 +198,7 @@ static u32 bmap(struct inode* ip, u32 bn) {
 
     bn -= NDIRECT;
     if(bn < NINDIRECT) {
-        //load indirect block, allocating if necessary.
+        /* load indirect block, allocating if necessary. */
         if((addr = ip->addrs[NDIRECT]) == 0)
             ip->addrs[NDIRECT] = addr = blk_alloc(ip->dev);
         bp = buf_read(ip->dev, addr);
@@ -265,8 +265,8 @@ int writei(struct inode* ip, char* addr, u32 off, u32 n) {
 }
 
 
-s32 namecmp(const char* s, const char* t) {
-    return strncmp(s, t, NAME_MAX); //DIRSIZE is the max length of name
+static s32 namecmp(const char* s, const char* t) {
+    return strncmp(s, t, NAME_MAX);
 }
 
 

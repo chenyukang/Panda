@@ -25,16 +25,19 @@
 #define CMD_WRITE 0x30
 
 struct hd_struct {
-    unsigned int head;
-    unsigned int sect;
-    unsigned int cyl;
-    unsigned int wpcom,lzone,ctl;
+    u32 head;
+    u32 sect;
+    u32 cyl;
+    u32 wpcom;
+    u32 lzone;
+    u32 ctl;
 };
 
 static int havedisk1;
 static struct buf* ide_queue;
 static struct spinlock hdlock;
 
+/* disk details, haven't used now */
 struct hd_struct hd_inf[] = { {0,0,0,0,0,0},
                               {0,0,0,0,0,0} };
 
@@ -43,24 +46,26 @@ static int waitfor_ready(int check_error) {
     int r;
     while( --retries ) {
         r = inb(IDE_STAT);
-        if ( (r & (IDE_BUSY | IDE_READY)) == IDE_READY ) {
+        if ((r & (IDE_BUSY | IDE_READY)) == IDE_READY ) {
             break;
         }
     }
-    if(check_error & (( r & (IDE_DF | IDE_ERROR)) != 0))
+    if(check_error & ((r & (IDE_DF | IDE_ERROR)) != 0))
         return -1;
     return 0;
 }
 
-// Start the request for b.  Caller must hold idelock.
+/* Start the request for b.  Caller must hold idelock. */
 static void
 ide_start(struct buf *b) {
   if(b == 0)
     PANIC("ide_start");
 
   waitfor_ready(1);
-  outb(0x3f6, 0);  // generate interrupt
-  outb(0x1f2, 1);  // number of sectors
+  /* generate interrupt */
+  outb(0x3f6, 0);
+  /* number of sectors */
+  outb(0x1f2, 1);
   outb(0x1f3, b->b_sector & 0xff);
   outb(0x1f4, (b->b_sector >> 8) & 0xff);
   outb(0x1f5, (b->b_sector >> 16) & 0xff);
@@ -79,7 +84,7 @@ void hd_interupt_handler(void) {
     if(bp == 0) {
         return;
     }
-    
+
     ide_queue = bp->b_qnext;
     if(!(bp->b_flag & B_DIRTY) && waitfor_ready(1) >= 0){
         insl(0x1F0, bp->b_data, 512/4);
@@ -99,7 +104,7 @@ void hd_rw(struct buf* bp) {
         PANIC("hd_rw: buf is not busy");
     if(bp->b_dev != 0 && havedisk1 == 0)
         PANIC("hd_rw: error device number");
-    
+
     bp->b_qnext = 0;
     struct buf* p = ide_queue;
     if( p == 0 ) {
@@ -116,14 +121,15 @@ void hd_rw(struct buf* bp) {
     //may cause a interupt before this, for example Qemu
     while((bp->b_flag & (B_VALID | B_DIRTY)) != B_VALID) {
         do_sleep(bp, &hdlock);
-        sti(); 
+        sti();
     }
 }
 
 void init_hd() {
+    int i;
     init_lock(&hdlock, "disklock");
     void* bios = (void*)0x90080;
-    
+
     /* get the number of divers, from the BIOS data area */
     hd_inf[0].cyl   = *(u16*)bios;
     hd_inf[0].head  = *(u8*)(2+bios);
@@ -136,27 +142,23 @@ void init_hd() {
     irq_install(32+14, (isq_t)(&hd_interupt_handler));
     waitfor_ready(0);
 
-#if 1
-    int i;
-    // Check if disk 1 is present
+    /* to check if disk 1 is present */
     outb(0x1f6, 0xe0 | (1<<4));
-    for(i=0; i<1000; i++){
-        if(inb(0x1f7) != 0){
+    for(i=0; i<10; i++){
+        if(inb(0x1f7) != 0) {
             havedisk1 = 1;
-            //printk("have disk1\n");
             break;
         }
     }
     // Switch back to disk 0.
     outb(0x1f6, 0xe0 | (0<<4));
-#endif
-    
+
+    waitfor_ready(0);
+    ide_queue = 0;
 }
 
 void ide_init() {
     printk("[hd]   .... ");
     init_hd();
-    waitfor_ready(0);
-    ide_queue = 0;
     done();
 }

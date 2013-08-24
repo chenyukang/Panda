@@ -12,7 +12,6 @@
 #include <task.h>
 #include <asm.h>
 #include <gdt.h>
-//#include <syscall.h>
 
 /*
 Interrupt Gate Descriptor
@@ -56,56 +55,26 @@ struct idt_entry idt[256];
 struct idt_ptr   idtp;
 isq_t irq_routines[256];
 
-// These extern directives let us access the addresses of our ASM ISR handlers.
-extern void isr0 ();
-extern void isr1 ();
-extern void isr2 ();
-extern void isr3 ();
-extern void isr4 ();
-extern void isr5 ();
-extern void isr6 ();
-extern void isr7 ();
-extern void isr8 ();
-extern void isr9 ();
-extern void isr10();
-extern void isr11();
-extern void isr12();
-extern void isr13();
-extern void isr14();
-extern void isr15();
-extern void isr16();
-extern void isr17();
-extern void isr18();
-extern void isr19();
-extern void isr20();
-extern void isr21();
-extern void isr22();
-extern void isr23();
-extern void isr24();
-extern void isr25();
-extern void isr26();
-extern void isr27();
-extern void isr28();
-extern void isr29();
-extern void isr30();
-extern void isr31();
+/* These extern directives let us access the addresses of our ASM ISR handlers. */
+#define disr(idx) \
+    extern void isr##idx();
 
-extern void irq0 ();
-extern void irq1 ();
-extern void irq2 ();
-extern void irq3 ();
-extern void irq4 ();
-extern void irq5 ();
-extern void irq6 ();
-extern void irq7 ();
-extern void irq8 ();
-extern void irq9 ();
-extern void irq10();
-extern void irq11();
-extern void irq12();
-extern void irq13();
-extern void irq14();
-extern void irq15();
+#define dirq(idx) \
+    extern void irq##idx();
+
+disr(0);  disr(1);  disr(2);  disr(3);
+disr(4);  disr(5);  disr(6);  disr(7);
+disr(8);  disr(9);  disr(10); disr(11);
+disr(12); disr(13); disr(14); disr(15);
+disr(16); disr(17); disr(18); disr(19);
+disr(20); disr(21); disr(22); disr(23);
+disr(24); disr(25); disr(26); disr(27);
+disr(28); disr(29); disr(30); disr(31);
+
+dirq(0);  dirq(1);  dirq(2);  dirq(3);
+dirq(4);  dirq(5);  dirq(6);  dirq(7);
+dirq(8);  dirq(9);  dirq(10); dirq(11);
+dirq(12); dirq(13); dirq(14); dirq(15);
 
 extern void sys_call();
 
@@ -176,6 +145,12 @@ void irq_install(int irq, isq_t handler) {
     irq_routines[irq] = handler;
 }
 
+#define isr_set(idx)                            \
+    idt_set(idx, (u32)(isr##idx), 1<<3, 0x8F);
+
+#define irq_set(idx) \
+    idt_set(idx + 32, (u32)(irq##idx), 1<<3, 0x8F);
+
 /* Installs the IDT */
 void idt_init() {
     puts("[idt]  .... ");
@@ -183,10 +158,10 @@ void idt_init() {
     /* Sets the special IDT pointer up, just like in 'gdt.c' */
     idtp.limit = (sizeof (struct idt_entry) * 256) - 1;
     idtp.base = (u32)&idt;
-    /* Clear out the entire IDT, initializing it to zeros */
+
     memset(&idt, 0, sizeof(struct idt_entry) * 256);
 
-    // Remap the irq table.
+    /* Remap the irq table. */
     outb(0x20, 0x11);
     outb(0xA0, 0x11);
     outb(0x21, 0x20);
@@ -201,55 +176,20 @@ void idt_init() {
 
     /* Add any new ISRs to the IDT here using idt_set_gate */
     /* Points the processor's internal register to the new IDT */
-    idt_set( 0, (u32)isr0 , 1<<3, 0x8F); //1000 1110
-    idt_set( 1, (u32)isr1 , 1<<3, 0x8F);
-    idt_set( 2, (u32)isr2 , 1<<3, 0x8F);
-    idt_set( 3, (u32)isr3 , 1<<3, 0x8F);
-    idt_set( 4, (u32)isr4 , 1<<3, 0x8F);
-    idt_set( 5, (u32)isr5 , 1<<3, 0x8F);
-    idt_set( 6, (u32)isr6 , 1<<3, 0x8F);
-    idt_set( 7, (u32)isr7 , 1<<3, 0x8F);
-    idt_set( 8, (u32)isr8 , 1<<3, 0x8F);
-    idt_set( 9, (u32)isr9 , 1<<3, 0x8F);
-    idt_set(10, (u32)isr10, 1<<3, 0x8F);
-    idt_set(11, (u32)isr11, 1<<3, 0x8F);
-    idt_set(12, (u32)isr12, 1<<3, 0x8F);
-    idt_set(13, (u32)isr13, 1<<3, 0x8F);
-    idt_set(14, (u32)isr14, 1<<3, 0x8F);
-    idt_set(15, (u32)isr15, 1<<3, 0x8F);
-    idt_set(16, (u32)isr16, 1<<3, 0x8F);
-    idt_set(17, (u32)isr17, 1<<3, 0x8F);
-    idt_set(18, (u32)isr18, 1<<3, 0x8F);
-    idt_set(19, (u32)isr19, 1<<3, 0x8F);
-    idt_set(20, (u32)isr20, 1<<3, 0x8F);
-    idt_set(21, (u32)isr21, 1<<3, 0x8F);
-    idt_set(22, (u32)isr22, 1<<3, 0x8F);
-    idt_set(23, (u32)isr23, 1<<3, 0x8F);
-    idt_set(24, (u32)isr24, 1<<3, 0x8F);
-    idt_set(25, (u32)isr25, 1<<3, 0x8F);
-    idt_set(26, (u32)isr26, 1<<3, 0x8F);
-    idt_set(27, (u32)isr27, 1<<3, 0x8F);
-    idt_set(28, (u32)isr28, 1<<3, 0x8F);
-    idt_set(29, (u32)isr29, 1<<3, 0x8F);
-    idt_set(30, (u32)isr30, 1<<3, 0x8F);
-    idt_set(31, (u32)isr31, 1<<3, 0x8F);
+    /* 1000 1110 */
+    isr_set(0);  isr_set(1);  isr_set(2);  isr_set(3);
+    isr_set(4);  isr_set(5);  isr_set(6);  isr_set(7);
+    isr_set(8);  isr_set(9);  isr_set(10); isr_set(11);
+    isr_set(12); isr_set(13); isr_set(14); isr_set(15);
+    isr_set(16); isr_set(17); isr_set(18); isr_set(19);
+    isr_set(20); isr_set(21); isr_set(22); isr_set(23);
+    isr_set(24); isr_set(25); isr_set(26); isr_set(27);
+    isr_set(28); isr_set(29); isr_set(30); isr_set(31);
 
-    idt_set(32, (u32)irq0, 1<<3, 0x8E);
-    idt_set(33, (u32)irq1, 1<<3, 0x8E);
-    idt_set(34, (u32)irq2, 1<<3, 0x8E);
-    idt_set(35, (u32)irq3, 1<<3, 0x8E);
-    idt_set(36, (u32)irq4, 1<<3, 0x8E);
-    idt_set(37, (u32)irq5, 1<<3, 0x8E);
-    idt_set(38, (u32)irq6, 1<<3, 0x8E);
-    idt_set(39, (u32)irq7, 1<<3, 0x8E);
-    idt_set(40, (u32)irq8, 1<<3, 0x8E);
-    idt_set(41, (u32)irq9, 1<<3, 0x8E);
-    idt_set(42, (u32)irq10, 1<<3, 0x8E);
-    idt_set(43, (u32)irq11, 1<<3, 0x8E);
-    idt_set(44, (u32)irq12, 1<<3, 0x8E);
-    idt_set(45, (u32)irq13, 1<<3, 0x8E);
-    idt_set(46, (u32)irq14, 1<<3, 0x8E);
-    idt_set(47, (u32)irq15, 1<<3, 0x8E);
+    irq_set(0);  irq_set(1);  irq_set(2);  irq_set(3);
+    irq_set(4);  irq_set(5);  irq_set(6);  irq_set(7);
+    irq_set(8);  irq_set(9);  irq_set(10); irq_set(11);
+    irq_set(12); irq_set(13); irq_set(14); irq_set(15);
 
     idt_set(0x80, (u32)sys_call, 1<<3, 0xEF);
 
@@ -263,7 +203,8 @@ void idt_init() {
 }
 
 
-// This gets called from our ASM interrupt handler stub.
+/* This gets called from our ASM interrupt handler stub. */
+/* use [ asm volatile("int $0x80"); ] etc to have test */
 void hwint_handler(struct registers_t* regs) {
     if ((regs->cs & 3) == 3) {
         current->p_trap = regs;
@@ -283,8 +224,4 @@ void hwint_handler(struct registers_t* regs) {
     if((regs->cs & 3) == 3) {
         sched();
     }
-}
-
-void test_idt(){
-    asm volatile ("int $0x80");
 }

@@ -9,7 +9,6 @@ void init_lock(struct spinlock* lk, char* name) {
     lk->locked = 0;
 }
 
-
 int holding(struct spinlock* lk) {
     return lk->locked == 1;
 }
@@ -26,7 +25,6 @@ void acquire_lock(struct spinlock* lk) {
         ;
 }
 
-
 void release_lock(struct spinlock* lk) {
     if(!holding(lk)){
         printk("release_lock error: %s\n", lk->name);
@@ -35,4 +33,3 @@ void release_lock(struct spinlock* lk) {
     xchg(&lk->locked, 0);
     sti();
 }
-

@@ -5,7 +5,7 @@
 #include <stat.h>
 
 #define NDIRECT 12
-#define NINODE  50  // maximum number of active i-nodes
+#define NINODE  50  //maximum number of active i-nodes
 
 #define I_BUSY  0x1
 #define I_VALID 0x2
@@ -33,7 +33,6 @@ void            iunlockput(struct inode*);
 void            iupdate(struct inode*);
 
 s32             dir_link(struct inode*, char*, u32);
-s32             namecmp(const char*, const char*);
 
 struct inode*   idup(struct inode*);
 struct inode*   ialloc(u32 dev, s16 type);
