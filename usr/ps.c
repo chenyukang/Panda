@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *
- *      pid.c
+ *      ps.c
  *
  *      @brief
  *
@@ -16,22 +16,6 @@
 
 int main() {
     char buf[1024];
-#if 0
-    printf("size: %d\n", sizeof(int));
-    int* p = (int*)malloc(sizeof(int));
-    printf("pointer: %x\n",(unsigned int)p);
-    printf("value  : %d\n",*p);
-    *p = 1;
-    printf("value  : %d\n", *p);
-    *p = 2;
-    printf("value  : %d\n", *p);
-    int i;
-    for(i=0; i<10; i++) {
-        p = (int*)malloc(sizeof(int));
-        printf("pointer: %x value: %d\n", (u32)p, (u32)(*p));
-        free(p);
-    }
-#endif
     memset(buf, 0, sizeof(buf));
     procs(buf, 1024);
     printf("current task list:\n");

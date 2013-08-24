@@ -96,14 +96,14 @@ int do_exec(char* path, char** argv) {
     }
     store = store_argv(path, argv);
     vm = &current->p_vm;
+    memset(current->name, 0, sizeof(current->name));
     strcpy(current->name, path);
-    //vm_clear(vm);
     vm_renew(vm, &head, ip);
 
     esp = VM_STACK;
     argc = ustack_push_argv(&esp, store);
     if(argc < 0) {
-        kassert(0);
+        PANIC("push argv error");
     }
     ustack_push(&esp, (char*)&argc, sizeof(u32));
     free_argv(store);

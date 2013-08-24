@@ -222,8 +222,7 @@ void hwint_handler(struct registers_t* regs) {
             handler(regs);
     }
     /* user-mode */
-    if((regs->cs & 3) == 3 && current!= 0 ) {
+    if((regs->cs & 3) == 3 && current != 0 ) {
         sched();
-        //yield();
     }
 }

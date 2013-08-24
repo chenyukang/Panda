@@ -103,7 +103,6 @@ struct page* alloc_page() {
     return 0;
 }
 
-
 /* alloc_mem alloc PAGE_SIZE memory for use */
 u32 alloc_mem() {
     struct page* pg = alloc_page();
@@ -357,13 +356,13 @@ void page_fault_handler(struct registers_t* regs) {
         return;
     }
     //write error
-    if(regs->err_code & 0x002) {  //write
+    if(regs->err_code & 0x002) {
         do_wt_page((void*)fault_addr);
         return;
     }
     if (regs->err_code & 0x004) {
-        printk("address: %x %d %d\n", (u32)fault_addr, current->pid,
-               current->stat);
+        printk("address: %x %d %s %d\n",
+               (u32)fault_addr, current->pid, current->name, current->stat);
         PANIC("user-mode ");
         return;
     }

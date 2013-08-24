@@ -82,6 +82,7 @@ static void init_proc0() {
     strcpy(t->cwd_path, "/home");
     tss.ss0  = KERN_DS;
     tss.esp0 = (u32)t + PAGE_SIZE;
+    memset(t->name, 0, sizeof(t->name));
     strcpy(t->name, "kernel");
 }
 
@@ -136,6 +137,7 @@ void yield() {
     sched();
 }
 
+/* find the proc with smallest r_time to switch */
 void sched() {
     int i, min;
     struct task* next;
@@ -143,6 +145,13 @@ void sched() {
 
     t = next = 0;
     min = -1;
+    for(i=0; i<PROC_NUM; i++) {
+        t = proc_table.procs[i];
+        if(t != NULL &&
+           (t->stat != ZOMBIE && t->stat != WAIT)) {
+            t->stat = RUNNABLE;
+        }
+    }
     for(i=0; i<PROC_NUM; i++)  {
         t = proc_table.procs[i];
         if(t == 0 || t == current ) continue;
@@ -167,8 +176,8 @@ void do_sleep(void* change, struct spinlock* lock) {
 }
 
 void do_wakeup(void* change) {
-    u32 i;
     struct task* p;
+    u32 i;
 
     if(change == 0)
         PANIC("wakeup: change error");
