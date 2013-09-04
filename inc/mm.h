@@ -55,7 +55,6 @@ struct pde {
     u32 pt_avial  : 3;  //for system programmer
     u32 pt_base   : 20; //base addr
 };
-
 //so struct pde* (with 1024) == pg_dir
 
 struct pte {

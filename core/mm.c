@@ -22,8 +22,8 @@ struct page  freepg_list;
 static u32 end_addr, ker_addr, used_addr;
 
 static u32 page_nr;      //all page number
-static u32 free_nr; //free page number
-static u32 kern_nr;     //this is number of page mapped by kernel
+static u32 free_nr;      //free page number
+static u32 kern_nr;      //this is number of page mapped by kernel
 
 void page_fault_handler(struct registers_t* regs);
 

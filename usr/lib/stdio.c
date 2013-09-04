@@ -1,16 +1,3 @@
-
-/*******************************************************************************
- *
- *      stdio.c
- *
- *      @brief
- *
- *      @author   Yukang Chen  @date  2013-08-11 20:22:50
- *
- *      COPYRIGHT (C) 2006~2012, Nextop INC., ALL RIGHTS RESERVED.
- *
- *******************************************************************************/
-
 #include <stdio.h>
 #include <syscall.h>
 #include <fcntl.h>

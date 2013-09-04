@@ -18,8 +18,7 @@
 
 #define ASM	 __asm__ __volatile__
 
-#define xhalt()             (native_halt())
-
+#define xhalt()  (native_halt())
 
 #define first_zerobit(x) (first_onebit(~(x)))
 
