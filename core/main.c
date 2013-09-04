@@ -49,7 +49,6 @@ void kmain(u32 init_stack) {
     while(1) {
         if(!init) {
             printk("kernel running ...\n");
-            printk("%x %x\n", 1024*1024, 1024);
             init = 1;
         }
         sti();

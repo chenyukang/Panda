@@ -68,7 +68,6 @@ void time_init(void) {
     time.tm_year = time.tm_centry*100 + time.tm_year;
     kern_setup_time = kernel_mktime(&time);
     kern_time = time;
-    //print_time_local();
 }
 
 void print_time_local(void) {
