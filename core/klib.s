@@ -5,19 +5,19 @@
 read_eip:
     pop eax                     ; Get the return address
     jmp eax                     ; Return. Can't use RET because return
-                                ; address popped off the stack. 
+                                ; address popped off the stack.
 
 ;; return to user mode via an IRET instruction.
-;; note:  
+;; note:
 ;;    USER_CS = 0x1B
 ;;    USER_DS = 0x23
-;; 
+;;
 [global enter_user]
 enter_user:
     pop dword eax       ;; ignore the returned eip
     pop dword ebx       ;; eip -> ebx
     pop dword ecx       ;; esp3 -> ecx
-    mov ax, 0x23 
+    mov ax, 0x23
     mov ds, ax
     mov es, ax
     mov fs, ax
@@ -29,7 +29,7 @@ enter_user:
     push dword ebx      ;; eip
     iretd
 
-global gdt_flush	
+global gdt_flush
 extern gp
 gdt_flush:
     lgdt [gp]
@@ -78,7 +78,7 @@ _do_swtch:
     push dword [eax]
     ret
 
-	
+
 ;;; This macro creates a stub for an ISR which does NOT pass it's own
 ; error code (adds a dummy errcode byte).
 %macro ISR_NOERRCODE 1
@@ -110,7 +110,7 @@ _do_swtch:
     push byte %2
     jmp common_stub
 %endmacro
-	
+
 global isr14
 isr14:
 	cli                         ; Disable interrupts firstly.
@@ -172,10 +172,10 @@ IRQ  12,    44
 IRQ  13,    45
 IRQ  14,    46
 IRQ  15,    47
-	
-; In isr.c
+
+;; int idt.c
 extern hwint_handler
-global stub_ret	
+global stub_ret
 common_stub:
     cli
     pusha
@@ -183,14 +183,14 @@ common_stub:
     push es
     push fs
     push gs
-    
+
     mov ax, 0x10   ; Load the Kernel Data Segment descriptor!
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
-    mov eax, esp   ; Push us the stack
-    
+    mov eax, esp   ; Push the stack
+
     push eax
     mov eax, hwint_handler
     call eax       ; A special call, preserves the 'eip' register
@@ -209,4 +209,3 @@ stub_ret:
 section .bss
 	resb 8192	; 80KB for stack
 stack_top:	; top of our stack here
-	

@@ -2,13 +2,13 @@
 
 ;;; [0x7c00] will be seted in boot.ld
 [global start]
-start:	
+start:
 	;; puts loading
 	mov si, msg
 	call print
 
 	;; read the setup code from floppy
-	;; begin with second
+	;; begin with second, read setup to 0x90100
 .readfloppy:
 	mov ax, setupseg
 	mov es, ax
@@ -35,18 +35,17 @@ print:
 	jmp .next
 .done:
 	ret
-	
+
 msg	db "Loading Panda OS"	;
 	db 13, 10, 0  		;
-	
+
 ;;; some constants
-bootseg 	equ 0x0000	;boot begin address
-	
+
 setupseg 	equ 0x9000    	;setup address
 setupoffset     equ 0x0100	;
 setupsize 	equ 512
-	
-bootdriver 	db  0		
+
+bootdriver 	db  0
 ; Magic number for sector
 times 510-($-$$) db 0
 dw 0xAA55

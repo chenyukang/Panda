@@ -8,8 +8,8 @@ extern kmain
 	mov cl, 0x04
 	mov [0xb8001], cl
 
-    ;; check A20 enable
-    xor eax, eax
+        ;; check A20 enable
+        xor eax, eax
 err:	inc eax
 	mov [0x000000], eax
 	cmp [0x100000], eax
