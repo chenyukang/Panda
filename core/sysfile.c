@@ -156,8 +156,6 @@ s32 do_chdir(char* path) {
         //pass;
     }
     else {
-        //memset(cu->cwd_path, 0, sizeof(cu->cwd_path));
-        //strcpy(cu->cwd_path, path);
         strcat(cu->cwd_path, path);
     }
     return 0;
