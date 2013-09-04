@@ -24,8 +24,7 @@ void buf_init() {
 }
 
 
-static struct buf*
-buf_get(u32 dev, u32 sector) {
+static struct buf* buf_get(u32 dev, u32 sector) {
     struct buf* bp;
 
     acquire_lock(&bcache.lock);
@@ -56,8 +55,7 @@ loop:
 }
 
 
-struct buf*
-buf_read(u32 dev, u32 sector) {
+struct buf* buf_read(u32 dev, u32 sector) {
     struct buf* bp;
     bp = buf_get(dev, sector);
     kassert(bp);

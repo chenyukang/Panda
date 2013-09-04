@@ -56,8 +56,7 @@ static int waitfor_ready(int check_error) {
 }
 
 /* Start the request for b.  Caller must hold idelock. */
-static void
-ide_start(struct buf *b) {
+static void ide_start(struct buf *b) {
   if(b == 0)
     PANIC("ide_start");
 

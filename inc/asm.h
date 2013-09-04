@@ -12,10 +12,6 @@
 
 #include <types.h>
 
-#define ENABLE_NMI 0x00
-#define DISABLE_NMI 0x80
-
-
 #define ASM	 __asm__ __volatile__
 
 #define xhalt()  (native_halt())
