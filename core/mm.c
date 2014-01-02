@@ -192,7 +192,6 @@ void copy_pgd(struct pde* from, struct pde* targ) {
 }
 
 s32 free_pgd(struct pde* pgd) {
-    return 0;
     struct pde* pde;
     struct pte* pte;
     struct pte* pt;
