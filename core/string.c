@@ -83,14 +83,9 @@ unsigned short *memsetw(unsigned short *dest, unsigned short val, size_t count) 
 }
 
 s32 strcmp(const char* v1, const char* v2) {
-    const char* p = v1;
-    const char* q = v2;
-    while(*p && *q && *p == *q) {
-        p++, q++;
-    }
-    if(*p) return 1;
-    if(*q) return -1;
-    return (u8)*p - (u8)*q;
+    while(*v1 && *v1 == *v2)
+        v1++, v2++;
+    return (u8)*v1 - (u8)*v2;
 }
 
 s32 strncmp(const char* v1, const char* v2, u32 n) {
