@@ -20,3 +20,8 @@ Any contribution is welcome :)
 ## snapshot
 
 ![snapshot](https://github.com/chenyukang/Panda/blob/master/imgs/snapshot.png?raw=true)
+
+
+## tools
+
+[cross gcc for MacOs](http://crossgcc.rts-software.org/doku.php?id=compiling_for_linux)

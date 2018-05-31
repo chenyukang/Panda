@@ -24,7 +24,8 @@ else
     LD="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-ld "
     OBJCPY="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objcopy"
     OBJDUMP="/usr/local/gcc-4.5.2-for-linux32/bin/i586-pc-linux-objdump"
-    QEMU="/usr/local/Cellar/qemu/1.5.1/bin/qemu-system-i386"
+    #QEMU="/usr/local/Cellar/qemu/1.5.1/bin/qemu-system-i386"
+    QEMU="/usr/local/Cellar/qemu/2.12.0/bin/qemu-system-i386"
     BOCHS_CONF="./.bochs_mac"
     DEFAULT="qemu"
 fi
@@ -136,7 +137,8 @@ do_prepare_hd() {
     cd objs/usr/;
     #mkdir home;
     rm -rf *.o;
-    ../mkfs.exe hd.img *;
+    ../mkfs.exe h
+    .img *;
     cd ../../;
     cp objs/usr/hd.img ./;
 }
@@ -148,7 +150,7 @@ do_all() {
     then
         if [ $1 == "qemu" ]
         then
-	    $QEMU -hdb hd.img -fda a.img -localtime -m 128;
+	    $QEMU -hdb hd.img -fda a.img -rtc base=localtime  -m 128;
         else
      	    $BOCHS -f $BOCHS_CONF -q;
         fi

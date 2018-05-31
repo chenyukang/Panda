@@ -27,7 +27,7 @@
 #define s32    int
 #define u32    unsigned int
 
-#define static_assert(a, b) do { switch (0) case 0: case (a): ; } while (0)
+#define _static_assert(a, b) do { switch (0) case 0: case (a): ; } while (0)
 
 int nblocks = 985;
 int nlog    = LOGSIZE;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     struct dinode din;
     struct stat stat;
 
-    static_assert(sizeof(int) == 4, "Integers must be 4 bytes!");
+    _static_assert(sizeof(int) == 4, "Integers must be 4 bytes!");
 
     if(argc < 2){
         fprintf(stderr, "Usage: mkfs fs.img files...\n");
