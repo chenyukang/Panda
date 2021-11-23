@@ -5,7 +5,7 @@ BOOT="./boot"
 KERNEL="./core"
 INCLUDE="./inc"
 NASM="nasm -f elf "
-CFLAGS="-Wall -m32 -O -nostdinc -fno-builtin -fno-stack-protector -finline-functions -finline-functions-called-once -I./inc/ "
+CFLAGS="-Wall -m32 -O -nostdinc -fno-builtin -fno-stack-protector -Wno-implicit-function-declaration -finline-functions -finline-functions-called-once -I./inc/ "
 BOCHS="bochs "
 DEFAULT="None"
 
@@ -79,7 +79,7 @@ do_compile() {
     `cd ../`;
     for f in $users;
     do
-        `$GCC -I./inc -m32 -fno-builtin -fno-stack-protector -nostdinc -c usr/$f -o $USEROBJDIR/${f/.c/.o}`
+        `$GCC -I./inc -m32 -fno-builtin -Wno-implicit-function-declaration -fno-stack-protector -nostdinc -c usr/$f -o $USEROBJDIR/${f/.c/.o}`
         if [ $? -ne 0 ]
             then exit;
         fi
@@ -89,11 +89,12 @@ do_compile() {
     usrc=`cd ./usr/lib; ls *.c`
     for f in $usrc;
     do
-	`$GCC -I./inc -DUSR -m32 -fno-builtin -fno-stack-protector -nostdinc -c ./usr/lib/$f -o $USEROBJDIR/lib/${f/.c/.o}`
+	`$GCC -I./inc -DUSR -m32 -fno-builtin -Wno-implicit-function-declaration -fno-stack-protector -nostdinc -c ./usr/lib/$f -o $USEROBJDIR/lib/${f/.c/.o}`
     done
     `$NASM -f elf ./usr/lib/entry.s -o $USEROBJDIR/lib/entry.O`
     for f in $users;
     do
+        echo "build user obj: $f"
         `$LD $USEROBJDIR/lib/entry.O $USEROBJDIR/lib/*.o $USEROBJDIR/$f -m elf_i386 -e _start -o $USEROBJDIR/${f/.o/ } -T $TOOL/user.ld`
         if [ $? -ne 0 ]
            then exit;
@@ -117,13 +118,13 @@ do_link() {
 
     if [ $? -ne 0 ]
     then
-	echo "link error!"
-	exit
+	    echo "link error!"
+	    exit
     else
-	echo "making a.img"
-	`cat boot.bin setup.bin kernel.bin > ../a.img`
-	ls -lh kernel.bin;
-	cd ../;
+	    echo "making a.img"
+	    `cat boot.bin setup.bin kernel.bin > ../a.img`
+	    ls -lh kernel.bin;
+	    cd .a./;
     fi
 }
 
