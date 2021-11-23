@@ -13,6 +13,9 @@ Dependencies:
 ```console
 sudo apt-get install build-essential gcc nasm
 ```
+Install [Cross GCC](https://wiki.osdev.org/GCC_Cross-Compiler).
+
+Compile steps:
 
 ```console
 step1: clone the code
@@ -23,14 +26,9 @@ step2: cd Panda;
       details refer to do.sh)
 ```
 
-## snapshot
+## Snapshot
 
 ![snapshot](https://github.com/chenyukang/Panda/blob/master/imgs/snapshot.png?raw=true)
-
-
-## tools
-
-[Cross GCC](https://wiki.osdev.org/GCC_Cross-Compiler)
 
 ## Credits
 
