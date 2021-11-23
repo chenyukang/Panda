@@ -5,7 +5,8 @@
  *      @author : Yukang Chen (moorekang@gmail.com)
  *      @date   : 2012-06-02 01:20:55
  *
- *      @brief  : multi-tasking implement
+ *      @brief  : multi-tasking implementation, 
+ *                most code of this part is from fleurix
  *
  *******************************************************************************/
 

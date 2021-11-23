@@ -25,3 +25,8 @@ Any contribution is welcome :)
 ## tools
 
 [cross gcc for MacOs](http://crossgcc.rts-software.org/doku.php?id=compiling_for_linux)
+
+## Credits
+
+Many of the code is from [fleurix](https://github.com/flaneur2020/fleurix).
+Other excellent resources are [osdev](https://wiki.osdev.org/Expanded_Main_Page).
