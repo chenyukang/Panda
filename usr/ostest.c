@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <stdio.h>
 #include <string.h>
 #include <syscall.h>
 
@@ -60,12 +61,37 @@ static void test_write_rodata() {
         fail("write rodata", -1);
 }
 
+static void test_stdio_file() {
+    FILE* fp;
+    char buf[8];
+    int fd;
+    int n;
+
+    fp = fopen("/home/stdio.tmp", "w");
+    if(fp == NULL)
+        fail("fopen write", -1);
+    if(fprintf(fp, "abc") != 3)
+        fail("fprintf", -1);
+    if(fclose(fp) != 0)
+        fail("fclose", -1);
+
+    memset(buf, 0, sizeof(buf));
+    fd = open("/home/stdio.tmp", O_RDONLY, 0);
+    if(fd < 0)
+        fail("open stdio tmp", fd);
+    n = read(fd, buf, 3);
+    close(fd);
+    if(n != 3 || strncmp(buf, "abc", 3) != 0)
+        fail("read stdio tmp", n);
+}
+
 int main(int argc, char* argv[]) {
     printf("ostest: start\n");
     run("badfd", "/home/badfd");
     run_fail("fault", "/home/fault");
     test_open_existing();
     test_write_rodata();
+    test_stdio_file();
     printf("ostest: ok\n");
     halt();
     return 0;

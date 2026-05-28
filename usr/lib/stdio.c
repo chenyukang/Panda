@@ -49,7 +49,7 @@ FILE* fopen(char* filename, const char* mode) {
     if( fp >= _iob + OPEN_MAX)
         return NULL;
     if( c == 'w') {
-        fd = open(filename, O_RDWR, 0);
+        fd = open(filename, O_CREATE | O_TRUNC | O_RDWR, 0);
     } else if( c == 'r') {
         fd = open(filename, O_RDONLY, 0);
     } else {
@@ -99,18 +99,26 @@ int _flushbuf(int c, FILE* fp) {
 }
 
 int fclose(FILE* fp) {
-    if(--(fp->cnt) == 0) {
-        fflush(fp);
-        fp->flag = 0;
-        close(fp->fd);
-        if(fp->base) {
-            free(fp->base);
-            fp->base = NULL;
-        }
-        fp->ptr = NULL;
-        return close(fp->fd);
+    int ret = 0;
+
+    if(fp == NULL || fp < _iob || fp >= _iob + OPEN_MAX)
+        return -1;
+    if((fp->flag & (_READ | _WRITE)) == 0)
+        return -1;
+
+    if((fp->flag & _WRITE) && fflush(fp) < 0)
+        ret = -1;
+    if(close(fp->fd) < 0)
+        ret = -1;
+    if(fp->base) {
+        free(fp->base);
+        fp->base = NULL;
     }
-    return 0;
+    fp->ptr = NULL;
+    fp->cnt = 0;
+    fp->fd = -1;
+    fp->flag = 0;
+    return ret;
 }
 
 int fprintf(FILE* fp, const char* format, ...) {
