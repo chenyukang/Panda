@@ -12,9 +12,17 @@
 
 struct inode* create(char* path, int type);
 static s32 fd_alloc(struct file* f);
+static struct file* fd_get(u32 fd);
+
+static struct file* fd_get(u32 fd) {
+    if(fd >= NOFILE)
+        return 0;
+    return current->ofile[fd];
+}
 
 s32 do_read(u32 fd, char* buf, u32 cnt) {
     u32 r;
+    struct file* f;
     if(fd == 0) {
         tty_dev.read_need = cnt;
         while((r = tty_get_buf(buf, cnt)) == -1) {
@@ -24,18 +32,25 @@ s32 do_read(u32 fd, char* buf, u32 cnt) {
         return r;
     } else {
         //read from file
-        return file_read(current->ofile[fd], buf, cnt);
+        f = fd_get(fd);
+        if(f == 0)
+            return -1;
+        return file_read(f, buf, cnt);
     }
     return -1;
 }
 
 s32 do_write(u32 fd, char* buf, u32 cnt) {
+    struct file* f;
     if(fd == 1 || fd == 2) {
         screen_write(buf, cnt);
         return cnt;
     } else {
         //write to file
-        return file_write(current->ofile[fd], buf, cnt);
+        f = fd_get(fd);
+        if(f == 0)
+            return -1;
+        return file_write(f, buf, cnt);
     }
 }
 
@@ -69,7 +84,12 @@ s32 do_open(char* path, int mode, int flag) {
 }
 
 s32 do_close(int fd) {
-    struct file* f = current->ofile[fd];
+    struct file* f;
+    if(fd < 0 || fd >= NOFILE)
+        return -1;
+    f = current->ofile[fd];
+    if(f == 0)
+        return -1;
     current->ofile[fd] = 0;
     file_close(f);
     return 0;
