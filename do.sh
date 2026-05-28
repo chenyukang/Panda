@@ -7,7 +7,6 @@ INCLUDE="./inc"
 NASM="${NASM:-nasm} -f elf"
 CFLAGS="-Wall -m32 -O -nostdinc -fno-builtin -fno-stack-protector -fcommon -mno-sse -mno-sse2 -mno-mmx -Wno-implicit-function-declaration -finline-functions -I./inc/ "
 BOCHS="${BOCHS:-bochs}"
-PYTHON="${PYTHON:-python3}"
 DEFAULT="None"
 
 find_tool() {
@@ -121,7 +120,7 @@ do_compile() {
     do
         echo "build user obj: $f"
         $LD $USEROBJDIR/lib/entry.O $USEROBJDIR/lib/*.o $USEROBJDIR/$f -m elf_i386 -e _start -o $USEROBJDIR/${f/.o/}.elf -T $TOOL/user.ld || exit
-        $PYTHON $TOOL/elf2aout.py $USEROBJDIR/${f/.o/}.elf $USEROBJDIR/${f/.o/}
+        $OBJCPY -O binary $USEROBJDIR/${f/.o/}.elf $USEROBJDIR/${f/.o/}
         if [ $? -ne 0 ]
            then exit;
         fi

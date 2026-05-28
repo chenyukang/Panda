@@ -21,7 +21,7 @@ Fix:
 - Make `do.sh` discover tools instead of using hardcoded paths.
 - On macOS, use Homebrew LLVM Clang with `-target i386-unknown-elf`, `ld.lld`, Homebrew `objcopy`, and `qemu-system-i386`.
 - Add `-fcommon -mno-sse -mno-sse2 -mno-mmx` to avoid modern compiler defaults that break this kernel.
-- Link user programs as ELF and convert them to Panda's expected a.out-like executable format with `tool/elf2aout.py`.
+- Link user programs as ELF with Panda's executable header emitted by the linker script, then use `objcopy -O binary` to produce the final user binaries.
 
 ## QEMU Boot Failure
 
