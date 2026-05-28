@@ -15,6 +15,10 @@
 
 static u16 *textmemptr;
 static s32 attrib = 0x0E, csr_x = 10, csr_y = 0;
+static int esc_state;
+static int esc_arg;
+static int esc_args[2];
+static int esc_argc;
 
 static void scroll(void) {
     unsigned blank, temp;
@@ -59,6 +63,14 @@ static void move_csr(void) {
     outb(0x3D5, temp);
 }
 
+static void enable_cursor(u8 start, u8 end) {
+    outb(0x3D4, 0x0A);
+    outb(0x3D5, (inb(0x3D5) & 0xC0) | start);
+
+    outb(0x3D4, 0x0B);
+    outb(0x3D5, (inb(0x3D5) & 0xE0) | end);
+}
+
 /* Clears the screen */
 void cls() {
     unsigned blank;
@@ -80,10 +92,82 @@ void cls() {
     move_csr();
 }
 
-/* Puts a single character on the screen */
-void putch(char c) {
+static void clear_eol(void) {
+    unsigned blank = 0x20 | (attrib << 8);
+    int x;
+    for(x = csr_x; x < 80; x++)
+        textmemptr[csr_y * 80 + x] = blank;
+    move_csr();
+}
+
+static void set_cursor(int row, int col) {
+    if(row < 1) row = 1;
+    if(col < 1) col = 1;
+    if(row > 25) row = 25;
+    if(col > 80) col = 80;
+    csr_y = row - 1;
+    csr_x = col - 1;
+    move_csr();
+}
+
+static int parse_escape(char c) {
+    if(esc_state == 0) {
+        if(c == 27) {
+            esc_state = 1;
+            esc_arg = 0;
+            esc_argc = 0;
+            esc_args[0] = 0;
+            esc_args[1] = 0;
+            return 1;
+        }
+        return 0;
+    }
+
+    if(esc_state == 1) {
+        if(c == '[') {
+            esc_state = 2;
+            return 1;
+        }
+        esc_state = 0;
+        return 1;
+    }
+
+    if(c >= '0' && c <= '9') {
+        esc_arg = esc_arg * 10 + c - '0';
+        return 1;
+    }
+
+    if(c == ';') {
+        if(esc_argc < 2)
+            esc_args[esc_argc++] = esc_arg;
+        esc_arg = 0;
+        return 1;
+    }
+
+    if(esc_argc < 2)
+        esc_args[esc_argc++] = esc_arg;
+
+    if(c == 'J') {
+        if(esc_args[0] == 2)
+            cls();
+    } else if(c == 'K') {
+        clear_eol();
+    } else if(c == 'H' || c == 'f') {
+        int row = esc_argc > 0 && esc_args[0] ? esc_args[0] : 1;
+        int col = esc_argc > 1 && esc_args[1] ? esc_args[1] : 1;
+        set_cursor(row, col);
+    }
+
+    esc_state = 0;
+    return 1;
+}
+
+static void putch_internal(char c, int update_cursor) {
     unsigned short *where;
     unsigned att = attrib << 8;
+
+    if(parse_escape(c))
+        return;
 
     /* Handle a backspace, by moving the cursor back one space */
     if(c == 0x08) {
@@ -126,6 +210,19 @@ void putch(char c) {
     }
 
     scroll();
+    if(update_cursor)
+        move_csr();
+}
+
+/* Puts a single character on the screen */
+void putch(char c) {
+    putch_internal(c, 1);
+}
+
+void screen_write(char* buf, u32 cnt) {
+    u32 i;
+    for(i = 0; i < cnt; i++)
+        putch_internal(buf[i], 0);
     move_csr();
 }
 
@@ -139,6 +236,7 @@ void settextcolor(unsigned char forecolor, unsigned char backcolor) {
 /* Sets our text-mode VGA pointer, then clears the screen for us */
 void init_video(void) {
     textmemptr = (unsigned short *)0xB8000;
+    enable_cursor(14, 15);
     cls();
 }
 

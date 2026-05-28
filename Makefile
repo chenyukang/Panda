@@ -49,6 +49,9 @@ endif
 
 QEMU ?= $(shell command -v qemu-system-i386 2>/dev/null || command -v qemu-system-x86_64 2>/dev/null || printf qemu-system-i386)
 QEMU_ARGS := -boot a -drive file=a.img,format=raw,if=floppy -drive file=hd.img,format=raw,index=1,media=disk -rtc base=localtime -m 128
+QEMU_COCOA_DISPLAY_ARGS ?= -display cocoa,zoom-to-fit=on
+QEMU_CURSES_DISPLAY_ARGS ?= -display curses
+QEMU_DISPLAY_ARGS ?= $(QEMU_COCOA_DISPLAY_ARGS)
 QEMU_EXTRA_ARGS ?=
 SMOKE_SECONDS ?= 5
 
@@ -85,7 +88,8 @@ USER_LIB_ALL := $(USER_ENTRY) $(USER_LIB_OBJS)
 
 FS_PAYLOADS := $(USER_BINS) $(USER_ELFS) $(USEROBJDIR)/README.md $(USEROBJDIR)/prog.scm
 
-.PHONY: all images compile qemu run smoke clean line help tools check-build-tools check-qemu
+.PHONY: all images compile qemu qemu-cocoa qemu-curses run smoke clean line help tools check-build-tools check-qemu
+.NOTPARALLEL:
 
 all: images
 
@@ -209,7 +213,13 @@ hd.img: $(USEROBJDIR)/hd.img
 	cp $< $@
 
 qemu run: images check-qemu
-	$(QEMU) $(QEMU_ARGS) $(QEMU_EXTRA_ARGS)
+	$(QEMU) $(QEMU_ARGS) $(QEMU_DISPLAY_ARGS) $(QEMU_EXTRA_ARGS)
+
+qemu-cocoa: QEMU_DISPLAY_ARGS := $(QEMU_COCOA_DISPLAY_ARGS)
+qemu-cocoa: qemu
+
+qemu-curses: QEMU_DISPLAY_ARGS := $(QEMU_CURSES_DISPLAY_ARGS)
+qemu-curses: qemu
 
 smoke: images check-qemu
 	@set -e; \
@@ -244,7 +254,11 @@ line:
 help:
 	@echo "Targets:"
 	@echo "  make all      Build a.img and hd.img"
-	@echo "  make qemu     Build and run with QEMU"
+	@echo "  make qemu     Build and run with QEMU Cocoa display"
+	@echo "  make qemu-cocoa"
+	@echo "                Build and run with QEMU Cocoa display"
+	@echo "  make qemu-curses"
+	@echo "                Build and run with QEMU curses display"
 	@echo "  make smoke    Build and run a short headless QEMU smoke test"
 	@echo "  make clean    Remove generated files"
 	@echo "  make tools    Print resolved tool paths"

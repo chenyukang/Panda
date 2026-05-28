@@ -31,6 +31,7 @@ void            iput(struct inode*);
 void            iunlock(struct inode*);
 void            iunlockput(struct inode*);
 void            iupdate(struct inode*);
+void            itrunc(struct inode*);
 
 s32             dir_link(struct inode*, char*, u32);
 

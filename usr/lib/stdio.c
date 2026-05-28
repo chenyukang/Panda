@@ -121,6 +121,10 @@ int fprintf(FILE* fp, const char* format, ...) {
     memset(buf, 0, sizeof(buf));
     cnt = _sprintf(buf, format, ap);
     va_end(ap);
+    if(fp == stdout || fp == stderr) {
+        write(fp->fd, buf, cnt);
+        return cnt;
+    }
     for(k=0; k<cnt; k++)
         putc(buf[k], fp);
     fflush(fp);

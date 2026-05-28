@@ -172,7 +172,12 @@ int sys_procs(struct registers_t* regs) {
 }
 
 int sys_halt(struct registers_t* regs) {
-    xhalt();
+    cli();
+    outw(0x604, 0x2000); /* QEMU ACPI poweroff */
+    outw(0xB004, 0x2000); /* Bochs/QEMU fallback */
+    outw(0x4004, 0x3400); /* VirtualBox fallback */
+    while(1)
+        xhalt();
     regs->eax = 0;
     return 0;
 }

@@ -126,12 +126,10 @@ void itrunc(struct inode* ip) {
             if(addr[i])
                 blk_free(ip->dev, addr[i]);
         }
-        buf_write(bp);
         buf_release(bp);
-        blk_free(ip->dev, addr[NDIRECT]);
+        blk_free(ip->dev, ip->addrs[NDIRECT]);
         ip->addrs[NDIRECT] = 0;
     }
-    kassert(0);
     ip->size = 0;
     iupdate(ip);
 }
