@@ -86,7 +86,7 @@ void free_mem(u32 addr);
 
 void flush_pgd(struct pde* pg_dir);
 
-void do_no_page(void* addr);
-void do_wt_page(void* addr);
+s32  do_no_page(void* addr);
+s32  do_wt_page(void* addr);
 
 #endif

@@ -8,7 +8,7 @@ static void fail(char* name, int status) {
         ;
 }
 
-static void run(char* name, char* path) {
+static int run_status(char* name, char* path) {
     int status = -1;
 
     if(fork() == 0) {
@@ -16,7 +16,20 @@ static void run(char* name, char* path) {
         fail(name, OPENERR);
     }
     wait(-1, &status);
+    return status;
+}
+
+static void run(char* name, char* path) {
+    int status = run_status(name, path);
+
     if(status != 0)
+        fail(name, status);
+}
+
+static void run_fail(char* name, char* path) {
+    int status = run_status(name, path);
+
+    if(status == 0)
         fail(name, status);
 }
 
@@ -50,6 +63,7 @@ static void test_write_rodata() {
 int main(int argc, char* argv[]) {
     printf("ostest: start\n");
     run("badfd", "/home/badfd");
+    run_fail("fault", "/home/fault");
     test_open_existing();
     test_write_rodata();
     printf("ostest: ok\n");

@@ -260,18 +260,29 @@ void mm_init() {
     done();
 }
 
-void do_wt_page(void* vaddr) {
+static void bad_page_fault(struct registers_t* regs, u32 fault_addr, char* reason) {
+    printk("address: %x pid:%d name:%s\n",
+           fault_addr, current->pid, current->name);
+    if(regs->err_code & 0x004) {
+        do_exit(-1);
+        return;
+    }
+    PANIC(reason);
+}
+
+int do_wt_page(void* vaddr) {
     struct vma *vp;
     struct pte *pte;
     struct page *pg;
     char *old_page, *new_page;
 
     vp = find_vma((u32)vaddr);
+    if (vp == NULL)
+        return -1;
     if (vp->v_flag & VMA_RDONLY) {
-        //sigsend(cu->p_pid, SIGSEGV, 1);
         printk("task:%d name:%s address:%x\n",
                current->pid, current->name, (u32)vaddr);
-        PANIC("memory error");
+        return -1;
     }
 
     if (vp->v_flag & VMA_PRIVATE) {
@@ -290,10 +301,12 @@ void do_wt_page(void* vaddr) {
             pte->pt_flags |= PTE_W;
             flush_pgd(current->p_vm.vm_pgd);
         }
+        return 0;
     }
+    return -1;
 }
 
-void do_no_page(void* vaddr) {
+int do_no_page(void* vaddr) {
     struct vm *vm;
     struct vma *vp;
     struct pte *pte;
@@ -309,23 +322,21 @@ void do_no_page(void* vaddr) {
         vm->vm_stack.v_size += PAGE_SIZE;
         pg = alloc_page();
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
-        return;
+        return 0;
     }
 
     vp = find_vma((u32)vaddr);
     if (vp == NULL) {
         printk("vaddr: %x\n", (u32)vaddr);
         printk("pid: %d name: %s\n", current->pid, current->name);
-        kassert(0);
-        //sigsend(current->p_pid, SIGSEGV, 1);
-        return;
+        return -1;
     }
     // demand bss/heap
     if (vp->v_flag & VMA_ZERO) {
         pg = alloc_page();
         put_page(vm->vm_pgd, PG_ADDR(vaddr), pg);
         memset((void*)PG_ADDR(vaddr), 0, PAGE_SIZE);
-        return;
+        return 0;
     }
 
     // demand file
@@ -340,7 +351,9 @@ void do_no_page(void* vaddr) {
         iunlock(vp->v_ino);
         pte->pt_flags &= ~(vp->v_flag & VMA_RDONLY? 0:PTE_W);
         flush_pgd(current->p_vm.vm_pgd);
+        return 0;
     }
+    return -1;
 }
 
 void page_fault_handler(struct registers_t* regs) {
@@ -350,18 +363,18 @@ void page_fault_handler(struct registers_t* regs) {
 
     //present error
     if((regs->err_code & 0x001) == 0) {
-        do_no_page((void*)fault_addr);
+        if(do_no_page((void*)fault_addr) < 0)
+            bad_page_fault(regs, fault_addr, "no page");
         return;
     }
     //write error
     if(regs->err_code & 0x002) {
-        do_wt_page((void*)fault_addr);
+        if(do_wt_page((void*)fault_addr) < 0)
+            bad_page_fault(regs, fault_addr, "write page");
         return;
     }
     if (regs->err_code & 0x004) {
-        printk("address: %x %d %s %d\n",
-               (u32)fault_addr, current->pid, current->name, current->stat);
-        PANIC("user-mode ");
+        bad_page_fault(regs, fault_addr, "user-mode");
         return;
     }
     if (regs->err_code & 0x008) {
