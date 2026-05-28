@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install dependencies on Linux
         if: runner.os == 'Linux'
@@ -27,7 +27,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew update
-          brew install llvm binutils nasm qemu
+          brew install llvm lld binutils nasm qemu
 
       - name: Show tools
         run: make tools

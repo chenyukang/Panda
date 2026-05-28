@@ -18,7 +18,7 @@ You can also use an i386 ELF cross GCC if you already have one installed.
 On macOS, install the build tools with Homebrew:
 
 ```console
-brew install llvm binutils nasm qemu
+brew install llvm lld binutils nasm qemu
 ```
 
 Build and run:

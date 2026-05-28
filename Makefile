@@ -10,6 +10,7 @@ USERLIBOBJDIR := $(USEROBJDIR)/lib
 
 BREW := $(shell command -v brew 2>/dev/null)
 LLVM_PREFIX := $(shell if [ -n "$(BREW)" ]; then "$(BREW)" --prefix llvm 2>/dev/null; fi)
+LLD_PREFIX := $(shell if [ -n "$(BREW)" ]; then "$(BREW)" --prefix lld 2>/dev/null; fi)
 BINUTILS_PREFIX := $(shell if [ -n "$(BREW)" ]; then "$(BREW)" --prefix binutils 2>/dev/null; fi)
 
 NASM ?= nasm
@@ -25,8 +26,10 @@ DARWIN_CC := clang -target i386-unknown-elf
 endif
 endif
 TARGET_CC ?= $(DARWIN_CC)
-ifneq ($(LLVM_PREFIX),)
+ifneq ($(wildcard $(LLVM_PREFIX)/bin/ld.lld),)
 TARGET_LD ?= $(LLVM_PREFIX)/bin/ld.lld
+else ifneq ($(LLD_PREFIX),)
+TARGET_LD ?= $(LLD_PREFIX)/bin/ld.lld
 else
 TARGET_LD ?= ld.lld
 endif
@@ -115,7 +118,7 @@ check-build-tools:
 	if [ "$$missing" -ne 0 ]; then \
 		echo ""; \
 		echo "Install hints:"; \
-		echo "  macOS:        brew install llvm binutils nasm qemu"; \
+		echo "  macOS:        brew install llvm lld binutils nasm qemu"; \
 		echo "  Ubuntu/Debian: sudo apt-get update && sudo apt-get install -y build-essential gcc-multilib binutils nasm qemu-system-x86"; \
 		echo ""; \
 		echo "You can also override tools, for example:"; \
