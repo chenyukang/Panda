@@ -123,7 +123,8 @@ struct inode* create(char* path, int type) {
     if((ip = dir_lookup(dp, name, &off)) != 0) {
         i_unlock_drop(dp);
         ilock(ip);
-        if(ip->type == type) {
+        if((ip->type & S_IFMT) == (type & S_IFMT)) {
+            iunlock(ip);
             return ip;
         }
         i_unlock_drop(ip);
