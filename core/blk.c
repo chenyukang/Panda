@@ -23,6 +23,7 @@ void readsb(u32 dev, struct superblock* sb) {
 void blk_zero(u32 dev, u32 bn) {
     struct buf* bp = buf_read(dev, bn);
     memset(bp->b_data, 0, BSIZE);
+    buf_write(bp);
     buf_release(bp);
 }
 
@@ -38,6 +39,7 @@ void blk_free(u32 dev, u32 bn) {
     if((bp->b_data[bi/8] & m) == 0)
         PANIC("freeing free block");
     bp->b_data[bi/8] &= ~m;
+    buf_write(bp);
     buf_release(bp);
 }
 
@@ -52,6 +54,7 @@ u32  blk_alloc(u32 dev) {
             mark = 1 << (bit % 8);
             if((bp->b_data[bit/8] & mark) == 0) { //a free block found
                 bp->b_data[bit/8] |= mark;
+                buf_write(bp);
                 buf_release(bp);
                 blk_zero(dev, b+bit);
                 return b + bit; //return block number

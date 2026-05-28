@@ -69,11 +69,11 @@ struct page {
     struct page* pg_next;
 };
 
-void mm_init();
+void mm_init(void);
 
-struct page* alloc_page();
+struct page* alloc_page(void);
 struct page* find_page(u32 nr);
-struct pde* alloc_pde();
+struct pde* alloc_pde(void);
 
 void free_page(struct page* pg);
 void init_page_dir(struct pde* pgd);
@@ -81,8 +81,8 @@ s32  free_pgd(struct pde* pgd);
 void copy_pgd(struct pde* from, struct pde* targ);
 struct pte* find_pte(struct pde* pg_dir, u32 vaddr , u32 new);
 
-u32  alloc_mem();
-void free_mem();
+u32  alloc_mem(void);
+void free_mem(u32 addr);
 
 void flush_pgd(struct pde* pg_dir);
 

@@ -24,3 +24,5 @@ err:	inc eax
 section .bss
 	resb 8192	; 80KB for stack
 stack_top:	; top of our stack here
+
+section .note.GNU-stack noalloc noexec nowrite progbits

@@ -50,6 +50,7 @@ struct inode* ialloc(u32 dev, s16 type) {
         if(dip->type == 0) {
             memset(dip, 0, sizeof(*dip));
             dip->type = type;
+            buf_write(bp);
             buf_release(bp);
             return iget(dev, inum);
         }
@@ -70,6 +71,7 @@ void iupdate(struct inode* ip) {
     dip->nlink = ip->nlink;
     dip->size  = ip->size;
     memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
+    buf_write(bp);
     buf_release(bp);
 }
 
@@ -125,10 +127,9 @@ void itrunc(struct inode* ip) {
                 blk_free(ip->dev, addr[i]);
         }
         buf_release(bp);
-        blk_free(ip->dev, addr[NDIRECT]);
+        blk_free(ip->dev, ip->addrs[NDIRECT]);
         ip->addrs[NDIRECT] = 0;
     }
-    kassert(0);
     ip->size = 0;
     iupdate(ip);
 }
@@ -205,6 +206,7 @@ static u32 bmap(struct inode* ip, u32 bn) {
         extend = (u32*)bp->b_data;
         if((addr = extend[bn]) == 0) {
             extend[bn] = addr = blk_alloc(ip->dev);
+            buf_write(bp);
         }
         buf_release(bp);
         return addr;
@@ -253,8 +255,9 @@ int writei(struct inode* ip, char* addr, u32 off, u32 n) {
 
     for(total=0; total<n; total+=done, off+=done, addr+=done) {
         bp = buf_read(ip->dev, bmap(ip, off/BSIZE));
-        done = min(n-total, BSIZE - off/BSIZE);
+        done = min(n-total, BSIZE - off%BSIZE);
         memmove(bp->b_data + off%BSIZE, addr, done);
+        buf_write(bp);
         buf_release(bp);
     }
     if(n>0 && off > ip->size) {

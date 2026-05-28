@@ -11,19 +11,29 @@ Any contribution is welcome :)
 Dependencies:
 
 ```console
-sudo apt-get install build-essential gcc nasm
+sudo apt-get install build-essential gcc-multilib binutils nasm qemu-system-x86
 ```
-Install [Cross GCC](https://wiki.osdev.org/GCC_Cross-Compiler).
+You can also use an i386 ELF cross GCC if you already have one installed.
 
-Compile steps:
+On macOS, install the build tools with Homebrew:
 
 ```console
-step1: clone the code
+brew install llvm lld binutils nasm qemu
+```
 
-step2: cd Panda;
-      ./do.sh
-      (will run bochs or qemu, you may need to do some modification for config Qemu/Bochs. 
-      details refer to do.sh)
+Build and run:
+
+```console
+make all
+make qemu
+```
+
+The build uses QEMU as the only supported emulator.
+
+For CI-style validation:
+
+```console
+make smoke
 ```
 
 ## Snapshot

@@ -17,17 +17,19 @@ void tty_clear() {
     tty_dev.head  = 0;
     tty_dev.tail  = 0;
     tty_dev.count = 0;
+    tty_dev.read_need = 0;
 }
 
 u32 tty_ch(u8 c) {
-    putch(c);
-    if( c == 0x08 ) {
+    if(tty_dev.read_need != 1)
+        putch(c);
+    if(c == 0x08 && tty_dev.read_need != 1) {
         //delete
         return tty_pop();
     }
 
     tty_push(c);
-    if(c == 0x0A) {
+    if(c == 0x0A || tty_dev.read_need == 1) {
         //newline
         do_wakeup(&tty_dev);
     }

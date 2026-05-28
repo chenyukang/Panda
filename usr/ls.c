@@ -4,8 +4,21 @@
 #include <stat.h>
 #include <dirent.h>
 #define MAX 10
+#define OUT_LEN 4096
 
 static int detail = 0;
+static char out[OUT_LEN];
+
+static void append(char* out, int* pos, char* text) {
+    while(*text) {
+        if(*pos >= OUT_LEN - 1) {
+            write(1, out, *pos);
+            *pos = 0;
+        }
+        out[(*pos)++] = *text++;
+    }
+    out[*pos] = 0;
+}
 
 void fmt(char* buf) {
     int len = strlen(buf);
@@ -25,9 +38,13 @@ int ls(char* path, char* name) {
     struct stat s;
     struct dirent dire;
     char buf[1024 * 4];
+    char line[128];
     int fd;
     int num = 0;
+    int out_pos = 0;
 
+    memset(buf, 0, sizeof(buf));
+    memset(out, 0, sizeof(out));
     memset(&dire, 0, sizeof(dire));
     if((fd = open(path, O_RDONLY, 0)) < 0) {
         printf("open failed: %s\n", path);
@@ -46,7 +63,8 @@ int ls(char* path, char* name) {
             return -1;
         }
         fmt(buf);
-        printf("name: %s size: %d\n", buf, s.st_size);
+        sprintf(line, "name: %s size: %d\n", buf, s.st_size);
+        append(out, &out_pos, line);
     }
     else if(S_ISDIR(s.st_mode)) {
         memset(&dire, 0, sizeof(dire));
@@ -63,19 +81,23 @@ int ls(char* path, char* name) {
                 return -1;
             }
             if(detail == 0) {
-                printf("%s ", buf);
+                append(out, &out_pos, buf);
+                append(out, &out_pos, " ");
             } else {
                 fmt(buf);
                 if(S_ISREG(s.st_mode)) {
-                    printf("file: %s size: %d\n", buf,  s.st_size);
+                    sprintf(line, "file: %s size: %d\n", buf,  s.st_size);
                 } else {
-                    printf("dire: %s size: %d\n", buf,  s.st_size);
+                    sprintf(line, "dire: %s size: %d\n", buf,  s.st_size);
                 }
+                append(out, &out_pos, line);
             }
         }
     }
     if(!detail && num > 1)
-        printf("\n");
+        append(out, &out_pos, "\n");
+    if(out_pos > 0)
+        write(1, out, out_pos);
     close(fd);
     return 0;
 }

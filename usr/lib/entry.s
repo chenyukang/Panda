@@ -11,3 +11,5 @@ _start:
 [section .data]
 [global errno]
 errno dw 0
+
+section .note.GNU-stack noalloc noexec nowrite progbits

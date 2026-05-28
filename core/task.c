@@ -204,13 +204,15 @@ s32 do_exit(int ret) {
         current->ofile[i] = 0;
     }
     vm_clear(&current->p_vm);
-    free_mem(current->p_vm.vm_pgd);
+    free_mem((u32)current->p_vm.vm_pgd);
     current->chan = 0;
     current->stat = ZOMBIE;
     current->exit_code = ret;
     parent = find_task(current->ppid);
     do_wakeup(parent);
-    return 0;
+    sched();
+    for(;;)
+        ;
 }
 
 s32 growtask(u32 size) {
@@ -242,7 +244,7 @@ try_find:
         if(p->pid != pid && pid != -1) continue;
         if(p->stat == ZOMBIE) {
             *stat = p->exit_code;
-            free_mem(p);
+            free_mem((u32)p);
             proc_table.procs[i] = 0;
             return pid;
         }
@@ -264,7 +266,7 @@ int  task_debug_s(char* buf, u32 size) {
     u32 i, k, max;
     max = 25;
     memset(t, 0, sizeof(t));
-    memset(buf, 0, sizeof(buf));
+    memset(buf, 0, size);
     for(i=0; i<PROC_NUM; i++) {
         p = proc_table.procs[i];
         if(p) {

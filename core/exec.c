@@ -33,9 +33,9 @@ static char** store_argv(char* path, char** args) {
 static void free_argv(char** args) {
     u32 i;
     for(i=0; args[i] != NULL; i++) {
-        free_mem(args[i]);
+        free_mem((u32)args[i]);
     }
-    free_mem(args);
+    free_mem((u32)args);
 }
 
 u32 ustack_push(u32* esp, char* buf, u32 len) {
@@ -59,7 +59,7 @@ u32 ustack_push_argv(u32* esp, char** args) {
         arglen += (strlen(s) + 1);
         argc++;
     }
-    arglen += sizeof(char*) * argc;
+    arglen += sizeof(char*) * (argc + 1);
     if(vm_verify(*esp - arglen, arglen) < 0) {
         return -1;
     }
@@ -69,6 +69,7 @@ u32 ustack_push_argv(u32* esp, char** args) {
         ustack_push(esp, s, strlen(s) + 1);
         uargv[i] = (char*) (*esp);
     }
+    uargv[argc] = NULL;
     *esp = (u32)uargv;
     ustack_push(esp, (char*)&uargv, sizeof(u32));
     return argc;

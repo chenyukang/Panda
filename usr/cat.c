@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     while((cnt = read(fd, buf, sizeof(buf))) > 0) {
-        printf("%s", buf);
+        write(1, buf, cnt);
     }
     
     printf("\n");

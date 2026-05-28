@@ -183,12 +183,13 @@ void copy_pgd(struct pde* from, struct pde* targ) {
                     //turn off PTE_W
                     fpte[k].pt_flags &= ~PTE_W;
                     tpte[k].pt_flags &= ~PTE_W;
-                    page = find_page(fpte->pt_base);
+                    page = find_page(fpte[k].pt_base);
                     page->pg_refcnt++;
                 }
             }
         }
     }
+    flush_pgd(from);
 }
 
 s32 free_pgd(struct pde* pgd) {

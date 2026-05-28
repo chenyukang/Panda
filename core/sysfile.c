@@ -16,9 +16,11 @@ static s32 fd_alloc(struct file* f);
 s32 do_read(u32 fd, char* buf, u32 cnt) {
     u32 r;
     if(fd == 0) {
+        tty_dev.read_need = cnt;
         while((r = tty_get_buf(buf, cnt)) == -1) {
             do_sleep(&tty_dev, NULL);
         }
+        tty_dev.read_need = 0;
         return r;
     } else {
         //read from file
@@ -29,16 +31,12 @@ s32 do_read(u32 fd, char* buf, u32 cnt) {
 
 s32 do_write(u32 fd, char* buf, u32 cnt) {
     if(fd == 1 || fd == 2) {
-        int k;
-        for(k=0; k<cnt; k++) {
-            putch(buf[k]);
-        }
+        screen_write(buf, cnt);
+        return cnt;
     } else {
         //write to file
         return file_write(current->ofile[fd], buf, cnt);
     }
-
-    return -1;
 }
 
 s32 do_open(char* path, int mode, int flag) {
@@ -59,18 +57,20 @@ s32 do_open(char* path, int mode, int flag) {
             file_close(f);
         return 0;
     }
-    f->ref++;
     f->type = FD_INODE;
     f->ip   = ip;
     f->offset = 0;
     f->readable = (mode & O_WRONLY) ? 0 : 1;
     f->writeable = (mode & O_WRONLY) || (mode & O_RDWR);
+    if((mode & O_TRUNC) && S_ISREG(ip->type))
+        itrunc(ip);
     iunlock(ip);
     return fd;
 }
 
 s32 do_close(int fd) {
     struct file* f = current->ofile[fd];
+    current->ofile[fd] = 0;
     file_close(f);
     return 0;
 }

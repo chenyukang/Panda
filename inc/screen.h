@@ -13,8 +13,8 @@
 
 void init_video(void);
 void putch(char c);
+void screen_write(char* buf, u32 cnt);
 void puts_color_str(char* str, unsigned color);
 void puts_mid_str(char* str);
 
 #endif
-

@@ -43,16 +43,36 @@ read_info:
 	mov ax, setupseg
 	mov es, ax
 	mov bx, setupoffset+setupsize ; put kernel at here now
-	mov ah, 2
-	mov dl, [0]
-	mov ch, 0
 	;0,1 is for boot, setupsize/512 for setup.bin
+	mov ch, 0
+	mov dh, 0
 	mov cl, 3
-	mov al, systemsize/512
+	mov si, systemsize/512
 .readfloppy:
+	mov ax, 0x0201
+	and dx, 0xff00
 	int 0x13
-    dec al
+	jc .read_error
+	add bx, 512
+	inc cl
+	cmp cl, 19
+	jne .read_next
+	mov cl, 1
+	inc dh
+	cmp dh, 2
+	jne .read_next
+	mov dh, 0
+	inc ch
+.read_next:
+	dec si
 	jnz .readfloppy
+	jmp .read_done
+.read_error:
+	xor ax, ax
+	and dx, 0xff00
+	int 0x13
+	jmp .readfloppy
+.read_done:
 
 	;; move system to 0x00000
 	;; this is OK for our kernel.bin is small
@@ -61,7 +81,7 @@ read_info:
 	mov ax, systemseg
 	mov es, ax
 	mov di, systemoffset
-	mov cx, systemsize
+	mov cx, systemsize/4
 	rep movsd
 	;;
 	cli

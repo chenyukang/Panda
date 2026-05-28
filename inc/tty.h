@@ -8,7 +8,7 @@
 struct tty_t {
     u32 head, tail;
     u32 count;
-    u32 flush;
+    u32 read_need;
     u8  buf[TTY_BUF_LEN];
 };
 
@@ -21,7 +21,6 @@ u32 tty_pop();
 u32 tty_get_buf(char* buf, u32 need);
 
 #endif
-
 
 
 

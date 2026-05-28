@@ -53,6 +53,7 @@ void strcpy(char* dest, char* src) {
     while(*p) {
         *dest++ = *p++;
     }
+    *dest = 0;
 }
 
 void strncpy(char* dest, char* src, size_t cnt) {
@@ -264,12 +265,10 @@ int _sprintf(char* buf, const char* format, va_list args) {
 int printf(const char* format, ... ) {
     va_list ap;
     char buf[1024];
-    u32  cnt = 0, k = 0;
+    u32  cnt = 0;
     va_start(ap, format);
     cnt = _sprintf(buf, format, ap);
-    for(k=0; k<cnt; k++){
-        write(1, (char*)(&buf[k]), 1);
-    }
+    write(1, buf, cnt);
     va_end(ap);
     return cnt;
 }

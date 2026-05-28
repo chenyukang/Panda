@@ -43,14 +43,16 @@ struct hd_struct hd_inf[] = { {0,0,0,0,0,0},
 
 static int waitfor_ready(int check_error) {
     int retries = 1000;
-    int r;
+    int r = 0;
     while( --retries ) {
         r = inb(IDE_STAT);
         if ((r & (IDE_BUSY | IDE_READY)) == IDE_READY ) {
             break;
         }
     }
-    if(check_error & ((r & (IDE_DF | IDE_ERROR)) != 0))
+    if((r & (IDE_BUSY | IDE_READY)) != IDE_READY)
+        return -1;
+    if(check_error && ((r & (IDE_DF | IDE_ERROR)) != 0))
         return -1;
     return 0;
 }

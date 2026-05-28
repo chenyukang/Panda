@@ -14,10 +14,20 @@
 #include <tty.h>
 
 static int shift_state = 0 ;
+static int extend_state = 0;
+
+#define KEY_LEFT  0x11
+#define KEY_RIGHT 0x12
+#define KEY_UP    0x13
+#define KEY_DOWN  0x14
 
 void kb_handler(void) {
     u8 ch;
     u8 code = inb(0x60); //read the data buffer
+    if(code == 0xe0) {
+        extend_state = 1;
+        return;
+    }
     if(code == 0x2a || code == 0x36)
         shift_state = 1;
     else if(code == 0xaa || code == 0xb6 )
@@ -28,13 +38,31 @@ void kb_handler(void) {
     if (code & 0x80) {
         /* You can use this one to see if the user released the
         *  shift, alt, or control keys... */
+        extend_state = 0;
     } else {
         /* Here, a key was just pressed. Please note that if you
         *  hold a key down, you will get repeated key press
         *  interrupts. */
+        if(extend_state) {
+            extend_state = 0;
+            if(code == 0x48)
+                ch = KEY_UP;
+            else if(code == 0x50)
+                ch = KEY_DOWN;
+            else if(code == 0x4b)
+                ch = KEY_LEFT;
+            else if(code == 0x4d)
+                ch = KEY_RIGHT;
+            else
+                ch = 0;
+            if(ch)
+                tty_ch(ch);
+            return;
+        }
         if(code == SHIFT_L || code == SHIFT_R) return;
         ch = shift_state? kbdus_upper[code] : kbdus[code];
-        tty_ch(ch);
+        if(ch)
+            tty_ch(ch);
     }
 }
 
