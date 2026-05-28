@@ -233,7 +233,7 @@ s32 growtask(u32 size) {
 s32 wait_p(s32 pid, s32* stat) {
     struct task* p;
     u32 i;
-    if(vm_verify_write((u32)stat, sizeof(s32)) < 0) {
+    if(vm_verify_user_writable((u32)stat, sizeof(s32)) < 0) {
         return -1;
     }
 

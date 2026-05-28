@@ -99,16 +99,16 @@ static u32 vm_verify_range(u32 vaddr, u32 size, u32 write) {
     return 0;
 }
 
-u32 vm_verify_read(u32 vaddr, u32 size) {
+u32 vm_verify_user_readable(u32 vaddr, u32 size) {
     return vm_verify_range(vaddr, size, 0);
 }
 
-u32 vm_verify_write(u32 vaddr, u32 size) {
+u32 vm_verify_user_writable(u32 vaddr, u32 size) {
     return vm_verify_range(vaddr, size, 1);
 }
 
 u32 vm_verify(u32 vaddr, u32 size) {
-    return vm_verify_write(vaddr, size);
+    return vm_verify_user_writable(vaddr, size);
 }
 
 struct vma* find_vma(u32 vaddr) {
