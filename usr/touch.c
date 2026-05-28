@@ -19,6 +19,10 @@ int main(int argc, char* argv[] ) {
         strcpy(path, argv[k]);
         strcpy(buf, "hello");
         fd = open(path, O_CREATE|O_RDWR, 0);
+        if(fd < 0) {
+            printf("touch: open %s failed\n", path);
+            return -1;
+        }
         write(fd, buf, strlen(buf));
         close(fd);
 
@@ -26,8 +30,11 @@ int main(int argc, char* argv[] ) {
         fd = open(path, O_RDONLY, 0);
         if(fd > 0) {
             while((cnt = read(fd, buf, sizeof(buf))) > 0) {
-                printf("content:%s\n", buf);
+                printf("content:");
+                write(1, buf, cnt);
+                printf("\n");
             }
+            close(fd);
         }
     }
     return 0;
