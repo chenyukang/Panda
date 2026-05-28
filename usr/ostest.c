@@ -39,10 +39,19 @@ static void test_open_existing() {
     close(fd);
 }
 
+static void test_write_rodata() {
+    char* msg = "ostest: rodata write ok\n";
+    int len = strlen(msg);
+
+    if(write(1, msg, len) != len)
+        fail("write rodata", -1);
+}
+
 int main(int argc, char* argv[]) {
     printf("ostest: start\n");
     run("badfd", "/home/badfd");
     test_open_existing();
+    test_write_rodata();
     printf("ostest: ok\n");
     halt();
     return 0;

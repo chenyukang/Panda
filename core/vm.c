@@ -70,10 +70,12 @@ u32 vm_renew(struct vm* vm, struct header* header, struct inode* ip) {
     return 0;
 }
 
-u32 vm_verify(u32 vaddr, u32 size) {
+static u32 vm_verify_range(u32 vaddr, u32 size, u32 write) {
     struct pte *pte;
     u32 page;
-    if (vaddr<0x8000000 || size<0) {
+    if(size == 0)
+        return 0;
+    if (vaddr<0x8000000 || vaddr + size - 1 < vaddr) {
         return -1;
     }
 
@@ -81,12 +83,30 @@ u32 vm_verify(u32 vaddr, u32 size) {
         pte = find_pte(current->p_vm.vm_pgd, page, 1);
         if ((pte->pt_flags & PTE_P)==0) {
             do_no_page((void*)page);
+            pte = find_pte(current->p_vm.vm_pgd, page, 0);
+            if(pte == 0 || (pte->pt_flags & PTE_P) == 0)
+                return -1;
         }
-        else if ((pte->pt_flags & PTE_W)==0) {
+        if (write && (pte->pt_flags & PTE_W)==0) {
             do_wt_page((void*)page);
+            pte = find_pte(current->p_vm.vm_pgd, page, 0);
+            if(pte == 0 || (pte->pt_flags & PTE_W) == 0)
+                return -1;
         }
     }
     return 0;
+}
+
+u32 vm_verify_read(u32 vaddr, u32 size) {
+    return vm_verify_range(vaddr, size, 0);
+}
+
+u32 vm_verify_write(u32 vaddr, u32 size) {
+    return vm_verify_range(vaddr, size, 1);
+}
+
+u32 vm_verify(u32 vaddr, u32 size) {
+    return vm_verify_write(vaddr, size);
 }
 
 struct vma* find_vma(u32 vaddr) {
