@@ -1,4 +1,4 @@
-OUTPUT_FORMAT("a.out-i386-linux")
+OUTPUT_FORMAT("elf32-i386")
 ENTRY(_start)
 
 SECTIONS {
@@ -6,18 +6,18 @@ SECTIONS {
     .text : {
         __text__ = .;
         ./objs/usr/lib/entry.O(.text) *(.text)
-        *(.rodata .gnu.linkonce.*)
+        *(.rodata .rodata.* .gnu.linkonce.*)
         . = ALIGN(0x1000);
         __text_end__ = .;
     }
     .data : {
         __data__ = .;
-        *(.data)
+        *(.data .data.*)
         . = ALIGN(0x1000);
     }
     .bss : {
         __bss__ = .;
-        *(.bss)
+        *(.bss .bss.* COMMON)
         . = ALIGN(0x1000);
     }
     /DISCARD/ : {

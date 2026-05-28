@@ -210,7 +210,9 @@ s32 do_exit(int ret) {
     current->exit_code = ret;
     parent = find_task(current->ppid);
     do_wakeup(parent);
-    return 0;
+    sched();
+    for(;;)
+        ;
 }
 
 s32 growtask(u32 size) {

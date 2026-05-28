@@ -18,6 +18,7 @@ void strcpy(char* dest, char* src) {
     while(*p) {
         *dest++ = *p++;
     }
+    *dest = 0;
 }
 
 void strncpy(char* dest, char* src, size_t cnt) {
@@ -107,6 +108,7 @@ void* strcat(char* v1, const char* v2) {
     while(*q != 0) {
         *p++ = *q++;
     }
+    *p = 0;
     return v1;
 }
 

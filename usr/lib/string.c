@@ -53,6 +53,7 @@ void strcpy(char* dest, char* src) {
     while(*p) {
         *dest++ = *p++;
     }
+    *dest = 0;
 }
 
 void strncpy(char* dest, char* src, size_t cnt) {
