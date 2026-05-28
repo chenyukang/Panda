@@ -86,7 +86,7 @@ USER_LIB_OBJS := $(patsubst usr/lib/%.c,$(USERLIBOBJDIR)/%.o,$(USER_LIB_C_SRCS))
 USER_ENTRY := $(USERLIBOBJDIR)/entry.O
 USER_LIB_ALL := $(USER_ENTRY) $(USER_LIB_OBJS)
 
-FS_PAYLOADS := $(USER_BINS) $(USER_ELFS) $(USEROBJDIR)/README.md $(USEROBJDIR)/prog.scm
+FS_PAYLOADS := $(USER_BINS) $(USEROBJDIR)/README.md $(USEROBJDIR)/prog.scm
 
 .PHONY: all images compile qemu qemu-cocoa qemu-curses run smoke clean line help tools check-build-tools check-qemu
 .NOTPARALLEL:
