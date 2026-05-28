@@ -230,8 +230,8 @@ qemu-curses: qemu
 smoke: images check-qemu
 	@set -e; \
 	echo "Starting QEMU smoke test for $(SMOKE_SECONDS)s..."; \
-	tmp_a=$$(mktemp "$${TMPDIR:-/tmp}/panda-a.XXXXXX.img"); \
-	tmp_h=$$(mktemp "$${TMPDIR:-/tmp}/panda-hd.XXXXXX.img"); \
+	tmp_a=$$(mktemp "$${TMPDIR:-/tmp}/panda-a.XXXXXX"); \
+	tmp_h=$$(mktemp "$${TMPDIR:-/tmp}/panda-hd.XXXXXX"); \
 	cp a.img "$$tmp_a"; \
 	cp hd.img "$$tmp_h"; \
 	log="$(OBJDIR)/qemu-smoke.log"; \
@@ -254,8 +254,8 @@ smoke: images check-qemu
 os-test: a.img $(USEROBJDIR)/hd-test.img check-qemu
 	@set -e; \
 	echo "Starting QEMU OS test..."; \
-	tmp_a=$$(mktemp "$${TMPDIR:-/tmp}/panda-test-a.XXXXXX.img"); \
-	tmp_h=$$(mktemp "$${TMPDIR:-/tmp}/panda-test-hd.XXXXXX.img"); \
+	tmp_a=$$(mktemp "$${TMPDIR:-/tmp}/panda-test-a.XXXXXX"); \
+	tmp_h=$$(mktemp "$${TMPDIR:-/tmp}/panda-test-hd.XXXXXX"); \
 	cp a.img "$$tmp_a"; \
 	cp $(USEROBJDIR)/hd-test.img "$$tmp_h"; \
 	log="$(OBJDIR)/qemu-os-test.log"; \
