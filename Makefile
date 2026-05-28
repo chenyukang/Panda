@@ -88,7 +88,7 @@ USER_LIB_ALL := $(USER_ENTRY) $(USER_LIB_OBJS)
 
 FS_PAYLOADS := $(USER_BINS) $(USEROBJDIR)/README.md $(USEROBJDIR)/prog.scm
 
-.PHONY: all images compile qemu qemu-cocoa qemu-curses run smoke clean line help tools check-build-tools check-qemu
+.PHONY: all images compile qemu qemu-cocoa qemu-curses run smoke os-test clean line help tools check-build-tools check-qemu
 .NOTPARALLEL:
 
 all: images
@@ -206,8 +206,14 @@ $(USEROBJDIR)/README.md: README.md | $(USEROBJDIR)
 $(USEROBJDIR)/prog.scm: usr/prog.scm | $(USEROBJDIR)
 	cp $< $@
 
+$(USEROBJDIR)/.ostest: | $(USEROBJDIR)
+	: > $@
+
 $(USEROBJDIR)/hd.img: $(OBJDIR)/mkfs.exe $(FS_PAYLOADS)
 	cd $(USEROBJDIR) && ../mkfs.exe hd.img $(notdir $(FS_PAYLOADS))
+
+$(USEROBJDIR)/hd-test.img: $(OBJDIR)/mkfs.exe $(FS_PAYLOADS) $(USEROBJDIR)/.ostest
+	cd $(USEROBJDIR) && ../mkfs.exe hd-test.img $(notdir $(FS_PAYLOADS)) .ostest
 
 hd.img: $(USEROBJDIR)/hd.img
 	cp $< $@
@@ -245,6 +251,38 @@ smoke: images check-qemu
 		exit 1; \
 	fi
 
+os-test: a.img $(USEROBJDIR)/hd-test.img check-qemu
+	@set -e; \
+	echo "Starting QEMU OS test..."; \
+	tmp_a=$$(mktemp "$${TMPDIR:-/tmp}/panda-test-a.XXXXXX.img"); \
+	tmp_h=$$(mktemp "$${TMPDIR:-/tmp}/panda-test-hd.XXXXXX.img"); \
+	cp a.img "$$tmp_a"; \
+	cp $(USEROBJDIR)/hd-test.img "$$tmp_h"; \
+	log="$(OBJDIR)/qemu-os-test.log"; \
+	rm -f "$$log"; \
+	trap 'rm -f "$$tmp_a" "$$tmp_h"; if [ -n "$${pid:-}" ] && kill -0 "$$pid" >/dev/null 2>&1; then kill "$$pid" >/dev/null 2>&1 || true; fi' EXIT INT TERM; \
+	$(QEMU) -boot a -drive file="$$tmp_a",format=raw,if=floppy -drive file="$$tmp_h",format=raw,index=1,media=disk -rtc base=localtime -m 128 -display none -monitor none -serial none -no-reboot $(QEMU_EXTRA_ARGS) >"$$log" 2>&1 & \
+	pid=$$!; \
+	for i in 1 2 3 4 5 6 7 8 9 10; do \
+		if ! kill -0 "$$pid" >/dev/null 2>&1; then break; fi; \
+		sleep 1; \
+	done; \
+	if kill -0 "$$pid" >/dev/null 2>&1; then \
+		kill "$$pid" >/dev/null 2>&1 || true; \
+		wait "$$pid" >/dev/null 2>&1 || true; \
+		cat "$$log"; \
+		echo "error: QEMU OS test timed out"; \
+		exit 1; \
+	fi; \
+	if wait "$$pid"; then \
+		echo "QEMU OS test passed"; \
+	else \
+		status=$$?; \
+		cat "$$log"; \
+		echo "error: QEMU OS test failed"; \
+		exit "$$status"; \
+	fi
+
 clean:
 	rm -rf a.img hd.img bochsout.txt $(OBJDIR) $(TOOL)/mkfs.exe
 
@@ -260,6 +298,7 @@ help:
 	@echo "  make qemu-curses"
 	@echo "                Build and run with QEMU curses display"
 	@echo "  make smoke    Build and run a short headless QEMU smoke test"
+	@echo "  make os-test  Run CI-oriented guest OS tests in QEMU"
 	@echo "  make clean    Remove generated files"
 	@echo "  make tools    Print resolved tool paths"
 	@echo ""
