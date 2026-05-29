@@ -88,7 +88,7 @@ USER_LIB_ALL := $(USER_ENTRY) $(USER_LIB_OBJS)
 
 FS_PAYLOADS := $(USER_BINS) $(USEROBJDIR)/README.md $(USEROBJDIR)/prog.scm
 
-.PHONY: all images compile qemu qemu-cocoa qemu-curses run smoke os-test clean line help tools check-build-tools check-qemu
+.PHONY: all images compile qemu qemu-cocoa qemu-curses run smoke test clean line help tools check-build-tools check-qemu
 .NOTPARALLEL:
 
 all: images
@@ -251,14 +251,14 @@ smoke: images check-qemu
 		exit 1; \
 	fi
 
-os-test: a.img $(USEROBJDIR)/hd-test.img check-qemu
+test: a.img $(USEROBJDIR)/hd-test.img check-qemu
 	@set -e; \
 	echo "Starting QEMU OS test..."; \
 	tmp_a=$$(mktemp "$${TMPDIR:-/tmp}/panda-test-a.XXXXXX"); \
 	tmp_h=$$(mktemp "$${TMPDIR:-/tmp}/panda-test-hd.XXXXXX"); \
 	cp a.img "$$tmp_a"; \
 	cp $(USEROBJDIR)/hd-test.img "$$tmp_h"; \
-	log="$(OBJDIR)/qemu-os-test.log"; \
+	log="$(OBJDIR)/qemu-test.log"; \
 	rm -f "$$log"; \
 	trap 'rm -f "$$tmp_a" "$$tmp_h"; if [ -n "$${pid:-}" ] && kill -0 "$$pid" >/dev/null 2>&1; then kill "$$pid" >/dev/null 2>&1 || true; fi' EXIT INT TERM; \
 	$(QEMU) -boot a -drive file="$$tmp_a",format=raw,if=floppy -drive file="$$tmp_h",format=raw,index=1,media=disk -rtc base=localtime -m 128 -display none -monitor none -serial none -no-reboot $(QEMU_EXTRA_ARGS) >"$$log" 2>&1 & \
@@ -298,7 +298,7 @@ help:
 	@echo "  make qemu-curses"
 	@echo "                Build and run with QEMU curses display"
 	@echo "  make smoke    Build and run a short headless QEMU smoke test"
-	@echo "  make os-test  Run CI-oriented guest OS tests in QEMU"
+	@echo "  make test  Run CI-oriented guest OS tests in QEMU"
 	@echo "  make clean    Remove generated files"
 	@echo "  make tools    Print resolved tool paths"
 	@echo ""

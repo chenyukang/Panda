@@ -169,7 +169,7 @@ Use:
 
 ```bash
 make qemu
-make os-test
+make test
 ```
 
 If an old QEMU window is already running, close it first. It will keep using the old in-memory VM state and will not pick up newly generated `a.img` and `hd.img`.

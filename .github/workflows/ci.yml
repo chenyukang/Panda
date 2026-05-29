@@ -39,4 +39,4 @@ jobs:
         run: make smoke SMOKE_SECONDS=5
 
       - name: Guest OS tests
-        run: make os-test
+        run: make test

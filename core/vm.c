@@ -70,12 +70,10 @@ u32 vm_renew(struct vm* vm, struct header* header, struct inode* ip) {
     return 0;
 }
 
-static u32 vm_verify_range(u32 vaddr, u32 size, u32 write) {
+u32 vm_verify(u32 vaddr, u32 size) {
     struct pte *pte;
     u32 page;
-    if(size == 0)
-        return 0;
-    if (vaddr<0x8000000 || vaddr + size - 1 < vaddr) {
+    if (vaddr<0x8000000 || size<0) {
         return -1;
     }
 
@@ -88,7 +86,7 @@ static u32 vm_verify_range(u32 vaddr, u32 size, u32 write) {
             if(pte == 0 || (pte->pt_flags & PTE_P) == 0)
                 return -1;
         }
-        if (write && (pte->pt_flags & PTE_W)==0) {
+        if ((pte->pt_flags & PTE_W)==0) {
             if(do_wt_page((void*)page) < 0)
                 return -1;
             pte = find_pte(current->p_vm.vm_pgd, page, 0);
@@ -97,18 +95,6 @@ static u32 vm_verify_range(u32 vaddr, u32 size, u32 write) {
         }
     }
     return 0;
-}
-
-u32 vm_verify_user_readable(u32 vaddr, u32 size) {
-    return vm_verify_range(vaddr, size, 0);
-}
-
-u32 vm_verify_user_writable(u32 vaddr, u32 size) {
-    return vm_verify_range(vaddr, size, 1);
-}
-
-u32 vm_verify(u32 vaddr, u32 size) {
-    return vm_verify_user_writable(vaddr, size);
 }
 
 struct vma* find_vma(u32 vaddr) {

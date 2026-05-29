@@ -28,7 +28,7 @@ int sys_chdir(struct registers_t* regs) {
 int sys_getcwd(struct registers_t* regs) {
     char* buf = (char*)regs->ebx;
     int  size = (int)regs->ecx;
-    if(vm_verify_user_writable((u32)buf, size) < 0) {
+    if(vm_verify((u32)buf, size) < 0) {
         return -1;
     }
     return do_getcwd(buf);
@@ -75,7 +75,7 @@ int sys_write(struct registers_t* regs) {
     int cnt   = regs->edx;
     char* buf = (char*)regs->ecx;
 
-    if(vm_verify_user_readable((u32)buf, cnt) < 0) {
+    if(vm_verify((u32)buf, cnt) < 0) {
         return -1;
     }
     return do_write(fd, buf, cnt);
@@ -83,7 +83,7 @@ int sys_write(struct registers_t* regs) {
 
 int sys_uname(struct registers_t* regs) {
     struct utsname* p = (struct utsname*)regs->ebx;
-    if(vm_verify_user_writable((u32)p, sizeof(struct utsname)) < 0) {
+    if(vm_verify((u32)p, sizeof(struct utsname)) < 0) {
         return -1;
     }
     strcpy(p->sysname, "Panda OS");
@@ -96,7 +96,7 @@ int sys_stat(struct registers_t* regs) {
     char* path = (char*)regs->ebx;
     struct stat* stat = (struct stat*)regs->ecx;
 
-    if(vm_verify_user_writable((u32)stat, sizeof(struct stat)) < 0) {
+    if(vm_verify((u32)stat, sizeof(struct stat)) < 0) {
         return -1;
     }
     return do_stat(path, stat);
@@ -104,7 +104,7 @@ int sys_stat(struct registers_t* regs) {
 
 int sys_time(struct registers_t* regs) {
     struct tm* p = (struct tm*)regs->ebx;
-    if(vm_verify_user_writable((u32)p, sizeof(struct tm)) < 0) {
+    if(vm_verify((u32)p, sizeof(struct tm)) < 0) {
         return -1;
     }
     *p = kern_time;
@@ -137,7 +137,7 @@ int sys_read(struct registers_t* regs) {
     u32 fd    = regs->ebx;
     u32 cnt   = regs->edx;
     s32 ret;
-    if(vm_verify_user_writable((u32)buf, cnt) < 0) {
+    if(vm_verify((u32)buf, cnt) < 0) {
         return -1;
     }
     ret = do_read(fd, buf, cnt);
@@ -165,7 +165,7 @@ int sys_sbrk(struct registers_t* regs) {
 int sys_procs(struct registers_t* regs) {
     char* buf =(char*)regs->ebx;
     u32  size = (u32)regs->ecx;
-    if(vm_verify_user_writable((u32)buf, size) < 0) {
+    if(vm_verify((u32)buf, size) < 0) {
         return -1;
     }
     return task_debug_s(buf, size);

@@ -48,8 +48,6 @@ u32 vm_clone(struct vm* to);
 u32 vm_clear(struct vm* vm);
 u32 vm_renew(struct vm* vm, struct header* header, struct inode* ip);
 u32 vm_verify(u32 vaddr, u32 size);
-u32 vm_verify_user_readable(u32 vaddr, u32 size);
-u32 vm_verify_user_writable(u32 vaddr, u32 size);
 struct vma* find_vma(u32 addr);
 
 
