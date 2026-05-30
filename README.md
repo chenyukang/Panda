@@ -34,6 +34,7 @@ For CI-style validation:
 
 ```console
 make smoke
+make test
 ```
 
 ## Snapshot

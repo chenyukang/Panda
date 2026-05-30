@@ -1,18 +1,26 @@
 #include <string.h>
 #include <syscall.h>
+#include <stat.h>
 
-int main(int argc, char **argv) {
-    printf("\n====== ENTER USER SPACE =======\n\n");
+static void run(char* path) {
     if(fork() == 0) {
-        exec("/home/sh", NULL);
-        while(1) {
-            ;
-        }
-    } else {
-        //printf("parent\n");
+        exec(path, NULL);
         while(1) {
             ;
         }
     }
+    while(1) {
+        ;
+    }
+}
+
+int main(int argc, char **argv) {
+    struct stat s;
+
+    printf("\n====== ENTER USER SPACE =======\n\n");
+    if(stat("/home/.ostest", &s) == 0)
+        run("/home/ostest");
+
+    run("/home/sh");
     return 0;
 }

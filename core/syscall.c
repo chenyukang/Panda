@@ -186,8 +186,9 @@ void do_syscall(struct registers_t* regs) {
     s32 ret;
     sysc_func func = 0;
 
-    if (regs->eax > NSYSC) {
-        PANIC("bad syscall");
+    if (regs->eax >= NSYSC) {
+        regs->eax = -1;
+        return;
     }
     current->p_error = 0;
     func = sys_routines[regs->eax];

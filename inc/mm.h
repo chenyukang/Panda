@@ -28,7 +28,7 @@
 #define PMEM     0x8000000
 #define NPAGE    (PMEM/PAGE_SIZE)
 //Present
-//Writeable
+//Writable
 //User
 //Accessed
 //Dirty
@@ -55,7 +55,7 @@ struct pde {
     u32 pt_avial  : 3;  //for system programmer
     u32 pt_base   : 20; //base addr
 };
-//so struct pde* (with 1024) == pg_dir
+// so struct pde* (with 1024) == pg_dir
 
 struct pte {
     u32 pt_flags  : 9;
@@ -86,7 +86,7 @@ void free_mem(u32 addr);
 
 void flush_pgd(struct pde* pg_dir);
 
-void do_no_page(void* addr);
-void do_wt_page(void* addr);
+s32  do_no_page(void* addr);
+s32  do_wt_page(void* addr);
 
 #endif

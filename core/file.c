@@ -73,7 +73,7 @@ int file_read(struct file* f, char* addr, int n) {
 
 int file_write(struct file* f, char* addr, int n) {
     int r;
-    if(f->writeable == 0)
+    if(f->writable == 0)
         return -1;
 
     if(f->type == FD_INODE) {

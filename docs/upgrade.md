@@ -18,7 +18,7 @@ Root cause:
 
 Fix:
 
-- Make `do.sh` discover tools instead of using hardcoded paths.
+- Replace the old shell scripts with a `Makefile` that discovers tools instead of using hardcoded paths.
 - On macOS, use Homebrew LLVM Clang with `-target i386-unknown-elf`, `ld.lld`, Homebrew `objcopy`, and `qemu-system-i386`.
 - Add `-fcommon -mno-sse -mno-sse2 -mno-mmx` to avoid modern compiler defaults that break this kernel.
 - Link user programs as ELF with Panda's executable header emitted by the linker script, then use `objcopy -O binary` to produce the final user binaries.
@@ -156,11 +156,11 @@ A clean run after the fixes should show external commands working:
 
 ```text
 [PandaOS]$ ls
-.. . README.md cat cat.elf cowsay cowsay.elf date date.elf init init.elf ls ...
+.. . README.md badfd cat cowsay date fault init ls ostest ...
 [PandaOS]$ touch now.scm
 content:hello
 [PandaOS]$ ls
-.. . README.md cat cat.elf ... vi vi.elf now.scm
+.. . README.md badfd cat cowsay date fault init ls ostest ... vi now.scm
 [PandaOS]$ scm
 no such command: scm
 ```
@@ -168,7 +168,8 @@ no such command: scm
 Use:
 
 ```bash
-./do.sh -qemu
+make qemu
+make test
 ```
 
 If an old QEMU window is already running, close it first. It will keep using the old in-memory VM state and will not pick up newly generated `a.img` and `hd.img`.

@@ -80,10 +80,18 @@ u32 vm_verify(u32 vaddr, u32 size) {
     for (page=PG_ADDR(vaddr); page<=PG_ADDR(vaddr+size-1); page+=PAGE_SIZE) {
         pte = find_pte(current->p_vm.vm_pgd, page, 1);
         if ((pte->pt_flags & PTE_P)==0) {
-            do_no_page((void*)page);
+            if(do_no_page((void*)page) < 0)
+                return -1;
+            pte = find_pte(current->p_vm.vm_pgd, page, 0);
+            if(pte == 0 || (pte->pt_flags & PTE_P) == 0)
+                return -1;
         }
-        else if ((pte->pt_flags & PTE_W)==0) {
-            do_wt_page((void*)page);
+        if ((pte->pt_flags & PTE_W)==0) {
+            if(do_wt_page((void*)page) < 0)
+                return -1;
+            pte = find_pte(current->p_vm.vm_pgd, page, 0);
+            if(pte == 0 || (pte->pt_flags & PTE_W) == 0)
+                return -1;
         }
     }
     return 0;
